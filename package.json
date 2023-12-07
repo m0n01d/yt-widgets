@@ -1,0 +1,31 @@
+{
+  "name": "web",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "res:build": "rescript",
+    "res:dev": "rescript build -w",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "vite",
+    "build-widgets": "vite build --config widget-config.js",
+    "prebuild": "rescript",
+    "build": "npm run build-widgets && vite build",
+    "postbuild": "npm run bundle-script",
+    "preview": "vite preview",
+    "bundle-script": "cp app/extension/manifest.json dist/manifest.json & npm run mv-popup",
+    "mv-popup": "cp -r src/Popup/ext/. dist/popup"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@rescript/react": "^0.11.0",
+    "@vitejs/plugin-react": "^4.1.1",
+    "elm-debug-transformer": "^1.2.1",
+    "rescript": "^10.1.4",
+    "vite": "^4.5.0",
+    "vite-plugin-elm": "^2.8.0"
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "manifest_version": 3,
+  "name": "YT Studio Widgets",
+  "description": "Widgets for Studio powerusers",
+  "version": "1.0",
+  "action": {
+    "default_popup": "./popup/popup.html",
+    "default_icon": "./popup/popup.png"
+  },
+  "content_scripts": [
+    { "matches": ["https://*.youtube.com/*"], "js": ["content/content.js"] }
+  ]
+}
