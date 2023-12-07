@@ -17,14 +17,16 @@ module Counter = {
 let make = () => {
   open Inject
   let counter = <Counter />
-  // inject
-  switch ReactDOM.querySelector("ytcd-channel-facts-item") {
-  | Some(rootElement) => {
-      // inject counter to div
-      // append div to rootElement
-      let y = Inject.mount(rootElement, counter)
-      counter
+  let x = Js.Global.setTimeout(() => {
+    // inject
+    switch ReactDOM.querySelector("ytcd-channel-facts-item") {
+    | Some(rootElement) => {
+        // inject counter to div
+        // append div to rootElement
+        let y = Inject.mount(rootElement, counter)
+      }
+    | None => ()
     }
-  | None => counter
-  }
+  }, 1000)
+  counter
 }

@@ -29,13 +29,15 @@ var Counter = {
 
 function Counter$1(props) {
   var counter = React.createElement(Counter$Counter, {});
-  var rootElement = document.querySelector("ytcd-channel-facts-item");
-  if (rootElement == null) {
-    return counter;
-  } else {
-    Inject.Inject.mount(rootElement, counter);
-    return counter;
-  }
+  setTimeout((function (param) {
+          var rootElement = document.querySelector("ytcd-channel-facts-item");
+          if (!(rootElement == null)) {
+            Inject.Inject.mount(rootElement, counter);
+            return ;
+          }
+          
+        }), 1000);
+  return counter;
 }
 
 var make = Counter$1;
