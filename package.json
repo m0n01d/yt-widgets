@@ -1,0 +1,24 @@
+{
+  "name": "yt-widgets",
+  "version": "1.0.0",
+  "description": "",
+  "main": "vite.config.js",
+  "scripts": {
+    "build": "vite build",
+    "postbuild": "npm run bundle-script",
+    "bundle-script": "cp app/extension/manifest.json dist/manifest.json & npm run mv-popup",
+    "mv-popup": "cp -r src/Popup/ext/. dist/popup",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@rescript/react": "^0.11.0",
+    "@vitejs/plugin-react": "^4.2.1",
+    "elm-debug-transformer": "^1.2.1",
+    "rescript": "^10.1.4",
+    "vite": "^4.5.1",
+    "vite-plugin-elm": "^2.8.0"
+  }
+}

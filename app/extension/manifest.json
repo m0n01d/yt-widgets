@@ -1,0 +1,11 @@
+
+{
+    "manifest_version": 3,
+    "name": "YT-Widgets",
+    "description": "Poweruser widgets to enhance Youtube Studio",
+    "version": "1.0",
+    "action": {
+      "default_popup": "./popup/popup.html",
+      "default_icon": "./popup/popup.png"
+    }
+  }  
