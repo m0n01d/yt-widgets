@@ -9,7 +9,9 @@
     "build": "npm run build-widgets && vite build",
     "postbuild": "npm run bundle-script",
     "build-widgets": "vite build --config vite.widgets.js",
-    "bundle-script": "cp app/extension/manifest.json dist/manifest.json & npm run mv-popup",
+    "bundle-script": "cp app/extension/manifest.json dist/manifest.json & npm run mv-ext-assets",
+    "mv-ext-assets": "npm run mv-bg && npm run mv-popup",
+    "mv-bg": "cp -r src/Background/. dist/background",
     "mv-popup": "cp -r src/Popup/ext/. dist/popup",
     "test": "echo \"Error: no test specified\" && exit 1"
   },

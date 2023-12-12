@@ -4,6 +4,13 @@ external createElement: string => Dom.element = "createElement"
 module App = {
   @react.component
   let make = () => {
+    let onMessageListener = x => {
+      Js.log(x)
+    }
+    let port = Chrome.Runtime.connect({name: "yt-widgets-content"})
+
+    Chrome.Runtime.Port.addListener(port, onMessageListener)
+
     Js.log("Hello ReScript")
     <div> {React.string("Hello ReScript!")} </div>
   }

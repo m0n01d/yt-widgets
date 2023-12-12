@@ -4,6 +4,13 @@ import * as React from "react";
 import * as Client from "react-dom/client";
 
 function App$App(props) {
+  var onMessageListener = function (x) {
+    console.log(x);
+  };
+  var port = chrome.runtime.connect({
+        name: "yt-widgets-content"
+      });
+  port.onMessage.addListener(onMessageListener);
   console.log("Hello ReScript");
   return React.createElement("div", undefined, "Hello ReScript!");
 }
