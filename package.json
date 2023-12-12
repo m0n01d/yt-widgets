@@ -3,9 +3,12 @@
   "version": "1.0.0",
   "description": "",
   "main": "vite.config.js",
+  "type": "module",
   "scripts": {
-    "build": "vite build",
+    "prebuild": "rescript",
+    "build": "npm run build-widgets && vite build",
     "postbuild": "npm run bundle-script",
+    "build-widgets": "vite build --config vite.widgets.js",
     "bundle-script": "cp app/extension/manifest.json dist/manifest.json & npm run mv-popup",
     "mv-popup": "cp -r src/Popup/ext/. dist/popup",
     "test": "echo \"Error: no test specified\" && exit 1"
