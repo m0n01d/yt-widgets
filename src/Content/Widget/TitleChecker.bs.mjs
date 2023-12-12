@@ -2,6 +2,8 @@
 
 import * as React from "react";
 import * as ReactDom from "react-dom";
+import * as Belt_Option from "rescript/lib/es6/belt_Option.js";
+import * as Caml_option from "rescript/lib/es6/caml_option.js";
 
 var ytSelector = "ytcp-video-title";
 
@@ -9,12 +11,10 @@ function make(props) {
   var maybeVideoTitleEl = document.querySelector(ytSelector);
   var view = React.createElement("div", {
         id: "TitleChecker.view"
-      }, props.foo);
-  if (maybeVideoTitleEl == null) {
-    return React.createElement(React.Fragment, undefined);
-  } else {
-    return ReactDom.createPortal(view, maybeVideoTitleEl);
-  }
+      }, props.text);
+  return Belt_Option.mapWithDefault((maybeVideoTitleEl == null) ? undefined : Caml_option.some(maybeVideoTitleEl), React.createElement(React.Fragment, undefined), (function (videoTitleEl) {
+                return ReactDom.createPortal(view, videoTitleEl);
+              }));
 }
 
 export {

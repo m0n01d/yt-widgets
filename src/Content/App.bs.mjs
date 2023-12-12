@@ -5,9 +5,8 @@ import * as TitleChecker from "./Widget/TitleChecker.bs.mjs";
 import * as Client from "react-dom/client";
 
 function App$App(props) {
-  console.log("Hello ReScript");
   return React.createElement("div", undefined, React.createElement(TitleChecker.make, {
-                  foo: "bar"
+                  text: "TitleChecker Widget goes here"
                 }));
 }
 

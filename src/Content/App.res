@@ -4,9 +4,8 @@ external createElement: string => Dom.element = "createElement"
 module App = {
   @react.component
   let make = () => {
-    Js.log("Hello ReScript")
     <div>
-      <TitleChecker foo="bar" />
+      <TitleChecker text="TitleChecker Widget goes here" />
     </div>
   }
 }
