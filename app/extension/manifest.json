@@ -7,7 +7,11 @@
     "default_popup": "./popup/popup.html",
     "default_icon": "./popup/popup.png"
   },
+  "background": {
+    "service_worker": "./background/bg.js"
+  },
   "content_scripts": [
     { "matches": ["https://*.youtube.com/*"], "js": ["content/content.js"] }
-  ]
+  ],
+  "permissions": ["tabs", "activeTab"]
 }
