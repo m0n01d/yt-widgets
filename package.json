@@ -25,5 +25,8 @@
     "rescript": "^10.1.4",
     "vite": "^4.5.1",
     "vite-plugin-elm": "^2.8.0"
+  },
+  "dependencies": {
+    "rescript-webapi": "^0.9.0"
   }
 }
