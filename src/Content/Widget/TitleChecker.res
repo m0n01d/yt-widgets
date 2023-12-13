@@ -6,6 +6,18 @@ let moConfig = {"attributes": true, "childList": true, "subtree": true}
 
 type model = UnderLimit | OverLimit
 
+let viewOverLimit =
+  <div
+    id="TitleChecker.view"
+    style={ReactDOM.Style.make(
+      ~color="#dc3545",
+      ~fontSize="12px",
+      ~padding="0.2rem 1rem",
+      ~textAlign="right",
+      (),
+    )}>
+    {React.string("Your title is a little long there, pal...")} // nice passive aggressive tone
+  </div>
 let make = (props: props) => {
   let maybeVideoTitleEl = Document.querySelector(Webapi.Dom.document, ytSelector)
 
@@ -24,7 +36,7 @@ let make = (props: props) => {
 
   let view = switch state {
   | UnderLimit => <> </>
-  | OverLimit => <div id="TitleChecker.view"> {React.string("over limit dont do that")} </div>
+  | OverLimit => viewOverLimit
   }
 
   let watcher = (mutationList, observer) => {

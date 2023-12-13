@@ -15,6 +15,16 @@ var moConfig = {
   subtree: true
 };
 
+var viewOverLimit = React.createElement("div", {
+      id: "TitleChecker.view",
+      style: {
+        color: "#dc3545",
+        fontSize: "12px",
+        padding: "0.2rem 1rem",
+        textAlign: "right"
+      }
+    }, "Your title is a little long there, pal...");
+
 function make(props) {
   var maybeVideoTitleEl = document.querySelector(ytSelector);
   var maybeVideoTitleInput = Belt_Option.flatMap((maybeVideoTitleEl == null) ? undefined : Caml_option.some(maybeVideoTitleEl), (function (el) {
@@ -31,9 +41,7 @@ function make(props) {
         return initialModel;
       });
   var setState = match[1];
-  var view = match[0] ? React.createElement("div", {
-          id: "TitleChecker.view"
-        }, "over limit dont do that") : React.createElement(React.Fragment, undefined);
+  var view = match[0] ? viewOverLimit : React.createElement(React.Fragment, undefined);
   var watcher = function (mutationList, observer) {
     var textboxValue = Belt_Option.map(Belt_Option.map(Belt_Array.get(mutationList, 0), (function (mutation) {
                 return mutation.target;
@@ -67,6 +75,7 @@ function make(props) {
 export {
   ytSelector ,
   moConfig ,
+  viewOverLimit ,
   make ,
 }
-/* react Not a pure module */
+/* viewOverLimit Not a pure module */
