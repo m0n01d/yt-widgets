@@ -13,7 +13,7 @@ var observerConfig = {
   subtree: true
 };
 
-var ytSelector = "ytcp-video-title";
+var parentVideoTitleSelector = "ytcp-video-title";
 
 var viewOverLimit = React.createElement("div", {
       id: "TitleChecker.view",
@@ -26,46 +26,84 @@ var viewOverLimit = React.createElement("div", {
     }, "Your title is a little long there, pal...");
 
 function make(props) {
-  var maybeVideoTitleEl = document.querySelector(ytSelector);
+  var maybeVideoTitleEl = document.querySelector(parentVideoTitleSelector);
   var maybeVideoTitleEl$1 = (maybeVideoTitleEl == null) ? undefined : Caml_option.some(maybeVideoTitleEl);
   var maybeVideoTitleInput = Belt_Option.flatMap(maybeVideoTitleEl$1, (function (el) {
           return Caml_option.nullable_to_opt(el.querySelector("ytcp-social-suggestion-input"));
         }));
   console.log(maybeVideoTitleEl$1, maybeVideoTitleInput);
-  var initialState = Belt_Option.mapWithDefault(maybeVideoTitleInput, /* UnderLimit */1, (function (videoTitleEl) {
-          if (videoTitleEl.innerText.length > 60) {
-            return /* OverLimit */0;
+  var initialState = Belt_Option.mapWithDefault(maybeVideoTitleInput, {
+        TAG: /* UnderLimit */1,
+        _0: 0.0
+      }, (function (videoTitleEl) {
+          var len = videoTitleEl.innerText.length;
+          if (len > 60.0) {
+            return {
+                    TAG: /* OverLimit */0,
+                    _0: len
+                  };
           } else {
-            return /* UnderLimit */1;
+            return {
+                    TAG: /* UnderLimit */1,
+                    _0: len
+                  };
           }
         }));
   var match = React.useState(function () {
         return initialState;
       });
   var setState = match[1];
-  var view = match[0] ? React.createElement(React.Fragment, undefined) : viewOverLimit;
+  var state = match[0];
+  var viewProgress = function (len) {
+    console.log(len);
+    var w_ = len / 60.0 * 100.0;
+    var w = Math.min(w_, 100.0);
+    console.log(w);
+    var width = String(w) + "%";
+    var backgroundColor = len > 60.0 ? "red" : (
+        len > 42.0 ? "yellow" : "green"
+      );
+    return React.createElement("div", undefined, React.createElement("div", {
+                    style: {
+                      backgroundColor: backgroundColor,
+                      height: "2px",
+                      width: width
+                    }
+                  }));
+  };
+  var children;
+  children = state.TAG === /* OverLimit */0 ? [
+      viewProgress(state._0),
+      viewOverLimit
+    ] : [viewProgress(state._0)];
   var watcher = function (mutationList, observer) {
     var textboxLen = Belt_Option.mapWithDefault(Belt_Option.map(Belt_Option.map(Belt_Array.get(mutationList, 0), (function (mutation) {
                     return mutation.target;
                   })), (function (el) {
                 return el.innerText;
-              })), 0, (function (text) {
+              })), 0.0, (function (text) {
             return text.length;
           }));
-    if (textboxLen > 60) {
+    if (textboxLen > 60.0) {
       return Curry._1(setState, (function (param) {
-                    return /* OverLimit */0;
+                    return {
+                            TAG: /* OverLimit */0,
+                            _0: textboxLen
+                          };
                   }));
     } else {
       return Curry._1(setState, (function (param) {
-                    return /* UnderLimit */1;
+                    return {
+                            TAG: /* UnderLimit */1,
+                            _0: textboxLen
+                          };
                   }));
     }
   };
   var observer = new MutationObserver(watcher);
   if (!(maybeVideoTitleEl == null) && maybeVideoTitleInput !== undefined) {
     observer.observe(Caml_option.valFromOption(maybeVideoTitleInput), observerConfig);
-    return ReactDom.createPortal(view, maybeVideoTitleEl);
+    return ReactDom.createPortal(children, maybeVideoTitleEl);
   } else {
     return React.createElement(React.Fragment, undefined);
   }
@@ -73,7 +111,7 @@ function make(props) {
 
 export {
   observerConfig ,
-  ytSelector ,
+  parentVideoTitleSelector ,
   viewOverLimit ,
   make ,
 }

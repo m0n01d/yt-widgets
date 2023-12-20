@@ -5,7 +5,7 @@
   "main": "vite.config.js",
   "type": "module",
   "scripts": {
-    "prebuild": "rescript",
+    "prebuild": "rescript build -with-deps",
     "build": "npm run build-widgets && vite build",
     "postbuild": "npm run bundle-script",
     "build-widgets": "vite build --config vite.widgets.js",
