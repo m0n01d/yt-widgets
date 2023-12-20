@@ -13,10 +13,8 @@ var observerConfig = {
   subtree: true
 };
 
-var parentVideoTitleSelector = "ytcp-video-title";
-
 var viewOverLimit = React.createElement("div", {
-      id: "TitleChecker.view",
+      id: "TitleChecker.viewOverLimit",
       style: {
         color: "#dc3545",
         fontSize: "12px",
@@ -26,12 +24,10 @@ var viewOverLimit = React.createElement("div", {
     }, "Your title is a little long there, pal...");
 
 function make(props) {
-  var maybeVideoTitleEl = document.querySelector(parentVideoTitleSelector);
-  var maybeVideoTitleEl$1 = (maybeVideoTitleEl == null) ? undefined : Caml_option.some(maybeVideoTitleEl);
-  var maybeVideoTitleInput = Belt_Option.flatMap(maybeVideoTitleEl$1, (function (el) {
+  var maybeVideoTitleEl = document.querySelector("ytcp-video-title");
+  var maybeVideoTitleInput = Belt_Option.flatMap((maybeVideoTitleEl == null) ? undefined : Caml_option.some(maybeVideoTitleEl), (function (el) {
           return Caml_option.nullable_to_opt(el.querySelector("ytcp-social-suggestion-input"));
         }));
-  console.log(maybeVideoTitleEl$1, maybeVideoTitleInput);
   var initialState = Belt_Option.mapWithDefault(maybeVideoTitleInput, {
         TAG: /* UnderLimit */1,
         _0: 0.0
@@ -55,15 +51,15 @@ function make(props) {
   var setState = match[1];
   var state = match[0];
   var viewProgress = function (len) {
-    console.log(len);
     var w_ = len / 60.0 * 100.0;
     var w = Math.min(w_, 100.0);
-    console.log(w);
     var width = String(w) + "%";
     var backgroundColor = len > 60.0 ? "red" : (
         len > 42.0 ? "yellow" : "green"
       );
-    return React.createElement("div", undefined, React.createElement("div", {
+    return React.createElement("div", {
+                id: "TitleChecker.progress"
+              }, React.createElement("div", {
                     style: {
                       backgroundColor: backgroundColor,
                       height: "2px",
@@ -111,7 +107,6 @@ function make(props) {
 
 export {
   observerConfig ,
-  parentVideoTitleSelector ,
   viewOverLimit ,
   make ,
 }

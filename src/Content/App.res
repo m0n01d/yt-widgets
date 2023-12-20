@@ -4,14 +4,13 @@ external createElement: string => Dom.element = "createElement"
 module App = {
   @react.component
   let make = () => {
-    Js.log("Hello ReScript")
     <div>
       <TitleChecker text="Video Title Checker goes here" />
     </div>
   }
 }
 let onMessageListener = port => {
-  Js.log(port)
+  Js.log2("App is listening", port)
 
   let dummy = createElement("div")
   let root = ReactDOM.Client.createRoot(dummy)

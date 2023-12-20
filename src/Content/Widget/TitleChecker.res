@@ -5,13 +5,12 @@ let observerConfig = {
   "childList": true,
   "subtree": true,
 }
-let parentVideoTitleSelector = "ytcp-video-title" // element where we'll inject <TitleChecker />
 type model = OverLimit(float) | UnderLimit(float)
 type props = {text: string}
 
 let viewOverLimit =
   <div
-    id="TitleChecker.view"
+    id="TitleChecker.viewOverLimit"
     style={ReactDOM.Style.make(
       ~color="#dc3545",
       ~fontSize="12px",
@@ -22,13 +21,11 @@ let viewOverLimit =
     {React.string("Your title is a little long there, pal...")} // nice passive aggressive tone
   </div>
 let make = (props: props): React.element => {
-  let maybeVideoTitleEl = Document.querySelector(Webapi.Dom.document, parentVideoTitleSelector)
+  let maybeVideoTitleEl = Document.querySelector(Webapi.Dom.document, "ytcp-video-title")
   let maybeVideoTitleInput =
     maybeVideoTitleEl->Belt.Option.flatMap(el =>
       Element.querySelector(el, "ytcp-social-suggestion-input")
     )
-
-  Js.log2(maybeVideoTitleEl, maybeVideoTitleInput)
 
   let initialState = maybeVideoTitleInput->Belt.Option.mapWithDefault(
     UnderLimit(0.0),
@@ -55,7 +52,7 @@ let make = (props: props): React.element => {
       "green"
     }
 
-    <div>
+    <div id="TitleChecker.progress">
       <div style={ReactDOM.Style.make(~height="2px", ~width, ~backgroundColor, ())} />
     </div>
   }

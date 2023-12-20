@@ -5,7 +5,6 @@ import * as TitleChecker from "./Widget/TitleChecker.bs.mjs";
 import * as Client from "react-dom/client";
 
 function App$App(props) {
-  console.log("Hello ReScript");
   return React.createElement("div", undefined, React.createElement(TitleChecker.make, {
                   text: "Video Title Checker goes here"
                 }));
@@ -16,7 +15,7 @@ var App = {
 };
 
 function onMessageListener(port) {
-  console.log(port);
+  console.log("App is listening", port);
   var dummy = window.document.createElement("div");
   var root = Client.createRoot(dummy);
   root.render(React.createElement(App$App, {}));
