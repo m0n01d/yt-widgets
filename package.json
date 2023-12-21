@@ -20,8 +20,11 @@
   "license": "ISC",
   "devDependencies": {
     "@rescript/react": "^0.11.0",
+    "@rescriptbr/react-query": "^1.1.0",
+    "@tanstack/react-query": "^5.14.2",
     "@vitejs/plugin-react": "^4.2.1",
     "elm-debug-transformer": "^1.2.1",
+    "reason-promise": "^1.1.5",
     "rescript": "^10.1.4",
     "vite": "^4.5.1",
     "vite-plugin-elm": "^2.8.0"

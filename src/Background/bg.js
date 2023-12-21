@@ -1,5 +1,6 @@
 const listeners = new Map();
 chrome.runtime.onConnect.addListener(function (port) {
+  console.log({ port });
   switch (port.name) {
     case "yt-widgets-content": {
       listeners.set(port.name, port);
