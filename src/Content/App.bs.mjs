@@ -79,13 +79,11 @@ var app = Belt_Option.map(Belt_Option.flatMap(Webapi__Dom__Document.asHtmlDocume
             var allNodes = Belt_Array.concatMany(addedNodes);
             var xs = allNodes.reduce((function (widgets, node) {
                     var name = node.nodeName.toLowerCase();
-                    if (name !== "ytcp-video-title") {
+                    if (name === "ytcp-video-title") {
+                      return Belt_Map.set(widgets, 0, React.createElement(TitleChecker.make, {}));
+                    } else {
                       return widgets;
                     }
-                    console.log("hi");
-                    var w = Belt_Map.set(widgets, 0, React.createElement(TitleChecker.make, {}));
-                    console.log(w);
-                    return w;
                   }), Belt_Map.make(IntCmp));
             if (Belt_Map.size(xs) > 0) {
               return Curry._1(dispatch, {

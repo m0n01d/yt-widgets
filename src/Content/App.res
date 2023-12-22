@@ -70,14 +70,8 @@ let app =
             // reduce here and match name to Widget
             let name = Js.String2.toLowerCase(Node.nodeName(node))
             switch name {
-            | "ytcp-video-title" => {
-                Js.log("hi")
-                let w = Belt.Map.set(widgets, 0, <TitleChecker />)
-                Js.log(w)
-                w
-              }
+            | "ytcp-video-title" => Belt.Map.set(widgets, 0, <TitleChecker />)
 
-            // Js.log2("widget added", widgets)
             | _ => widgets
             }
           }, Belt.Map.make(~id=module(IntCmp)))
