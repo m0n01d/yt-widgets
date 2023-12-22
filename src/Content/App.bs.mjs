@@ -2,12 +2,15 @@
 
 import * as Curry from "rescript/lib/es6/curry.js";
 import * as React from "react";
-import * as Js_string from "rescript/lib/es6/js_string.js";
+import * as Belt_Id from "rescript/lib/es6/belt_Id.js";
+import * as Belt_Map from "rescript/lib/es6/belt_Map.js";
+import * as Caml_obj from "rescript/lib/es6/caml_obj.js";
 import * as Belt_Array from "rescript/lib/es6/belt_Array.js";
 import * as Belt_Option from "rescript/lib/es6/belt_Option.js";
 import * as Caml_option from "rescript/lib/es6/caml_option.js";
 import * as TitleChecker from "./Widget/TitleChecker.bs.mjs";
 import * as Client from "react-dom/client";
+import * as Webapi__Dom__Document from "rescript-webapi/src/Webapi/Dom/Webapi__Dom__Document.bs.mjs";
 
 var observerConfig = {
   attributes: false,
@@ -16,6 +19,14 @@ var observerConfig = {
 };
 
 var $$document = window.document;
+
+var cmp = Caml_obj.compare;
+
+var IntCmp = Belt_Id.MakeComparable({
+      cmp: cmp
+    });
+
+var m = Belt_Map.make(IntCmp);
 
 var dummy = $$document.createElement("div");
 
@@ -26,75 +37,88 @@ var documentTitle_$1 = (documentTitle_ == null) ? undefined : Caml_option.some(d
 var documentTitle = Belt_Option.getWithDefault(documentTitle_$1, dummy);
 
 function update(state, action) {
-  if (action) {
-    return {
-            currentPage: action._0
-          };
-  } else {
+  if (typeof action === "number") {
     return state;
   }
+  if (action.TAG !== /* AddWidgets */0) {
+    return {
+            currentPage: action._0,
+            widgetContainers: state.widgetContainers
+          };
+  }
+  var ws = Belt_Map.merge(state.widgetContainers, action._0, (function (key, maybeA, maybeB) {
+          return maybeB;
+        }));
+  return {
+          currentPage: state.currentPage,
+          widgetContainers: ws
+        };
 }
 
-function App$App(props) {
-  var match = React.useReducer(update, {
-        currentPage: /* Other */1
-      });
-  var dispatch = match[1];
-  var onMessageListener = function (port) {
-    console.log("App is listening for Chrome Messages", port);
-  };
-  var watcher = function (mutationList, observer) {
-    var title = Belt_Option.mapWithDefault(Belt_Option.map(Belt_Array.get(mutationList, 0), (function (prim) {
-                return prim.target;
-              })), "", (function (prim) {
-            return prim.textContent;
-          }));
-    var t = Js_string.split(" - ", title);
-    if (t.length !== 2) {
-      return ;
-    }
-    var match = t[0];
-    if (match !== "Video details") {
-      return ;
-    }
-    setTimeout((function (param) {
-            Curry._1(dispatch, /* SetPage */{
-                  _0: /* Details */0
-                });
-          }), 1000);
-  };
-  var port = chrome.runtime.connect({
-        name: "yt-widgets-content"
-      });
-  port.onMessage.addListener(onMessageListener);
-  var observer = new MutationObserver(watcher);
-  React.useEffect(function () {
-        return (function (param) {
-                  observer.disconnect();
-                });
-      });
-  var match$1 = match[0].currentPage;
-  var widgets = match$1 ? [] : (console.log("details"), [React.createElement(TitleChecker.make, {})]);
-  observer.observe(documentTitle, observerConfig);
-  return widgets;
-}
-
-var App = {
-  make: App$App
-};
-
-var root = Client.createRoot(dummy);
-
-root.render(React.createElement(App$App, {}));
+var app = Belt_Option.map(Belt_Option.flatMap(Webapi__Dom__Document.asHtmlDocument($$document), (function ($$document) {
+            return Caml_option.nullable_to_opt($$document.body);
+          })), (function (body) {
+        var App = function (props) {
+          var initialState = {
+            currentPage: /* Other */1,
+            widgetContainers: m
+          };
+          var match = React.useReducer(update, initialState);
+          var dispatch = match[1];
+          var onMessageListener = function (port) {
+            console.log("App is listening for Chrome Messages", port);
+          };
+          var port = chrome.runtime.connect({
+                name: "yt-widgets-content"
+              });
+          port.onMessage.addListener(onMessageListener);
+          var bodyWatcher = function (mutationList, obsever) {
+            var addedNodes = Belt_Array.map(mutationList, (function (el) {
+                    return Array.prototype.slice.call(el.addedNodes);
+                  }));
+            var allNodes = Belt_Array.concatMany(addedNodes);
+            var xs = allNodes.reduce((function (widgets, node) {
+                    var name = node.nodeName.toLowerCase();
+                    if (name !== "ytcp-video-title") {
+                      return widgets;
+                    }
+                    console.log("hi");
+                    var w = Belt_Map.set(widgets, 0, React.createElement(TitleChecker.make, {}));
+                    console.log(w);
+                    return w;
+                  }), Belt_Map.make(IntCmp));
+            if (Belt_Map.size(xs) > 0) {
+              return Curry._1(dispatch, {
+                          TAG: /* AddWidgets */0,
+                          _0: xs
+                        });
+            }
+            
+          };
+          React.useEffect(function () {
+                var bodyObserver = new MutationObserver(bodyWatcher);
+                bodyObserver.observe(body, observerConfig);
+                return (function (param) {
+                          bodyObserver.disconnect();
+                        });
+              });
+          var widgets = Belt_Map.valuesToArray(match[0].widgetContainers);
+          console.log("widigies", widgets);
+          return widgets;
+        };
+        var root = Client.createRoot(dummy);
+        root.render(React.createElement(App, {}));
+      }));
 
 export {
   observerConfig ,
   $$document ,
+  IntCmp ,
+  m ,
   dummy ,
   documentTitle_$1 as documentTitle_,
   documentTitle ,
   update ,
-  App ,
-  root ,
+  app ,
 }
 /* document Not a pure module */

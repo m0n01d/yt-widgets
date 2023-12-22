@@ -4,17 +4,16 @@ import * as Curry from "rescript/lib/es6/curry.js";
 import * as React from "react";
 import * as ReactDom from "react-dom";
 import * as Belt_Array from "rescript/lib/es6/belt_Array.js";
-import * as ReactQuery from "@rescriptbr/react-query/src/ReactQuery.bs.mjs";
 import * as Belt_Option from "rescript/lib/es6/belt_Option.js";
 import * as Caml_option from "rescript/lib/es6/caml_option.js";
-import * as Js_promise2 from "rescript/lib/es6/js_promise2.js";
-import * as ReactQuery$1 from "@tanstack/react-query";
 
 var observerConfig = {
   attributes: false,
   childList: true,
   subtree: true
 };
+
+var parentVideoTitleSelector = "ytcp-video-title";
 
 var viewOverLimit = React.createElement("div", {
       id: "TitleChecker.viewOverLimit",
@@ -26,11 +25,14 @@ var viewOverLimit = React.createElement("div", {
       }
     }, "Your title is a little long there, pal...");
 
-function TitleChecker$TitleChecker(props) {
-  var maybeVideoTitleEl = document.querySelector("ytcp-video-title");
-  var maybeVideoTitleInput = Belt_Option.flatMap((maybeVideoTitleEl == null) ? undefined : Caml_option.some(maybeVideoTitleEl), (function (el) {
+function TitleChecker(props) {
+  console.log("init title checker");
+  var maybeVideoTitleEl = document.querySelector(parentVideoTitleSelector);
+  var maybeVideoTitleEl$1 = (maybeVideoTitleEl == null) ? undefined : Caml_option.some(maybeVideoTitleEl);
+  var maybeVideoTitleInput = Belt_Option.flatMap(maybeVideoTitleEl$1, (function (el) {
           return Caml_option.nullable_to_opt(el.querySelector("ytcp-social-suggestion-input"));
         }));
+  console.log(maybeVideoTitleEl$1, maybeVideoTitleInput);
   var initialState = Belt_Option.mapWithDefault(maybeVideoTitleInput, {
         TAG: /* UnderLimit */1,
         _0: 0.0
@@ -60,9 +62,7 @@ function TitleChecker$TitleChecker(props) {
     var backgroundColor = len > 60.0 ? "red" : (
         len > 42.0 ? "yellow" : "green"
       );
-    return React.createElement("div", {
-                id: "TitleChecker.progress"
-              }, React.createElement("div", {
+    return React.createElement("div", undefined, React.createElement("div", {
                     style: {
                       backgroundColor: backgroundColor,
                       height: "2px",
@@ -100,91 +100,20 @@ function TitleChecker$TitleChecker(props) {
     }
   };
   var observer = new MutationObserver(watcher);
-  React.useEffect(function () {
-        return (function (param) {
-                  observer.disconnect();
-                });
-      });
-  var asyncTimeout = function (param) {
-    return new Promise((function (resolve, reject) {
-                  setTimeout((function (param) {
-                          resolve(undefined);
-                        }), 1000);
-                }));
-  };
-  var queryDomHelp = async function (n) {
-    console.log("waiting...");
-    await asyncTimeout(undefined);
-    console.log("querying...");
-    var maybeVideoTitleEl = document.querySelector("ytcp-video-title");
-    if (maybeVideoTitleEl == null) {
-      return await queryDomHelp(n - 1 | 0);
-    } else {
-      return Promise.resolve(maybeVideoTitleEl);
-    }
-  };
-  var queryDom = function (param) {
-    return Js_promise2.then(queryDomHelp(3), (function (el) {
-                  return el;
-                }));
-  };
-  var queryResult = ReactQuery$1.useQuery({
-        queryKey: ["todos"],
-        queryFn: queryDom,
-        refetchOnMount: Caml_option.some(ReactQuery.refetchOnMount({
-                  NAME: "bool",
-                  VAL: true
-                })),
-        refetchOnWindowFocus: Caml_option.some(ReactQuery.refetchOnWindowFocus({
-                  NAME: "bool",
-                  VAL: false
-                }))
-      });
-  console.log("query", queryResult);
-  var tmp;
-  if (queryResult.isLoading) {
-    tmp = "Loading...";
-  } else if (queryResult.isError) {
-    tmp = "Unexpected error...";
+  if (!(maybeVideoTitleEl == null) && maybeVideoTitleInput !== undefined) {
+    observer.observe(Caml_option.valFromOption(maybeVideoTitleInput), observerConfig);
+    return ReactDom.createPortal(children, maybeVideoTitleEl);
   } else {
-    var videoTitleEl = queryResult.data;
-    if (videoTitleEl !== undefined) {
-      var videoTitleEl$1 = Caml_option.valFromOption(videoTitleEl);
-      var maybeVideoTitleInput$1 = videoTitleEl$1.querySelector("ytcp-social-suggestion-input");
-      if (maybeVideoTitleInput$1 == null) {
-        tmp = React.createElement(React.Fragment, undefined);
-      } else {
-        observer.observe(maybeVideoTitleInput$1, observerConfig);
-        tmp = ReactDom.createPortal(children, videoTitleEl$1);
-      }
-    } else {
-      tmp = "Unexpected error...";
-    }
+    return React.createElement(React.Fragment, undefined);
   }
-  return React.createElement("div", undefined, tmp);
 }
 
-var TitleChecker = {
-  viewOverLimit: viewOverLimit,
-  make: TitleChecker$TitleChecker
-};
-
-var client = new ReactQuery$1.QueryClient();
-
-function TitleChecker$1(props) {
-  console.log("title check me pls");
-  return React.createElement(ReactQuery$1.QueryClientProvider, {
-              client: client,
-              children: React.createElement(TitleChecker$TitleChecker, {})
-            });
-}
-
-var make = TitleChecker$1;
+var make = TitleChecker;
 
 export {
   observerConfig ,
-  TitleChecker ,
-  client ,
+  parentVideoTitleSelector ,
+  viewOverLimit ,
   make ,
 }
 /* viewOverLimit Not a pure module */
