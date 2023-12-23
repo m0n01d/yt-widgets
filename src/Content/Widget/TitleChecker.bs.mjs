@@ -2,9 +2,13 @@
 
 import * as Curry from "rescript/lib/es6/curry.js";
 import * as React from "react";
+import * as Caml_obj from "rescript/lib/es6/caml_obj.js";
 import * as ReactDom from "react-dom";
+import * as ReactQuery from "@rescriptbr/react-query/src/ReactQuery.bs.mjs";
 import * as Caml_option from "rescript/lib/es6/caml_option.js";
+import * as Js_promise2 from "rescript/lib/es6/js_promise2.js";
 import * as Caml_exceptions from "rescript/lib/es6/caml_exceptions.js";
+import * as ReactQuery$1 from "@tanstack/react-query";
 
 var observerConfig = {
   attributes: false,
@@ -18,14 +22,14 @@ function pause(param) {
   return new Promise((function (resolve, reject) {
                 setTimeout((function (param) {
                         resolve(undefined);
-                      }), 1333);
+                      }), 333);
               }));
 }
 
 var TestError = /* @__PURE__ */Caml_exceptions.create("TitleChecker.TestError");
 
 async function queryDomHelp(selector, n) {
-  await pause();
+  await pause(undefined);
   if (n < 0) {
     return Promise.reject({
                 RE_EXN_ID: TestError,
@@ -41,12 +45,12 @@ async function queryDomHelp(selector, n) {
 }
 
 function query(param) {
-  var videoTitleElQuery = queryDomHelp(parentVideoTitleSelector, 3).then(function (el) {
-        return el;
-      });
-  var videoTitleInputQuery = queryDomHelp("ytcp-social-suggestion-input", 3).then(function (el) {
-        return el;
-      });
+  var videoTitleElQuery = Js_promise2.then(queryDomHelp(parentVideoTitleSelector, 5), (function (el) {
+          return el;
+        }));
+  var videoTitleInputQuery = Js_promise2.then(queryDomHelp("ytcp-social-suggestion-input", 5), (function (el) {
+          return el;
+        }));
   return Promise.all([
               videoTitleElQuery,
               videoTitleInputQuery
@@ -63,61 +67,31 @@ var viewOverLimit = React.createElement("div", {
       }
     }, "Your title is a little long there, pal...");
 
-function TitleChecker(props) {
-  var match = React.useState(function (param) {
+function TitleChecker$TitleChecker(props) {
+  var match = React.useState(function () {
         return {
-                TAG: "UnderLimit",
+                TAG: /* UnderLimit */1,
                 _0: 0.0
               };
       });
   var setState = match[1];
   var state = match[0];
-  var match$1 = React.useState(function (param) {
-        return [
-                undefined,
-                undefined
-              ];
+  var queryResult = ReactQuery$1.useQuery({
+        queryKey: ["todos"],
+        queryFn: query,
+        staleTime: Caml_option.some(ReactQuery.time({
+                  NAME: "number",
+                  VAL: 1
+                })),
+        refetchOnMount: Caml_option.some(ReactQuery.refetchOnMount({
+                  NAME: "bool",
+                  VAL: true
+                })),
+        refetchOnWindowFocus: Caml_option.some(ReactQuery.refetchOnWindowFocus({
+                  NAME: "bool",
+                  VAL: false
+                }))
       });
-  var setEls = match$1[1];
-  var match$2 = match$1[0];
-  var maybeVideoTitleInput = match$2[1];
-  var maybeVideoTitleEl = match$2[0];
-  React.useEffect((function (param) {
-          query().then(function (param) {
-                if (param.length !== 2) {
-                  throw {
-                        RE_EXN_ID: "Match_failure",
-                        _1: [
-                          "TitleChecker.res",
-                          61,
-                          19
-                        ],
-                        Error: new Error()
-                      };
-                }
-                var videoTitleEl = param[0];
-                var videoTitleInput = param[1];
-                Curry._1(setEls, (function (param) {
-                        return [
-                                Caml_option.some(videoTitleEl),
-                                Caml_option.some(videoTitleInput)
-                              ];
-                      }));
-                var text = videoTitleInput.innerText;
-                var len = text.length;
-                var initialState = len > 60.0 ? ({
-                      TAG: "OverLimit",
-                      _0: len
-                    }) : ({
-                      TAG: "UnderLimit",
-                      _0: len
-                    });
-                Curry._1(setState, (function (param) {
-                        return initialState;
-                      }));
-                return Promise.resolve();
-              });
-        }), []);
   var viewProgress = function (len) {
     var w_ = len / 60.0 * 100.0;
     var w = Math.min(w_, 100.0);
@@ -134,31 +108,39 @@ function TitleChecker(props) {
                   }));
   };
   var children;
-  children = state.TAG === "OverLimit" ? [
+  children = state.TAG === /* OverLimit */0 ? [
       viewProgress(state._0),
       viewOverLimit
     ] : [viewProgress(state._0)];
-  if (maybeVideoTitleEl === undefined) {
-    return React.createElement(React.Fragment, {});
+  if (queryResult.isLoading) {
+    return "Loading...";
   }
-  if (maybeVideoTitleInput === undefined) {
-    return React.createElement(React.Fragment, {});
+  if (queryResult.isError) {
+    return React.createElement(React.Fragment, undefined);
   }
-  var videoTitleInput = Caml_option.valFromOption(maybeVideoTitleInput);
+  var match$1 = queryResult.data;
+  if (match$1 === undefined) {
+    return React.createElement(React.Fragment, undefined);
+  }
+  if (match$1.length !== 2) {
+    return React.createElement(React.Fragment, undefined);
+  }
+  var videoTitleEl = match$1[0];
+  var videoTitleInput = match$1[1];
   var watcher = function (mutationList, observer) {
     var text = videoTitleInput.innerText;
     var textboxLen = text.length;
     if (textboxLen > 60.0) {
       Curry._1(setState, (function (param) {
               return {
-                      TAG: "OverLimit",
+                      TAG: /* OverLimit */0,
                       _0: textboxLen
                     };
             }));
     } else {
       Curry._1(setState, (function (param) {
               return {
-                      TAG: "UnderLimit",
+                      TAG: /* UnderLimit */1,
                       _0: textboxLen
                     };
             }));
@@ -167,10 +149,38 @@ function TitleChecker(props) {
   };
   var observer = new MutationObserver(watcher);
   observer.observe(videoTitleInput, observerConfig);
-  return ReactDom.createPortal(children, Caml_option.valFromOption(maybeVideoTitleEl));
+  var text = videoTitleInput.innerText;
+  var len = text.length;
+  var initialState = len > 60.0 ? ({
+        TAG: /* OverLimit */0,
+        _0: len
+      }) : ({
+        TAG: /* UnderLimit */1,
+        _0: len
+      });
+  if (Caml_obj.notequal(initialState, state)) {
+    Curry._1(setState, (function (param) {
+            return initialState;
+          }));
+  }
+  return ReactDom.createPortal(children, videoTitleEl);
 }
 
-var make = TitleChecker;
+var TitleChecker = {
+  viewOverLimit: viewOverLimit,
+  make: TitleChecker$TitleChecker
+};
+
+var client = new ReactQuery$1.QueryClient();
+
+function TitleChecker$1(props) {
+  return React.createElement(ReactQuery$1.QueryClientProvider, {
+              client: client,
+              children: React.createElement(TitleChecker$TitleChecker, {})
+            });
+}
+
+var make = TitleChecker$1;
 
 export {
   observerConfig ,
@@ -179,7 +189,8 @@ export {
   TestError ,
   queryDomHelp ,
   query ,
-  viewOverLimit ,
+  TitleChecker ,
+  client ,
   make ,
 }
 /* viewOverLimit Not a pure module */

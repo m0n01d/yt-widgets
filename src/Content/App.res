@@ -1,5 +1,6 @@
 open Webapi
 open Webapi.Dom
+open Belt
 
 let observerConfig = {
   "attributes": false,
@@ -81,17 +82,13 @@ let app = Document.querySelector(document, "title")->Option.map(titleEl => {
         Some(cleanup)
       })
       Js.log2("widgets", state.currentPage)
-      let loadWidget = w => React.lazy_(() => w)
       let detailsPage = () => {
-        // [<TitleChecker.Wrapped />]
         [<TitleChecker />]
       }
 
       let widgets = switch state.currentPage {
       | Details => {
-          Js.log("details")
           detailsPage()
-          // []
         }
       | _ => []
       }
