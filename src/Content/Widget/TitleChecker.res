@@ -5,135 +5,120 @@ let observerConfig = {
   "childList": true,
   "subtree": true,
 }
+type sharedProps = {children: React.element}
+
 let parentVideoTitleSelector = "ytcp-video-title" // element where we'll inject <TitleChecker />
-module TitleChecker = {
-  type model = OverLimit(float) | UnderLimit(float)
 
-  let viewOverLimit =
-    <div
-      id="TitleChecker.viewOverLimit"
-      style={ReactDOM.Style.make(
-        ~color="#dc3545",
-        ~fontSize="12px",
-        ~padding="0.2rem 1rem",
-        ~textAlign="right",
-        (),
-      )}>
-      {React.string("Your title is a little long there, pal...")} // nice passive aggressive tone
-    </div>
-  @react.component
-  let make = () => {
-    Js.log("init title checker")
-    let maybeVideoTitleEl = Document.querySelector(Webapi.Dom.document, parentVideoTitleSelector)
-    let maybeVideoTitleInput =
-      maybeVideoTitleEl->Belt.Option.flatMap(el =>
-        Element.querySelector(el, "ytcp-social-suggestion-input")
-      )
-
-    Js.log2(maybeVideoTitleEl, maybeVideoTitleInput)
-
-    let initialState = maybeVideoTitleInput->Belt.Option.mapWithDefault(
-      UnderLimit(0.0),
-      videoTitleEl => {
-        let len = Belt.Int.toFloat(String.length(Element.innerText(videoTitleEl)))
-        if len > 60.0 {
-          OverLimit(len)
-        } else {
-          UnderLimit(len)
-        }
-      },
-    )
-    let (state, setState) = React.useState(_ => initialState)
-
-    let viewProgress = (len: float) => {
-      let w_ = len /. 60.0 *. 100.0
-      let w = Js.Math.min_float(w_, 100.0)
-      let width = Belt.Float.toString(w) ++ "%"
-      let backgroundColor = if len > 60.0 {
-        "red"
-      } else if len > 42.0 {
-        "yellow"
-      } else {
-        "green"
-      }
-
-      <div>
-        <div style={ReactDOM.Style.make(~height="2px", ~width, ~backgroundColor, ())} />
-      </div>
-    }
-    let view = {
-      let children = switch state {
-      | OverLimit(len) => [viewProgress(len), viewOverLimit]
-      | UnderLimit(len) => [viewProgress(len)]
-      }
-      React.array(children)
-    }
-
-    let watcher = (mutationList, observer) => {
-      let textboxLen: float =
-        mutationList
-        ->Belt.Array.get(0) // get the Head of the mutations returns a MutationRecord
-        ->Belt.Option.map(mutation => MutationRecord.target(mutation)) // returns a Node
-        ->Belt.Option.map(el => Node.innerText(el)) // get the text from the Node
-        ->Belt.Option.mapWithDefault(0.0, text => Belt.Int.toFloat(String.length(text)))
-
-      if textboxLen > 60.0 {
-        setState(_ => OverLimit(textboxLen))
-      } else {
-        setState(_ => UnderLimit(textboxLen))
-      }
-    }
-    let observer = MutationObserver.make(watcher)
-
-    switch (maybeVideoTitleEl, maybeVideoTitleInput) {
-    | (Some(videoTitleEl), Some(videoTitleInput)) => {
-        MutationObserver.observe(observer, videoTitleInput, observerConfig)
-        ReactDOM.createPortal(view, videoTitleEl)
-      }
-    | _ => <> </>
-    }
-  }
-}
 let pause = () => {
   Js.Promise2.make((~resolve, ~reject) => {
-    let x = Js.Global.setTimeout(_ => resolve(. None), 333)
+    let x = Js.Global.setTimeout(_ => resolve(. None), 1333)
   })
 }
 exception TestError(string)
 
 let rec queryDomHelp = async (selector, n): promise<Dom.element> => {
-  Js.log3("n", n, selector)
+  let wait = await pause()
 
   if n < 0 {
-    Js.log3("n", n, selector)
     Promise.reject(TestError("huh"))
   } else {
-    Js.log("waiting...")
-    let wait = await pause()
-    Js.log("querying...")
-    let maybeVideoTitleEl: option<Dom.element> = Document.querySelector(
-      Webapi.Dom.document,
-      selector,
-    )
-    Console.log2(n, maybeVideoTitleEl)
-    switch maybeVideoTitleEl {
+    let maybeEl: option<Dom.element> = Document.querySelector(Webapi.Dom.document, selector)
+    switch maybeEl {
     | Some(el) => Promise.resolve(el)
     | None => await queryDomHelp(selector, n - 1)
     }
   }
 }
 
-let videoTitleElQuery = queryDomHelp(parentVideoTitleSelector, 3)
-let videoTitleInputQuery = queryDomHelp("ytcp-social-suggestion-input", 3)
+let query = () => {
+  let videoTitleElQuery = queryDomHelp(parentVideoTitleSelector, 3)->Promise.then(el => el)
+  let videoTitleInputQuery = queryDomHelp("ytcp-social-suggestion-input", 3)->Promise.then(el => el)
 
-let querySelectors = Promise.all([videoTitleElQuery, videoTitleInputQuery])
+  Promise.all([videoTitleElQuery, videoTitleInputQuery])
+}
 
-let queryAndLoad = querySelectors->Promise.then(_ => Promise.resolve(TitleChecker.make))
-// let queryAndLoad = async () => {
-//   let waiti = await asyncTimeout()
+type model = OverLimit(float) | UnderLimit(float)
 
-//   // Promise.resolve(TitleChecker.make)
-//   TitleChecker.make
-// }
+let viewOverLimit =
+  <div
+    id="TitleChecker.viewOverLimit"
+    style={ReactDOM.Style.make(
+      ~color="#dc3545",
+      ~fontSize="12px",
+      ~padding="0.2rem 1rem",
+      ~textAlign="right",
+      (),
+    )}>
+    {React.string("Your title is a little long there, pal...")} // nice passive aggressive tone
+  </div>
 
-let make = React.lazy_(() => queryAndLoad)
+@react.component
+let make = () => {
+  let (state, setState) = React.useState(_ => UnderLimit(0.0))
+  let ((maybeVideoTitleEl, maybeVideoTitleInput), setEls) = React.useState(_ => (None, None))
+  React.useEffect0(() => {
+    query()
+    ->Promise.then(([videoTitleEl, videoTitleInput]) => {
+      setEls(_ => (Some(videoTitleEl), Some(videoTitleInput)))
+      let text = Element.innerText(videoTitleInput)
+      let initialState = {
+        let len = Belt.Int.toFloat(String.length(text))
+        if len > 60.0 {
+          OverLimit(len)
+        } else {
+          UnderLimit(len)
+        }
+      }
+
+      setState(_ => initialState)
+      Promise.resolve()
+    })
+    ->ignore
+
+    None
+  })
+
+  let viewProgress = (len: float) => {
+    let w_ = len /. 60.0 *. 100.0
+    let w = Js.Math.min_float(w_, 100.0)
+    let width = Belt.Float.toString(w) ++ "%"
+    let backgroundColor = if len > 60.0 {
+      "red"
+    } else if len > 42.0 {
+      "yellow"
+    } else {
+      "green"
+    }
+
+    <div>
+      <div style={ReactDOM.Style.make(~height="2px", ~width, ~backgroundColor, ())} />
+    </div>
+  }
+  let view = {
+    let children = switch state {
+    | OverLimit(len) => [viewProgress(len), viewOverLimit]
+    | UnderLimit(len) => [viewProgress(len)]
+    }
+    React.array(children)
+  }
+
+  switch (maybeVideoTitleEl, maybeVideoTitleInput) {
+  | (Some(videoTitleEl), Some(videoTitleInput)) => {
+      let watcher = (mutationList, observer) => {
+        let text = Element.innerText(videoTitleInput)
+
+        let textboxLen = Belt.Int.toFloat(String.length(text))
+        if textboxLen > 60.0 {
+          setState(_ => OverLimit(textboxLen))
+        } else {
+          setState(_ => UnderLimit(textboxLen))
+        }
+        MutationObserver.disconnect(observer)
+      }
+      let observer = MutationObserver.make(watcher)
+      MutationObserver.observe(observer, videoTitleInput, observerConfig)
+      ReactDOM.createPortal(view, videoTitleEl)
+    }
+  | _ => <> </>
+  }
+}

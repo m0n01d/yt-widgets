@@ -56,6 +56,19 @@ let app = Document.querySelector(document, "title")->Option.map(titleEl => {
 
       let titleWatcher = (mutationList: array<MutationRecord.t>, obsever) => {
         Js.log("body")
+        let title =
+          mutationList
+          ->Array.get(0)
+          ->Option.map(MutationRecord.target)
+          ->Option.mapWithDefault("", Node.textContent)
+
+        let t = Js.String.split(" - ", title)
+        Js.log2("page", t)
+
+        switch t {
+        | ["Video details", _] => dispatch(SetPage(Details))
+        | _ => dispatch(SetPage(Other))
+        }
       }
 
       React.useEffect0(() => {
@@ -67,11 +80,24 @@ let app = Document.querySelector(document, "title")->Option.map(titleEl => {
 
         Some(cleanup)
       })
+      Js.log2("widgets", state.currentPage)
+      let loadWidget = w => React.lazy_(() => w)
+      let detailsPage = () => {
+        // [<TitleChecker.Wrapped />]
+        [<TitleChecker />]
+      }
 
-      let widgets = Belt.Map.valuesToArray(state.widgetContainers)
+      let widgets = switch state.currentPage {
+      | Details => {
+          Js.log("details")
+          detailsPage()
+          // []
+        }
+      | _ => []
+      }
       Js.log2("widigies", widgets)
 
-      React.array([<TitleChecker />])
+      React.array(widgets)
     }
   }
 
