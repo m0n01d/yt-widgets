@@ -42,65 +42,39 @@ let update = (state: model, action: msg) => {
   }
 }
 
-let app =
-  document
-  ->Document.asHtmlDocument
-  ->Option.flatMap(document => document->HtmlDocument.body)
-  ->Option.map(body => {
-    module App = {
-      @react.component
-      let make = () => {
-        let initialState = {currentPage: Other, widgetContainers: m}
-        let (state, dispatch) = React.useReducer(update, initialState)
-        let onMessageListener = port => {
-          Js.log2("App is listening for Chrome Messages", port)
-        }
-        let port = Chrome.Runtime.connect({name: "yt-widgets-content"})
-        Chrome.Runtime.Port.addListener(port, onMessageListener)
-
-        let bodyWatcher = (mutationList: array<MutationRecord.t>, obsever) => {
-          // Js.log(mutationList)
-          // let x = mutationList->Belt.Array.map(el => Js.log2("el", el))
-          let addedNodes: array<Dom.Node.t> = mutationList->Array.flatMap(el => {
-            el->MutationRecord.addedNodes->NodeList.toArray
-          })
-
-          let allNodes: array<Dom.Node.t> = addedNodes
-          let xs: widgies = Array.reduce(allNodes, Belt.Map.make(~id=module(IntCmp)), (
-            widgets: widgies,
-            node,
-          ) => {
-            // reduce here and match name to Widget
-            let name = Js.String2.toLowerCase(Node.nodeName(node))
-            switch name {
-            | "ytcp-video-title" => Belt.Map.set(widgets, 0, <TitleChecker />)
-
-            | _ => widgets
-            }
-          })
-
-          if Belt.Map.size(xs) > 0 {
-            dispatch(AddWidgets(xs))
-          }
-        }
-
-        React.useEffect0(() => {
-          let bodyObserver = MutationObserver.make(bodyWatcher)
-          MutationObserver.observe(bodyObserver, body, observerConfig)
-          let cleanup = () => {
-            MutationObserver.disconnect(bodyObserver)
-          }
-
-          Some(cleanup)
-        })
-
-        let widgets = Belt.Map.valuesToArray(state.widgetContainers)
-        Js.log2("widigies", widgets)
-
-        React.array(widgets)
+let app = Document.querySelector(document, "title")->Option.map(titleEl => {
+  module App = {
+    @react.component
+    let make = () => {
+      let initialState = {currentPage: Other, widgetContainers: m}
+      let (state, dispatch) = React.useReducer(update, initialState)
+      let onMessageListener = port => {
+        Js.log2("App is listening for Chrome Messages", port)
       }
-    }
+      let port = Chrome.Runtime.connect({name: "yt-widgets-content"})
+      Chrome.Runtime.Port.addListener(port, onMessageListener)
 
-    let root = ReactDOM.Client.createRoot(dummy)
-    ReactDOM.Client.Root.render(root, <App />)
-  })
+      let titleWatcher = (mutationList: array<MutationRecord.t>, obsever) => {
+        Js.log("body")
+      }
+
+      React.useEffect0(() => {
+        let titleObserver = MutationObserver.make(titleWatcher)
+        MutationObserver.observe(titleObserver, titleEl, observerConfig)
+        let cleanup = () => {
+          MutationObserver.disconnect(titleObserver)
+        }
+
+        Some(cleanup)
+      })
+
+      let widgets = Belt.Map.valuesToArray(state.widgetContainers)
+      Js.log2("widigies", widgets)
+
+      React.array([<TitleChecker />])
+    }
+  }
+
+  let root = ReactDOM.Client.createRoot(dummy)
+  ReactDOM.Client.Root.render(root, <App />)
+})
