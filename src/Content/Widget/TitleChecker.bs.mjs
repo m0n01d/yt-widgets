@@ -34,23 +34,23 @@ function TitleChecker(props) {
         }));
   console.log(maybeVideoTitleEl$1, maybeVideoTitleInput);
   var initialState = Belt_Option.mapWithDefault(maybeVideoTitleInput, {
-        TAG: /* UnderLimit */1,
+        TAG: "UnderLimit",
         _0: 0.0
       }, (function (videoTitleEl) {
           var len = videoTitleEl.innerText.length;
           if (len > 60.0) {
             return {
-                    TAG: /* OverLimit */0,
+                    TAG: "OverLimit",
                     _0: len
                   };
           } else {
             return {
-                    TAG: /* UnderLimit */1,
+                    TAG: "UnderLimit",
                     _0: len
                   };
           }
         }));
-  var match = React.useState(function () {
+  var match = React.useState(function (param) {
         return initialState;
       });
   var setState = match[1];
@@ -71,7 +71,7 @@ function TitleChecker(props) {
                   }));
   };
   var children;
-  children = state.TAG === /* OverLimit */0 ? [
+  children = state.TAG === "OverLimit" ? [
       viewProgress(state._0),
       viewOverLimit
     ] : [viewProgress(state._0)];
@@ -86,14 +86,14 @@ function TitleChecker(props) {
     if (textboxLen > 60.0) {
       return Curry._1(setState, (function (param) {
                     return {
-                            TAG: /* OverLimit */0,
+                            TAG: "OverLimit",
                             _0: textboxLen
                           };
                   }));
     } else {
       return Curry._1(setState, (function (param) {
                     return {
-                            TAG: /* UnderLimit */1,
+                            TAG: "UnderLimit",
                             _0: textboxLen
                           };
                   }));
@@ -104,7 +104,7 @@ function TitleChecker(props) {
     observer.observe(Caml_option.valFromOption(maybeVideoTitleInput), observerConfig);
     return ReactDom.createPortal(children, maybeVideoTitleEl);
   } else {
-    return React.createElement(React.Fragment, undefined);
+    return React.createElement(React.Fragment, {});
   }
 }
 

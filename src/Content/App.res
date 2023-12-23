@@ -1,4 +1,3 @@
-open Belt
 open Webapi
 open Webapi.Dom
 
@@ -59,14 +58,18 @@ let app =
         let port = Chrome.Runtime.connect({name: "yt-widgets-content"})
         Chrome.Runtime.Port.addListener(port, onMessageListener)
 
-        let bodyWatcher = (mutationList, obsever) => {
+        let bodyWatcher = (mutationList: array<MutationRecord.t>, obsever) => {
           // Js.log(mutationList)
           // let x = mutationList->Belt.Array.map(el => Js.log2("el", el))
-          let addedNodes = mutationList->Array.map(el => {
+          let addedNodes: array<Dom.Node.t> = mutationList->Array.flatMap(el => {
             el->MutationRecord.addedNodes->NodeList.toArray
           })
-          let allNodes = Array.concatMany(addedNodes)
-          let xs: widgies = allNodes->Js.Array2.reduce((widgets: widgies, node) => {
+
+          let allNodes: array<Dom.Node.t> = addedNodes
+          let xs: widgies = Array.reduce(allNodes, Belt.Map.make(~id=module(IntCmp)), (
+            widgets: widgies,
+            node,
+          ) => {
             // reduce here and match name to Widget
             let name = Js.String2.toLowerCase(Node.nodeName(node))
             switch name {
@@ -74,14 +77,14 @@ let app =
 
             | _ => widgets
             }
-          }, Belt.Map.make(~id=module(IntCmp)))
+          })
 
           if Belt.Map.size(xs) > 0 {
             dispatch(AddWidgets(xs))
           }
         }
 
-        React.useEffect(() => {
+        React.useEffect0(() => {
           let bodyObserver = MutationObserver.make(bodyWatcher)
           MutationObserver.observe(bodyObserver, body, observerConfig)
           let cleanup = () => {

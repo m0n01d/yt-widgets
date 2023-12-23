@@ -5,9 +5,10 @@ import * as React from "react";
 import * as Belt_Id from "rescript/lib/es6/belt_Id.js";
 import * as Belt_Map from "rescript/lib/es6/belt_Map.js";
 import * as Caml_obj from "rescript/lib/es6/caml_obj.js";
-import * as Belt_Array from "rescript/lib/es6/belt_Array.js";
 import * as Belt_Option from "rescript/lib/es6/belt_Option.js";
 import * as Caml_option from "rescript/lib/es6/caml_option.js";
+import * as Core__Array from "@rescript/core/src/Core__Array.bs.mjs";
+import * as Core__Option from "@rescript/core/src/Core__Option.bs.mjs";
 import * as TitleChecker from "./Widget/TitleChecker.bs.mjs";
 import * as Client from "react-dom/client";
 import * as Webapi__Dom__Document from "rescript-webapi/src/Webapi/Dom/Webapi__Dom__Document.bs.mjs";
@@ -37,10 +38,10 @@ var documentTitle_$1 = (documentTitle_ == null) ? undefined : Caml_option.some(d
 var documentTitle = Belt_Option.getWithDefault(documentTitle_$1, dummy);
 
 function update(state, action) {
-  if (typeof action === "number") {
+  if (typeof action !== "object") {
     return state;
   }
-  if (action.TAG !== /* AddWidgets */0) {
+  if (action.TAG !== "AddWidgets") {
     return {
             currentPage: action._0,
             widgetContainers: state.widgetContainers
@@ -55,12 +56,12 @@ function update(state, action) {
         };
 }
 
-var app = Belt_Option.map(Belt_Option.flatMap(Webapi__Dom__Document.asHtmlDocument($$document), (function ($$document) {
+var app = Core__Option.map(Core__Option.flatMap(Webapi__Dom__Document.asHtmlDocument($$document), (function ($$document) {
             return Caml_option.nullable_to_opt($$document.body);
           })), (function (body) {
         var App = function (props) {
           var initialState = {
-            currentPage: /* Other */1,
+            currentPage: "Other",
             widgetContainers: m
           };
           var match = React.useReducer(update, initialState);
@@ -73,33 +74,32 @@ var app = Belt_Option.map(Belt_Option.flatMap(Webapi__Dom__Document.asHtmlDocume
               });
           port.onMessage.addListener(onMessageListener);
           var bodyWatcher = function (mutationList, obsever) {
-            var addedNodes = Belt_Array.map(mutationList, (function (el) {
-                    return Array.prototype.slice.call(el.addedNodes);
-                  }));
-            var allNodes = Belt_Array.concatMany(addedNodes);
-            var xs = allNodes.reduce((function (widgets, node) {
+            var addedNodes = mutationList.flatMap(function (el) {
+                  return Array.prototype.slice.call(el.addedNodes);
+                });
+            var xs = Core__Array.reduce(addedNodes, Belt_Map.make(IntCmp), (function (widgets, node) {
                     var name = node.nodeName.toLowerCase();
                     if (name === "ytcp-video-title") {
                       return Belt_Map.set(widgets, 0, React.createElement(TitleChecker.make, {}));
                     } else {
                       return widgets;
                     }
-                  }), Belt_Map.make(IntCmp));
+                  }));
             if (Belt_Map.size(xs) > 0) {
               return Curry._1(dispatch, {
-                          TAG: /* AddWidgets */0,
+                          TAG: "AddWidgets",
                           _0: xs
                         });
             }
             
           };
-          React.useEffect(function () {
-                var bodyObserver = new MutationObserver(bodyWatcher);
-                bodyObserver.observe(body, observerConfig);
-                return (function (param) {
-                          bodyObserver.disconnect();
-                        });
-              });
+          React.useEffect((function (param) {
+                  var bodyObserver = new MutationObserver(bodyWatcher);
+                  bodyObserver.observe(body, observerConfig);
+                  return (function (param) {
+                            bodyObserver.disconnect();
+                          });
+                }), []);
           var widgets = Belt_Map.valuesToArray(match[0].widgetContainers);
           console.log("widigies", widgets);
           return widgets;
