@@ -15,11 +15,9 @@
   "suffix": ".bs.mjs",
   "jsx": { "version": 4, "mode": "classic" },
   "bs-dependencies": [
-    "@rescript/core",
     "@rescript/react",
+    "@rescriptbr/react-query",
     "reason-promise",
     "rescript-webapi"
-  ],
-  "bsc-flags": ["-open RescriptCore"],
-  "uncurried": false
+  ]
 }
