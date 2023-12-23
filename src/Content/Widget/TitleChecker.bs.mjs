@@ -16,8 +16,6 @@ var observerConfig = {
   subtree: true
 };
 
-var parentVideoTitleSelector = "ytcp-video-title";
-
 function pause(param) {
   return new Promise((function (resolve, reject) {
                 setTimeout((function (param) {
@@ -45,7 +43,7 @@ async function queryDomHelp(selector, n) {
 }
 
 function query(param) {
-  var videoTitleElQuery = Js_promise2.then(queryDomHelp(parentVideoTitleSelector, 5), (function (el) {
+  var videoTitleElQuery = Js_promise2.then(queryDomHelp("ytcp-video-title", 5), (function (el) {
           return el;
         }));
   var videoTitleInputQuery = Js_promise2.then(queryDomHelp("ytcp-social-suggestion-input", 5), (function (el) {
@@ -92,6 +90,46 @@ function TitleChecker$TitleChecker(props) {
       });
   var setState = match[1];
   var state = match[0];
+  React.useEffect((function () {
+          var maybeVideoTitleElInput = document.querySelector("ytcp-social-suggestion-input");
+          console.log("sdfadf", (maybeVideoTitleElInput == null) ? undefined : Caml_option.some(maybeVideoTitleElInput));
+          if (maybeVideoTitleElInput == null) {
+            throw {
+                  RE_EXN_ID: "Match_failure",
+                  _1: [
+                    "TitleChecker.res",
+                    83,
+                    6
+                  ],
+                  Error: new Error()
+                };
+          }
+          var watcher = function (mutationList, observer) {
+            var text = maybeVideoTitleElInput.innerText;
+            var textboxLen = text.length;
+            if (textboxLen > 60.0) {
+              Curry._1(setState, (function (param) {
+                      return {
+                              TAG: /* OverLimit */0,
+                              _0: textboxLen
+                            };
+                    }));
+            } else {
+              Curry._1(setState, (function (param) {
+                      return {
+                              TAG: /* UnderLimit */1,
+                              _0: textboxLen
+                            };
+                    }));
+            }
+            observer.disconnect();
+          };
+          var observer = new MutationObserver(watcher);
+          observer.observe(maybeVideoTitleElInput, observerConfig);
+          return (function (param) {
+                    observer.disconnect();
+                  });
+        }), []);
   var queryResult = ReactQuery$1.useQuery({
         queryKey: ["todos"],
         queryFn: query,
@@ -128,28 +166,6 @@ function TitleChecker$TitleChecker(props) {
   }
   var videoTitleEl = match$1[0];
   var videoTitleInput = match$1[1];
-  var watcher = function (mutationList, observer) {
-    var text = videoTitleInput.innerText;
-    var textboxLen = text.length;
-    if (textboxLen > 60.0) {
-      Curry._1(setState, (function (param) {
-              return {
-                      TAG: /* OverLimit */0,
-                      _0: textboxLen
-                    };
-            }));
-    } else {
-      Curry._1(setState, (function (param) {
-              return {
-                      TAG: /* UnderLimit */1,
-                      _0: textboxLen
-                    };
-            }));
-    }
-    observer.disconnect();
-  };
-  var observer = new MutationObserver(watcher);
-  observer.observe(videoTitleInput, observerConfig);
   var text = videoTitleInput.innerText;
   var len = text.length;
   var initialState = len > 60.0 ? ({
@@ -184,7 +200,6 @@ var make = TitleChecker$1;
 
 export {
   observerConfig ,
-  parentVideoTitleSelector ,
   pause ,
   TestError ,
   queryDomHelp ,

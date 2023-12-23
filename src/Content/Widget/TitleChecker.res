@@ -6,9 +6,6 @@ let observerConfig = {
   "childList": true,
   "subtree": true,
 }
-type sharedProps = {children: React.element}
-
-let parentVideoTitleSelector = "ytcp-video-title" // element where we'll inject <TitleChecker />
 
 let pause = () => {
   Js.Promise2.make((~resolve, ~reject) => {
@@ -32,7 +29,7 @@ let rec queryDomHelp = async (selector, n): promise<Dom.element> => {
 }
 
 let query = _ => {
-  let videoTitleElQuery = queryDomHelp(parentVideoTitleSelector, 5)->Js.Promise2.then(el => el)
+  let videoTitleElQuery = queryDomHelp("ytcp-video-title", 5)->Js.Promise2.then(el => el)
   let videoTitleInputQuery =
     queryDomHelp("ytcp-social-suggestion-input", 5)->Js.Promise2.then(el => el)
 
@@ -72,6 +69,36 @@ module TitleChecker = {
   @react.component
   let make = () => {
     let (state, setState) = React.useState(_ => UnderLimit(0.0))
+
+    // @TODO
+    // add React.useEffect
+    // just query for elelement again but setup
+    React.useEffect0(() => {
+      let maybeVideoTitleElInput = Document.querySelector(
+        Webapi.Dom.document,
+        "ytcp-social-suggestion-input",
+      )
+      Js.log2("sdfadf", maybeVideoTitleElInput)
+
+      switch maybeVideoTitleElInput {
+      | Some(videoTitleInput) => {
+          let watcher = (mutationList, observer) => {
+            let text = Element.innerText(videoTitleInput)
+
+            let textboxLen = Belt.Int.toFloat(String.length(text))
+            if textboxLen > 60.0 {
+              setState(_ => OverLimit(textboxLen))
+            } else {
+              setState(_ => UnderLimit(textboxLen))
+            }
+            MutationObserver.disconnect(observer)
+          }
+          let observer = MutationObserver.make(watcher)
+          MutationObserver.observe(observer, videoTitleInput, observerConfig)
+          Some(() => MutationObserver.disconnect(observer))
+        }
+      }
+    })
     let queryResult = ReactQuery.useQuery({
       queryFn: query,
       queryKey: ["todos"],
@@ -90,19 +117,6 @@ module TitleChecker = {
     switch queryResult {
     | {isLoading: true} => "Loading..."->React.string
     | {data: Some([videoTitleEl, videoTitleInput]), isLoading: false, isError: false} => {
-        let watcher = (mutationList, observer) => {
-          let text = Element.innerText(videoTitleInput)
-
-          let textboxLen = Belt.Int.toFloat(String.length(text))
-          if textboxLen > 60.0 {
-            setState(_ => OverLimit(textboxLen))
-          } else {
-            setState(_ => UnderLimit(textboxLen))
-          }
-          MutationObserver.disconnect(observer)
-        }
-        let observer = MutationObserver.make(watcher)
-        MutationObserver.observe(observer, videoTitleInput, observerConfig)
         let text = Element.innerText(videoTitleInput)
         let initialState = {
           let len = Belt.Int.toFloat(String.length(text))
