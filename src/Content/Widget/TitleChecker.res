@@ -38,22 +38,36 @@ let query = _ => {
 
   Js.Promise2.all([videoTitleElQuery, videoTitleInputQuery])
 }
+let viewOverLimit =
+  <div
+    id="TitleChecker.viewOverLimit"
+    style={ReactDOM.Style.make(
+      ~color="#dc3545",
+      ~fontSize="12px",
+      ~padding="0.2rem 1rem",
+      ~textAlign="right",
+      (),
+    )}>
+    {React.string("Your title is a little long there, pal...")} // nice passive aggressive tone
+  </div>
+let viewProgress = (len: float) => {
+  let w_ = len /. 60.0 *. 100.0
+  let w = Js.Math.min_float(w_, 100.0)
+  let width = Belt.Float.toString(w) ++ "%"
+  let backgroundColor = if len > 60.0 {
+    "red"
+  } else if len > 42.0 {
+    "yellow"
+  } else {
+    "green"
+  }
 
+  <div>
+    <div style={ReactDOM.Style.make(~height="2px", ~width, ~backgroundColor, ())} />
+  </div>
+}
 module TitleChecker = {
   type model = OverLimit(float) | UnderLimit(float)
-
-  let viewOverLimit =
-    <div
-      id="TitleChecker.viewOverLimit"
-      style={ReactDOM.Style.make(
-        ~color="#dc3545",
-        ~fontSize="12px",
-        ~padding="0.2rem 1rem",
-        ~textAlign="right",
-        (),
-      )}>
-      {React.string("Your title is a little long there, pal...")} // nice passive aggressive tone
-    </div>
 
   @react.component
   let make = () => {
@@ -66,22 +80,6 @@ module TitleChecker = {
       staleTime: ReactQuery.time(#number(1)),
     })
 
-    let viewProgress = (len: float) => {
-      let w_ = len /. 60.0 *. 100.0
-      let w = Js.Math.min_float(w_, 100.0)
-      let width = Belt.Float.toString(w) ++ "%"
-      let backgroundColor = if len > 60.0 {
-        "red"
-      } else if len > 42.0 {
-        "yellow"
-      } else {
-        "green"
-      }
-
-      <div>
-        <div style={ReactDOM.Style.make(~height="2px", ~width, ~backgroundColor, ())} />
-      </div>
-    }
     let view = {
       let children = switch state {
       | OverLimit(len) => [viewProgress(len), viewOverLimit]

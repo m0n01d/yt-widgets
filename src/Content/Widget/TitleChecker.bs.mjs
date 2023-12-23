@@ -67,6 +67,22 @@ var viewOverLimit = React.createElement("div", {
       }
     }, "Your title is a little long there, pal...");
 
+function viewProgress(len) {
+  var w_ = len / 60.0 * 100.0;
+  var w = Math.min(w_, 100.0);
+  var width = String(w) + "%";
+  var backgroundColor = len > 60.0 ? "red" : (
+      len > 42.0 ? "yellow" : "green"
+    );
+  return React.createElement("div", undefined, React.createElement("div", {
+                  style: {
+                    backgroundColor: backgroundColor,
+                    height: "2px",
+                    width: width
+                  }
+                }));
+}
+
 function TitleChecker$TitleChecker(props) {
   var match = React.useState(function () {
         return {
@@ -92,21 +108,6 @@ function TitleChecker$TitleChecker(props) {
                   VAL: false
                 }))
       });
-  var viewProgress = function (len) {
-    var w_ = len / 60.0 * 100.0;
-    var w = Math.min(w_, 100.0);
-    var width = String(w) + "%";
-    var backgroundColor = len > 60.0 ? "red" : (
-        len > 42.0 ? "yellow" : "green"
-      );
-    return React.createElement("div", undefined, React.createElement("div", {
-                    style: {
-                      backgroundColor: backgroundColor,
-                      height: "2px",
-                      width: width
-                    }
-                  }));
-  };
   var children;
   children = state.TAG === /* OverLimit */0 ? [
       viewProgress(state._0),
@@ -167,7 +168,6 @@ function TitleChecker$TitleChecker(props) {
 }
 
 var TitleChecker = {
-  viewOverLimit: viewOverLimit,
   make: TitleChecker$TitleChecker
 };
 
@@ -189,6 +189,8 @@ export {
   TestError ,
   queryDomHelp ,
   query ,
+  viewOverLimit ,
+  viewProgress ,
   TitleChecker ,
   client ,
   make ,
