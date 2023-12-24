@@ -2,7 +2,6 @@
 
 import * as Curry from "rescript/lib/es6/curry.js";
 import * as React from "react";
-import * as Caml_obj from "rescript/lib/es6/caml_obj.js";
 import * as ReactDom from "react-dom";
 import * as ReactQuery from "@rescriptbr/react-query/src/ReactQuery.bs.mjs";
 import * as Caml_option from "rescript/lib/es6/caml_option.js";
@@ -27,13 +26,13 @@ function pause(param) {
 var TestError = /* @__PURE__ */Caml_exceptions.create("TitleChecker.TestError");
 
 async function queryDomHelp(selector, n) {
-  await pause(undefined);
   if (n < 0) {
     return Promise.reject({
                 RE_EXN_ID: TestError,
                 _1: "huh"
               });
   }
+  await pause(undefined);
   var maybeEl = document.querySelector(selector);
   if (maybeEl == null) {
     return await queryDomHelp(selector, n - 1 | 0);
@@ -90,46 +89,6 @@ function TitleChecker$TitleChecker(props) {
       });
   var setState = match[1];
   var state = match[0];
-  React.useEffect((function () {
-          var maybeVideoTitleElInput = document.querySelector("ytcp-social-suggestion-input");
-          console.log("sdfadf", (maybeVideoTitleElInput == null) ? undefined : Caml_option.some(maybeVideoTitleElInput));
-          if (maybeVideoTitleElInput == null) {
-            throw {
-                  RE_EXN_ID: "Match_failure",
-                  _1: [
-                    "TitleChecker.res",
-                    83,
-                    6
-                  ],
-                  Error: new Error()
-                };
-          }
-          var watcher = function (mutationList, observer) {
-            var text = maybeVideoTitleElInput.innerText;
-            var textboxLen = text.length;
-            if (textboxLen > 60.0) {
-              Curry._1(setState, (function (param) {
-                      return {
-                              TAG: /* OverLimit */0,
-                              _0: textboxLen
-                            };
-                    }));
-            } else {
-              Curry._1(setState, (function (param) {
-                      return {
-                              TAG: /* UnderLimit */1,
-                              _0: textboxLen
-                            };
-                    }));
-            }
-            observer.disconnect();
-          };
-          var observer = new MutationObserver(watcher);
-          observer.observe(maybeVideoTitleElInput, observerConfig);
-          return (function (param) {
-                    observer.disconnect();
-                  });
-        }), []);
   var queryResult = ReactQuery$1.useQuery({
         queryKey: ["todos"],
         queryFn: query,
@@ -175,11 +134,31 @@ function TitleChecker$TitleChecker(props) {
         TAG: /* UnderLimit */1,
         _0: len
       });
-  if (Caml_obj.notequal(initialState, state)) {
-    Curry._1(setState, (function (param) {
-            return initialState;
-          }));
-  }
+  Curry._1(setState, (function (param) {
+          return initialState;
+        }));
+  var watcher = function (mutationList, observer) {
+    var text = videoTitleInput.innerText;
+    var textboxLen = text.length;
+    if (textboxLen > 60.0) {
+      Curry._1(setState, (function (param) {
+              return {
+                      TAG: /* OverLimit */0,
+                      _0: textboxLen
+                    };
+            }));
+    } else {
+      Curry._1(setState, (function (param) {
+              return {
+                      TAG: /* UnderLimit */1,
+                      _0: textboxLen
+                    };
+            }));
+    }
+    observer.disconnect();
+  };
+  var observer = new MutationObserver(watcher);
+  observer.observe(videoTitleInput, observerConfig);
   return ReactDom.createPortal(children, videoTitleEl);
 }
 
