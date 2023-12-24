@@ -58,8 +58,8 @@ let viewProgress = (len: float) => {
     "green"
   }
 
-  <div>
-    <div style={ReactDOM.Style.make(~height="2px", ~width, ~backgroundColor, ())} />
+  <div style={ReactDOM.Style.make(~color=backgroundColor, ())}>
+    <Ui.LinearProgress color="inherit" value=w variant="determinate" />
   </div>
 }
 module TitleChecker = {

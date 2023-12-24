@@ -2,10 +2,12 @@
 
 import * as Curry from "rescript/lib/es6/curry.js";
 import * as React from "react";
+import * as Caml_obj from "rescript/lib/es6/caml_obj.js";
 import * as ReactDom from "react-dom";
 import * as ReactQuery from "@rescriptbr/react-query/src/ReactQuery.bs.mjs";
 import * as Caml_option from "rescript/lib/es6/caml_option.js";
 import * as Js_promise2 from "rescript/lib/es6/js_promise2.js";
+import * as Material from "@mui/material";
 import * as Caml_exceptions from "rescript/lib/es6/caml_exceptions.js";
 import * as ReactQuery$1 from "@tanstack/react-query";
 
@@ -67,16 +69,18 @@ var viewOverLimit = React.createElement("div", {
 function viewProgress(len) {
   var w_ = len / 60.0 * 100.0;
   var w = Math.min(w_, 100.0);
-  var width = String(w) + "%";
+  String(w) + "%";
   var backgroundColor = len > 60.0 ? "red" : (
       len > 42.0 ? "yellow" : "green"
     );
-  return React.createElement("div", undefined, React.createElement("div", {
-                  style: {
-                    backgroundColor: backgroundColor,
-                    height: "2px",
-                    width: width
-                  }
+  return React.createElement("div", {
+              style: {
+                color: backgroundColor
+              }
+            }, React.createElement(Material.LinearProgress, {
+                  variant: "determinate",
+                  color: "inherit",
+                  value: w
                 }));
 }
 
@@ -134,9 +138,11 @@ function TitleChecker$TitleChecker(props) {
         TAG: /* UnderLimit */1,
         _0: len
       });
-  Curry._1(setState, (function (param) {
-          return initialState;
-        }));
+  if (Caml_obj.notequal(initialState, state)) {
+    Curry._1(setState, (function (param) {
+            return initialState;
+          }));
+  }
   var watcher = function (mutationList, observer) {
     var text = videoTitleInput.innerText;
     var textboxLen = text.length;
