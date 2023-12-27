@@ -9,6 +9,7 @@ import * as Caml_option from "rescript/lib/es6/caml_option.js";
 import * as Js_promise2 from "rescript/lib/es6/js_promise2.js";
 import * as Material from "@mui/material";
 import * as Caml_exceptions from "rescript/lib/es6/caml_exceptions.js";
+import * as Colors from "@mui/material/colors";
 import * as ReactQuery$1 from "@tanstack/react-query";
 
 var observerConfig = {
@@ -59,7 +60,7 @@ function query(param) {
 var viewOverLimit = React.createElement("div", {
       id: "TitleChecker.viewOverLimit",
       style: {
-        color: "#dc3545",
+        color: Colors.red[700],
         fontSize: "12px",
         padding: "0.2rem 1rem",
         textAlign: "right"
@@ -70,9 +71,10 @@ function viewProgress(len) {
   var w_ = len / 60.0 * 100.0;
   var w = Math.min(w_, 100.0);
   String(w) + "%";
-  var backgroundColor = len > 60.0 ? "red" : (
-      len > 42.0 ? "yellow" : "green"
+  var backgroundColor = len > 60.0 ? Colors.red[500] : (
+      len > 42.0 ? Colors.yellow[300] : Colors.green[300]
     );
+  console.log("color", backgroundColor);
   return React.createElement("div", {
               style: {
                 color: backgroundColor

@@ -1,5 +1,6 @@
 open Webapi.Dom
 open Belt
+@module external colors: 'a = "@mui/material/colors"
 
 let observerConfig = {
   "attributes": false,
@@ -38,7 +39,7 @@ let viewOverLimit =
   <div
     id="TitleChecker.viewOverLimit"
     style={ReactDOM.Style.make(
-      ~color="#dc3545",
+      ~color=colors["red"]["700"],
       ~fontSize="12px",
       ~padding="0.2rem 1rem",
       ~textAlign="right",
@@ -51,12 +52,13 @@ let viewProgress = (len: float) => {
   let w = Js.Math.min_float(w_, 100.0)
   let width = Belt.Float.toString(w) ++ "%"
   let backgroundColor = if len > 60.0 {
-    "red"
+    colors["red"]["500"]
   } else if len > 42.0 {
-    "yellow"
+    colors["yellow"]["300"]
   } else {
-    "green"
+    colors["green"]["300"]
   }
+  Js.log2("color", backgroundColor)
 
   <div style={ReactDOM.Style.make(~color=backgroundColor, ())}>
     <Ui.LinearProgress color="inherit" value=w variant="determinate" />
