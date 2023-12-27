@@ -14,5 +14,9 @@
   ],
   "suffix": ".bs.mjs",
   "jsx": { "version": 4, "mode": "classic" },
-  "bs-dependencies": ["@rescript/react", "rescript-webapi"]
+  "bs-dependencies": [
+    "@rescript/react",
+    "@rescriptbr/react-query",
+    "rescript-webapi"
+  ]
 }
