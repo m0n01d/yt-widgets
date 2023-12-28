@@ -13,19 +13,22 @@ type page = Details | Other
 
 type msg = SetPage(page)
 
-type model = {currentPage: page}
+//ytcp-uploads-dialog
+type model = {currentPage: page, maybeUploadDialog: option<Dom.Element.t>}
 
 let update = (state: model, action: msg) => {
   switch action {
   | SetPage(thePage) => {...state, currentPage: thePage}
   }
 }
+let bodyEl =
+  document->Document.asHtmlDocument->Option.flatMap(HtmlDocument.body)->Option.getWithDefault(dummy)
 
 let app = Document.querySelector(document, "title")->Option.map(titleEl => {
   module App = {
     @react.component
     let make = () => {
-      let initialState = {currentPage: Other}
+      let initialState = {currentPage: Other, maybeUploadDialog: None}
       let (state, dispatch) = React.useReducer(update, initialState)
 
       let onMessageListener = port => {
@@ -50,10 +53,25 @@ let app = Document.querySelector(document, "title")->Option.map(titleEl => {
         | _ => dispatch(SetPage(Other))
         }
       }
+      let bodyWatcher = (mutationList, observer) => {
+        let dialog_ = mutationList->Array.get(0)
+        let dialog = mutationList->Array.some(mutation => {
+          let node = MutationRecord.target(mutation)
+          let name = node->Node.nodeName->Js.String.toLowerCase
+
+          "ytcp-uploads-dialog" == name
+        })
+
+        Js.log2("body", dialog)
+      }
+
       React.useEffect0(() => {
+        let bodyObserver = MutationObserver.make(bodyWatcher)
         let titleObserver = MutationObserver.make(titleElWatcher)
+        MutationObserver.observe(bodyObserver, bodyEl, observerConfig)
         MutationObserver.observe(titleObserver, titleEl, observerConfig)
         let cleanup = () => {
+          MutationObserver.disconnect(bodyObserver)
           MutationObserver.disconnect(titleObserver)
         }
 

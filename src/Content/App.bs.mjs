@@ -8,6 +8,7 @@ import * as Belt_Option from "rescript/lib/es6/belt_Option.js";
 import * as Caml_option from "rescript/lib/es6/caml_option.js";
 import * as TitleChecker from "./Widget/TitleChecker.bs.mjs";
 import * as Client from "react-dom/client";
+import * as Webapi__Dom__Document from "rescript-webapi/src/Webapi/Dom/Webapi__Dom__Document.bs.mjs";
 
 var observerConfig = {
   attributes: false,
@@ -21,14 +22,20 @@ var dummy = $$document.createElement("div");
 
 function update(state, action) {
   return {
-          currentPage: action._0
+          currentPage: action._0,
+          maybeUploadDialog: state.maybeUploadDialog
         };
 }
+
+var bodyEl = Belt_Option.getWithDefault(Belt_Option.flatMap(Webapi__Dom__Document.asHtmlDocument($$document), (function (prim) {
+            return Caml_option.nullable_to_opt(prim.body);
+          })), dummy);
 
 var app = Belt_Option.map(Caml_option.nullable_to_opt($$document.querySelector("title")), (function (titleEl) {
         var App = function (props) {
           var match = React.useReducer(update, {
-                currentPage: /* Other */1
+                currentPage: /* Other */1,
+                maybeUploadDialog: undefined
               });
           var dispatch = match[1];
           var onMessageListener = function (port) {
@@ -63,10 +70,22 @@ var app = Belt_Option.map(Caml_option.nullable_to_opt($$document.querySelector("
                         });
             }
           };
+          var bodyWatcher = function (mutationList, observer) {
+            Belt_Array.get(mutationList, 0);
+            var dialog = Belt_Array.some(mutationList, (function (mutation) {
+                    var node = mutation.target;
+                    var name = node.nodeName.toLowerCase();
+                    return "ytcp-uploads-dialog" === name;
+                  }));
+            console.log("body", dialog);
+          };
           React.useEffect((function () {
+                  var bodyObserver = new MutationObserver(bodyWatcher);
                   var titleObserver = new MutationObserver(titleElWatcher);
+                  bodyObserver.observe(bodyEl, observerConfig);
                   titleObserver.observe(titleEl, observerConfig);
                   return (function (param) {
+                            bodyObserver.disconnect();
                             titleObserver.disconnect();
                           });
                 }), []);
@@ -84,6 +103,7 @@ export {
   $$document ,
   dummy ,
   update ,
+  bodyEl ,
   app ,
 }
 /* document Not a pure module */
