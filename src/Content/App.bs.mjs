@@ -8,10 +8,12 @@ import * as Belt_Option from "rescript/lib/es6/belt_Option.js";
 import * as Caml_option from "rescript/lib/es6/caml_option.js";
 import * as TitleChecker from "./Widget/TitleChecker.bs.mjs";
 import * as Client from "react-dom/client";
+import * as JsxPPXReactSupport from "rescript/lib/es6/jsxPPXReactSupport.js";
+import * as Webapi__Dom__Element from "rescript-webapi/src/Webapi/Dom/Webapi__Dom__Element.bs.mjs";
 import * as Webapi__Dom__Document from "rescript-webapi/src/Webapi/Dom/Webapi__Dom__Document.bs.mjs";
 
 var observerConfig = {
-  attributes: false,
+  attributes: true,
   childList: true,
   subtree: true
 };
@@ -21,10 +23,17 @@ var $$document = window.document;
 var dummy = $$document.createElement("div");
 
 function update(state, action) {
-  return {
-          currentPage: action._0,
-          maybeUploadDialog: state.maybeUploadDialog
-        };
+  if (action.TAG === /* SetDialog */0) {
+    return {
+            currentPage: state.currentPage,
+            maybeUploadDialog: Caml_option.some(action._0)
+          };
+  } else {
+    return {
+            currentPage: action._0,
+            maybeUploadDialog: undefined
+          };
+  }
 }
 
 var bodyEl = Belt_Option.getWithDefault(Belt_Option.flatMap(Webapi__Dom__Document.asHtmlDocument($$document), (function (prim) {
@@ -38,6 +47,8 @@ var app = Belt_Option.map(Caml_option.nullable_to_opt($$document.querySelector("
                 maybeUploadDialog: undefined
               });
           var dispatch = match[1];
+          var state = match[0];
+          console.log("state", state);
           var onMessageListener = function (port) {
             console.log(port);
           };
@@ -55,29 +66,67 @@ var app = Belt_Option.map(Caml_option.nullable_to_opt($$document.querySelector("
             var route = Js_string.split(" - ", title);
             console.log("route", route);
             if (route.length !== 2) {
-              return Curry._1(dispatch, /* SetPage */{
+              return Curry._1(dispatch, {
+                          TAG: /* SetPage */1,
                           _0: /* Other */1
                         });
             }
             var match = route[0];
             if (match === "Video details") {
-              return Curry._1(dispatch, /* SetPage */{
+              return Curry._1(dispatch, {
+                          TAG: /* SetPage */1,
                           _0: /* Details */0
                         });
             } else {
-              return Curry._1(dispatch, /* SetPage */{
+              return Curry._1(dispatch, {
+                          TAG: /* SetPage */1,
                           _0: /* Other */1
                         });
             }
           };
           var bodyWatcher = function (mutationList, observer) {
-            Belt_Array.get(mutationList, 0);
-            var dialog = Belt_Array.some(mutationList, (function (mutation) {
-                    var node = mutation.target;
-                    var name = node.nodeName.toLowerCase();
-                    return "ytcp-uploads-dialog" === name;
+            Belt_Array.forEach(mutationList, (function (mutation) {
+                    var target = mutation.target;
+                    var name = target.nodeName.toLowerCase();
+                    var attributeName = mutation.attributeName;
+                    var attribute = Belt_Option.flatMap(Webapi__Dom__Element.ofNode(target), (function (node) {
+                            return Caml_option.nullable_to_opt(node.getAttribute("workflow-step"));
+                          }));
+                    var match = [
+                      name,
+                      (attributeName == null) ? undefined : Caml_option.some(attributeName),
+                      attribute
+                    ];
+                    if (match.length !== 3) {
+                      return ;
+                    }
+                    var match$1 = match[0];
+                    if (match$1 === undefined) {
+                      return ;
+                    }
+                    if (match$1 !== "ytcp-uploads-dialog") {
+                      return ;
+                    }
+                    var match$2 = match[1];
+                    if (match$2 === undefined) {
+                      return ;
+                    }
+                    if (match$2 !== "workflow-step") {
+                      return ;
+                    }
+                    var match$3 = match[2];
+                    if (match$3 === undefined) {
+                      return ;
+                    }
+                    if (match$3 !== "DETAILS") {
+                      return ;
+                    }
+                    console.log("m", mutation);
+                    Curry._1(dispatch, {
+                          TAG: /* SetDialog */0,
+                          _0: target
+                        });
                   }));
-            console.log("body", dialog);
           };
           React.useEffect((function () {
                   var bodyObserver = new MutationObserver(bodyWatcher);
@@ -89,8 +138,25 @@ var app = Belt_Option.map(Caml_option.nullable_to_opt($$document.querySelector("
                             titleObserver.disconnect();
                           });
                 }), []);
-          var match$1 = match[0].currentPage;
-          var widgets = match$1 ? [] : [React.createElement(TitleChecker.make, {})];
+          var detailsPage = function (param) {
+            return [JsxPPXReactSupport.createElementWithKey("details-page", TitleChecker.make, {
+                          maybeUploadDialog: undefined
+                        })];
+          };
+          var match$1 = state.currentPage;
+          var match$2 = state.maybeUploadDialog;
+          var widgets;
+          var exit = 0;
+          if (match$1 || match$2 !== undefined) {
+            exit = 1;
+          } else {
+            widgets = detailsPage(undefined);
+          }
+          if (exit === 1) {
+            widgets = match$2 !== undefined ? [JsxPPXReactSupport.createElementWithKey("upload-dialog", TitleChecker.make, {
+                      maybeUploadDialog: Webapi__Dom__Element.ofNode(Caml_option.valFromOption(match$2))
+                    })] : [];
+          }
           console.log("which widgets", widgets);
           return widgets;
         };

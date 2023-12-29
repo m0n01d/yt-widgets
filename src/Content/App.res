@@ -2,7 +2,7 @@ open Webapi
 open Webapi.Dom
 open Belt
 let observerConfig = {
-  "attributes": false,
+  "attributes": true,
   "childList": true,
   "subtree": true,
 }
@@ -11,14 +11,15 @@ let dummy = Document.createElement(document, "div")
 
 type page = Details | Other
 
-type msg = SetPage(page)
+type msg = SetDialog(Dom.Node.t) | SetPage(page)
 
 //ytcp-uploads-dialog
-type model = {currentPage: page, maybeUploadDialog: option<Dom.Element.t>}
+type model = {currentPage: page, maybeUploadDialog: option<Dom.Node.t>}
 
 let update = (state: model, action: msg) => {
   switch action {
-  | SetPage(thePage) => {...state, currentPage: thePage}
+  | SetDialog(dialog) => {...state, maybeUploadDialog: Some(dialog)}
+  | SetPage(thePage) => {...state, maybeUploadDialog: None, currentPage: thePage}
   }
 }
 let bodyEl =
@@ -30,6 +31,7 @@ let app = Document.querySelector(document, "title")->Option.map(titleEl => {
     let make = () => {
       let initialState = {currentPage: Other, maybeUploadDialog: None}
       let (state, dispatch) = React.useReducer(update, initialState)
+      Js.log2("state", state)
 
       let onMessageListener = port => {
         Js.log(port)
@@ -54,15 +56,23 @@ let app = Document.querySelector(document, "title")->Option.map(titleEl => {
         }
       }
       let bodyWatcher = (mutationList, observer) => {
-        let dialog_ = mutationList->Array.get(0)
-        let dialog = mutationList->Array.some(mutation => {
-          let node = MutationRecord.target(mutation)
-          let name = node->Node.nodeName->Js.String.toLowerCase
+        mutationList->Array.forEach(mutation => {
+          let target = MutationRecord.target(mutation)
+          let name = target->Node.nodeName->Js.String.toLowerCase->Some
+          let attributeName = MutationRecord.attributeName(mutation)
+          let attribute =
+            target
+            ->Element.ofNode
+            ->Option.flatMap(node => node->Element.getAttribute("workflow-step"))
 
-          "ytcp-uploads-dialog" == name
+          switch [name, attributeName, attribute] {
+          | [Some("ytcp-uploads-dialog"), Some("workflow-step"), Some("DETAILS")] => {
+              Js.log2("m", mutation)
+              dispatch(SetDialog(target))
+            }
+          | _ => ()
+          }
         })
-
-        Js.log2("body", dialog)
       }
 
       React.useEffect0(() => {
@@ -70,6 +80,8 @@ let app = Document.querySelector(document, "title")->Option.map(titleEl => {
         let titleObserver = MutationObserver.make(titleElWatcher)
         MutationObserver.observe(bodyObserver, bodyEl, observerConfig)
         MutationObserver.observe(titleObserver, titleEl, observerConfig)
+
+        // setup watcher for dialog....
         let cleanup = () => {
           MutationObserver.disconnect(bodyObserver)
           MutationObserver.disconnect(titleObserver)
@@ -77,9 +89,10 @@ let app = Document.querySelector(document, "title")->Option.map(titleEl => {
 
         Some(cleanup)
       })
-      let detailsPage = () => [<TitleChecker />]
-      let widgets = switch state.currentPage {
-      | Details => detailsPage()
+      let detailsPage = () => [<TitleChecker maybeUploadDialog=None key="details-page" />]
+      let widgets = switch (state.currentPage, state.maybeUploadDialog) {
+      | (Details, None) => detailsPage()
+      | (_, Some(d)) => [<TitleChecker maybeUploadDialog={Element.ofNode(d)} key="upload-dialog" />]
       | _ => []
       }
       Js.log2("which widgets", widgets)
