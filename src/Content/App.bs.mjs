@@ -13,9 +13,9 @@ import * as Webapi__Dom__Element from "rescript-webapi/src/Webapi/Dom/Webapi__Do
 import * as Webapi__Dom__Document from "rescript-webapi/src/Webapi/Dom/Webapi__Dom__Document.bs.mjs";
 
 var observerConfig = {
-  attributes: true,
-  childList: true,
-  subtree: true
+  attributes: false,
+  childList: false,
+  subtree: false
 };
 
 var $$document = window.document;
@@ -23,7 +23,12 @@ var $$document = window.document;
 var dummy = $$document.createElement("div");
 
 function update(state, action) {
-  if (action.TAG === /* SetDialog */0) {
+  if (typeof action === "number") {
+    return {
+            currentPage: state.currentPage,
+            maybeUploadDialog: undefined
+          };
+  } else if (action.TAG === /* SetDialog */0) {
     return {
             currentPage: state.currentPage,
             maybeUploadDialog: Caml_option.some(action._0)
@@ -36,11 +41,10 @@ function update(state, action) {
   }
 }
 
-var bodyEl = Belt_Option.getWithDefault(Belt_Option.flatMap(Webapi__Dom__Document.asHtmlDocument($$document), (function (prim) {
-            return Caml_option.nullable_to_opt(prim.body);
-          })), dummy);
-
 var app = Belt_Option.map(Caml_option.nullable_to_opt($$document.querySelector("title")), (function (titleEl) {
+        var bodyEl = Belt_Option.getWithDefault(Belt_Option.flatMap(Webapi__Dom__Document.asHtmlDocument($$document), (function (prim) {
+                    return Caml_option.nullable_to_opt(prim.body);
+                  })), dummy);
         var App = function (props) {
           var match = React.useReducer(update, {
                 currentPage: /* Other */1,
@@ -48,7 +52,6 @@ var app = Belt_Option.map(Caml_option.nullable_to_opt($$document.querySelector("
               });
           var dispatch = match[1];
           var state = match[0];
-          console.log("state", state);
           var onMessageListener = function (port) {
             console.log(port);
           };
@@ -86,6 +89,13 @@ var app = Belt_Option.map(Caml_option.nullable_to_opt($$document.querySelector("
           };
           var bodyWatcher = function (mutationList, observer) {
             Belt_Array.forEach(mutationList, (function (mutation) {
+                    var hasRemovedDialog = Array.prototype.slice.call(mutation.removedNodes).some(function (el) {
+                          var name = el.nodeName.toLowerCase();
+                          return name === "ytcp-uploads-dialog";
+                        });
+                    if (hasRemovedDialog) {
+                      return Curry._1(dispatch, /* RemovedDialog */0);
+                    }
                     var target = mutation.target;
                     var name = target.nodeName.toLowerCase();
                     var attributeName = mutation.attributeName;
@@ -115,50 +125,47 @@ var app = Belt_Option.map(Caml_option.nullable_to_opt($$document.querySelector("
                       return ;
                     }
                     var match$3 = match[2];
-                    if (match$3 === undefined) {
-                      return ;
+                    if (match$3 === "DETAILS") {
+                      return Curry._1(dispatch, {
+                                  TAG: /* SetDialog */0,
+                                  _0: target
+                                });
                     }
-                    if (match$3 !== "DETAILS") {
-                      return ;
-                    }
-                    console.log("m", mutation);
-                    Curry._1(dispatch, {
-                          TAG: /* SetDialog */0,
-                          _0: target
-                        });
+                    
                   }));
           };
           React.useEffect((function () {
                   var bodyObserver = new MutationObserver(bodyWatcher);
                   var titleObserver = new MutationObserver(titleElWatcher);
-                  bodyObserver.observe(bodyEl, observerConfig);
-                  titleObserver.observe(titleEl, observerConfig);
+                  bodyObserver.observe(bodyEl, {
+                        attributes: true,
+                        childList: true,
+                        subtree: true
+                      });
+                  titleObserver.observe(titleEl, {
+                        attributes: false,
+                        childList: true,
+                        subtree: false
+                      });
                   return (function (param) {
                             bodyObserver.disconnect();
                             titleObserver.disconnect();
                           });
                 }), []);
-          var detailsPage = function (param) {
+          var match$1 = state.currentPage;
+          var match$2 = state.maybeUploadDialog;
+          if (!match$1 && match$2 === undefined) {
             return [JsxPPXReactSupport.createElementWithKey("details-page", TitleChecker.make, {
                           maybeUploadDialog: undefined
                         })];
-          };
-          var match$1 = state.currentPage;
-          var match$2 = state.maybeUploadDialog;
-          var widgets;
-          var exit = 0;
-          if (match$1 || match$2 !== undefined) {
-            exit = 1;
+          }
+          if (match$2 !== undefined) {
+            return [JsxPPXReactSupport.createElementWithKey("upload-dialog", TitleChecker.make, {
+                          maybeUploadDialog: Webapi__Dom__Element.ofNode(Caml_option.valFromOption(match$2))
+                        })];
           } else {
-            widgets = detailsPage(undefined);
+            return [];
           }
-          if (exit === 1) {
-            widgets = match$2 !== undefined ? [JsxPPXReactSupport.createElementWithKey("upload-dialog", TitleChecker.make, {
-                      maybeUploadDialog: Webapi__Dom__Element.ofNode(Caml_option.valFromOption(match$2))
-                    })] : [];
-          }
-          console.log("which widgets", widgets);
-          return widgets;
         };
         var root = Client.createRoot(dummy);
         root.render(React.createElement(App, {}));
@@ -169,7 +176,6 @@ export {
   $$document ,
   dummy ,
   update ,
-  bodyEl ,
   app ,
 }
 /* document Not a pure module */

@@ -2,36 +2,40 @@ open Webapi
 open Webapi.Dom
 open Belt
 let observerConfig = {
-  "attributes": true,
-  "childList": true,
-  "subtree": true,
+  "attributes": false,
+  "childList": false,
+  "subtree": false,
 }
 let document = Window.document(Dom.window)
 let dummy = Document.createElement(document, "div")
 
 type page = Details | Other
 
-type msg = SetDialog(Dom.Node.t) | SetPage(page)
+type msg = RemovedDialog | SetDialog(Dom.Node.t) | SetPage(page)
 
 //ytcp-uploads-dialog
 type model = {currentPage: page, maybeUploadDialog: option<Dom.Node.t>}
 
 let update = (state: model, action: msg) => {
   switch action {
+  | RemovedDialog => {...state, maybeUploadDialog: None}
   | SetDialog(dialog) => {...state, maybeUploadDialog: Some(dialog)}
   | SetPage(thePage) => {...state, maybeUploadDialog: None, currentPage: thePage}
   }
 }
-let bodyEl =
-  document->Document.asHtmlDocument->Option.flatMap(HtmlDocument.body)->Option.getWithDefault(dummy)
 
 let app = Document.querySelector(document, "title")->Option.map(titleEl => {
   module App = {
+    let bodyEl =
+      document
+      ->Document.asHtmlDocument
+      ->Option.flatMap(HtmlDocument.body)
+      ->Option.getWithDefault(dummy)
+
     @react.component
     let make = () => {
       let initialState = {currentPage: Other, maybeUploadDialog: None}
       let (state, dispatch) = React.useReducer(update, initialState)
-      Js.log2("state", state)
 
       let onMessageListener = port => {
         Js.log(port)
@@ -57,29 +61,52 @@ let app = Document.querySelector(document, "title")->Option.map(titleEl => {
       }
       let bodyWatcher = (mutationList, observer) => {
         mutationList->Array.forEach(mutation => {
-          let target = MutationRecord.target(mutation)
-          let name = target->Node.nodeName->Js.String.toLowerCase->Some
-          let attributeName = MutationRecord.attributeName(mutation)
-          let attribute =
-            target
-            ->Element.ofNode
-            ->Option.flatMap(node => node->Element.getAttribute("workflow-step"))
+          let hasRemovedDialog =
+            MutationRecord.removedNodes(mutation)
+            ->Dom.NodeList.toArray
+            ->Js.Array2.some(
+              el => {
+                let name = el->Node.nodeName->Js.String.toLowerCase
+                name == "ytcp-uploads-dialog"
+              },
+            )
+          if hasRemovedDialog {
+            dispatch(RemovedDialog)
+          } else {
+            let target = MutationRecord.target(mutation) // it can only be the target if its added to the dom
+            let name = target->Node.nodeName->Js.String.toLowerCase->Some
 
-          switch [name, attributeName, attribute] {
-          | [Some("ytcp-uploads-dialog"), Some("workflow-step"), Some("DETAILS")] => {
-              Js.log2("m", mutation)
-              dispatch(SetDialog(target))
+            let attributeName = MutationRecord.attributeName(mutation)
+            let attribute =
+              target
+              ->Element.ofNode
+              ->Option.flatMap(node => node->Element.getAttribute("workflow-step"))
+
+            switch [name, attributeName, attribute] {
+            | [Some("ytcp-uploads-dialog"), Some("workflow-step"), Some("DETAILS")] => dispatch(
+                SetDialog(target),
+              )
+            | _ => ()
             }
-          | _ => ()
           }
         })
+
+        // add listener for when dialog is closed.... to unset maybeDialog
       }
 
       React.useEffect0(() => {
         let bodyObserver = MutationObserver.make(bodyWatcher)
         let titleObserver = MutationObserver.make(titleElWatcher)
-        MutationObserver.observe(bodyObserver, bodyEl, observerConfig)
-        MutationObserver.observe(titleObserver, titleEl, observerConfig)
+        MutationObserver.observe(
+          bodyObserver,
+          bodyEl,
+          {"attributes": true, "childList": true, "subtree": true},
+        )
+        MutationObserver.observe(
+          titleObserver,
+          titleEl,
+          {"attributes": false, "childList": true, "subtree": false},
+        )
 
         // setup watcher for dialog....
         let cleanup = () => {
@@ -95,7 +122,6 @@ let app = Document.querySelector(document, "title")->Option.map(titleEl => {
       | (_, Some(d)) => [<TitleChecker maybeUploadDialog={Element.ofNode(d)} key="upload-dialog" />]
       | _ => []
       }
-      Js.log2("which widgets", widgets)
 
       React.array(widgets)
     }
