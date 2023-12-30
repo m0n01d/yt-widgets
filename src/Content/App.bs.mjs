@@ -46,12 +46,22 @@ var app = Belt_Option.map(Caml_option.nullable_to_opt($$document.querySelector("
                     return Caml_option.nullable_to_opt(prim.body);
                   })), dummy);
         var App = function (props) {
-          var match = React.useReducer(update, {
-                currentPage: /* Other */1,
-                maybeUploadDialog: undefined
-              });
-          var dispatch = match[1];
-          var state = match[0];
+          var title = titleEl.textContent;
+          var route = Js_string.split(" - ", title);
+          var initialPage;
+          if (route.length !== 2) {
+            initialPage = /* Other */1;
+          } else {
+            var match = route[0];
+            initialPage = match === "Video details" ? /* Details */0 : /* Other */1;
+          }
+          var initialState = {
+            currentPage: initialPage,
+            maybeUploadDialog: undefined
+          };
+          var match$1 = React.useReducer(update, initialState);
+          var dispatch = match$1[1];
+          var state = match$1[0];
           var onMessageListener = function (port) {
             console.log(port);
           };
@@ -152,16 +162,16 @@ var app = Belt_Option.map(Caml_option.nullable_to_opt($$document.querySelector("
                             titleObserver.disconnect();
                           });
                 }), []);
-          var match$1 = state.currentPage;
-          var match$2 = state.maybeUploadDialog;
-          if (!match$1 && match$2 === undefined) {
+          var match$2 = state.currentPage;
+          var match$3 = state.maybeUploadDialog;
+          if (!match$2 && match$3 === undefined) {
             return [JsxPPXReactSupport.createElementWithKey("details-page", TitleChecker.make, {
                           maybeUploadDialog: undefined
                         })];
           }
-          if (match$2 !== undefined) {
+          if (match$3 !== undefined) {
             return [JsxPPXReactSupport.createElementWithKey("upload-dialog", TitleChecker.make, {
-                          maybeUploadDialog: Webapi__Dom__Element.ofNode(Caml_option.valFromOption(match$2))
+                          maybeUploadDialog: Webapi__Dom__Element.ofNode(Caml_option.valFromOption(match$3))
                         })];
           } else {
             return [];

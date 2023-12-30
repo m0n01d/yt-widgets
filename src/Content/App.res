@@ -34,7 +34,13 @@ let app = Document.querySelector(document, "title")->Option.map(titleEl => {
 
     @react.component
     let make = () => {
-      let initialState = {currentPage: Other, maybeUploadDialog: None}
+      let title = titleEl->Element.textContent
+      let route = Js.String.split(" - ", title)
+      let initialPage = switch route {
+      | ["Video details", _] => Details
+      | _ => Other
+      }
+      let initialState = {currentPage: initialPage, maybeUploadDialog: None}
       let (state, dispatch) = React.useReducer(update, initialState)
 
       let onMessageListener = port => {
@@ -83,9 +89,8 @@ let app = Document.querySelector(document, "title")->Option.map(titleEl => {
               ->Option.flatMap(node => node->Element.getAttribute("workflow-step"))
 
             switch [name, attributeName, attribute] {
-            | [Some("ytcp-uploads-dialog"), Some("workflow-step"), Some("DETAILS")] => dispatch(
-                SetDialog(target),
-              )
+            | [Some("ytcp-uploads-dialog"), Some("workflow-step"), Some("DETAILS")] =>
+              dispatch(SetDialog(target))
             | _ => ()
             }
           }
