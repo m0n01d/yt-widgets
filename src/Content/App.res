@@ -50,7 +50,6 @@ let app = Document.querySelector(document, "title")->Option.map(titleEl => {
       Chrome.Runtime.Port.addListener(port, onMessageListener)
 
       let titleElWatcher = (mutationList: array<MutationRecord.t>, observer) => {
-        Js.log2("title changed", mutationList)
         let title =
           mutationList
           ->Array.get(0)
@@ -58,7 +57,6 @@ let app = Document.querySelector(document, "title")->Option.map(titleEl => {
           ->Option.mapWithDefault("", Node.textContent)
 
         let route = Js.String.split(" - ", title)
-        Js.log2("route", route)
 
         switch route {
         | ["Video details", _] => dispatch(SetPage(Details))
@@ -95,8 +93,6 @@ let app = Document.querySelector(document, "title")->Option.map(titleEl => {
             }
           }
         })
-
-        // add listener for when dialog is closed.... to unset maybeDialog
       }
 
       React.useEffect0(() => {
@@ -113,7 +109,6 @@ let app = Document.querySelector(document, "title")->Option.map(titleEl => {
           {"attributes": false, "childList": true, "subtree": false},
         )
 
-        // setup watcher for dialog....
         let cleanup = () => {
           MutationObserver.disconnect(bodyObserver)
           MutationObserver.disconnect(titleObserver)
@@ -122,9 +117,12 @@ let app = Document.querySelector(document, "title")->Option.map(titleEl => {
         Some(cleanup)
       })
       let detailsPage = () => [<TitleChecker maybeUploadDialog=None key="details-page" />]
+      let dialogWidgets = dialog => [
+        <TitleChecker maybeUploadDialog={Element.ofNode(dialog)} key="upload-dialog" />,
+      ]
       let widgets = switch (state.currentPage, state.maybeUploadDialog) {
       | (Details, None) => detailsPage()
-      | (_, Some(d)) => [<TitleChecker maybeUploadDialog={Element.ofNode(d)} key="upload-dialog" />]
+      | (_, Some(dialog)) => dialogWidgets(dialog)
       | _ => []
       }
 

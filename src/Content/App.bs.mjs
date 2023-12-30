@@ -70,14 +70,12 @@ var app = Belt_Option.map(Caml_option.nullable_to_opt($$document.querySelector("
               });
           port.onMessage.addListener(onMessageListener);
           var titleElWatcher = function (mutationList, observer) {
-            console.log("title changed", mutationList);
             var title = Belt_Option.mapWithDefault(Belt_Option.map(Belt_Array.get(mutationList, 0), (function (prim) {
                         return prim.target;
                       })), "", (function (prim) {
                     return prim.textContent;
                   }));
             var route = Js_string.split(" - ", title);
-            console.log("route", route);
             if (route.length !== 2) {
               return Curry._1(dispatch, {
                           TAG: /* SetPage */1,
@@ -162,19 +160,29 @@ var app = Belt_Option.map(Caml_option.nullable_to_opt($$document.querySelector("
                             titleObserver.disconnect();
                           });
                 }), []);
+          var dialogWidgets = function (dialog) {
+            return [JsxPPXReactSupport.createElementWithKey("upload-dialog", TitleChecker.make, {
+                          maybeUploadDialog: Webapi__Dom__Element.ofNode(dialog)
+                        })];
+          };
           var match$2 = state.currentPage;
           var match$3 = state.maybeUploadDialog;
-          if (!match$2 && match$3 === undefined) {
+          if (match$2) {
+            if (match$3 !== undefined) {
+              return dialogWidgets(Caml_option.valFromOption(match$3));
+            } else {
+              return [];
+            }
+          } else if (match$3 !== undefined) {
+            if (match$3 !== undefined) {
+              return dialogWidgets(Caml_option.valFromOption(match$3));
+            } else {
+              return [];
+            }
+          } else {
             return [JsxPPXReactSupport.createElementWithKey("details-page", TitleChecker.make, {
                           maybeUploadDialog: undefined
                         })];
-          }
-          if (match$3 !== undefined) {
-            return [JsxPPXReactSupport.createElementWithKey("upload-dialog", TitleChecker.make, {
-                          maybeUploadDialog: Webapi__Dom__Element.ofNode(Caml_option.valFromOption(match$3))
-                        })];
-          } else {
-            return [];
           }
         };
         var root = Client.createRoot(dummy);
