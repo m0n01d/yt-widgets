@@ -20,7 +20,7 @@ async function queryDom(maybeAncestorEl, selector, n) {
   if (n < 0) {
     return Promise.reject({
                 RE_EXN_ID: TestError,
-                _1: "Not Found"
+                _1: selector + " Not Found"
               });
   }
   await pause(undefined);

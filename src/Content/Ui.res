@@ -18,7 +18,7 @@ exception TestError(string)
 
 let rec queryDom = async (maybeAncestorEl, selector, n): promise<Dom.element> => {
   if n < 0 {
-    Js.Promise2.reject(TestError("Not Found"))
+    Js.Promise2.reject(TestError(selector ++ " " ++ "Not Found"))
   } else {
     let wait = await pause()
     let maybeEl: option<Dom.element> =
