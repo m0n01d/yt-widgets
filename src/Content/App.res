@@ -116,7 +116,10 @@ let app = Document.querySelector(document, "title")->Option.map(titleEl => {
 
         Some(cleanup)
       })
-      let detailsPage = () => [<TitleChecker maybeUploadDialog=None key="details-page" />]
+      let detailsPage = () => [
+        <TitleChecker maybeUploadDialog=None key="details-page" />,
+        <Thumbnail />,
+      ]
       let dialogWidgets = dialog => [
         <TitleChecker maybeUploadDialog={Element.ofNode(dialog)} key="upload-dialog" />,
       ]

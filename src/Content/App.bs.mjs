@@ -3,6 +3,7 @@
 import * as Curry from "rescript/lib/es6/curry.js";
 import * as React from "react";
 import * as Js_string from "rescript/lib/es6/js_string.js";
+import * as Thumbnail from "./Widget/Thumbnail.bs.mjs";
 import * as Belt_Array from "rescript/lib/es6/belt_Array.js";
 import * as Belt_Option from "rescript/lib/es6/belt_Option.js";
 import * as Caml_option from "rescript/lib/es6/caml_option.js";
@@ -180,9 +181,12 @@ var app = Belt_Option.map(Caml_option.nullable_to_opt($$document.querySelector("
               return [];
             }
           } else {
-            return [JsxPPXReactSupport.createElementWithKey("details-page", TitleChecker.make, {
+            return [
+                    JsxPPXReactSupport.createElementWithKey("details-page", TitleChecker.make, {
                           maybeUploadDialog: undefined
-                        })];
+                        }),
+                    React.createElement(Thumbnail.make, {})
+                  ];
           }
         };
         var root = Client.createRoot(dummy);
