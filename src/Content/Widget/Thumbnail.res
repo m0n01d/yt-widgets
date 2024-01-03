@@ -91,10 +91,75 @@ module Preview = {
       None
     })
 
+    let viewThumbnail = src => {
+      <div
+        style={ReactDOM.Style.make(
+          ~position="relative",
+          ~width="320px",
+          ~height="180px",
+          ~margin="0 auto",
+          (),
+        )}>
+        <img src />
+        <span
+          style={ReactDOM.Style.make(
+            ~background="white",
+            ~border="1px solid black",
+            ~bottom="0",
+            ~left="33%",
+            ~position="absolute",
+            ~top="0",
+            ~width="2px",
+            ~zIndex="1",
+            (),
+          )}
+        />
+        <span
+          style={ReactDOM.Style.make(
+            ~background="white",
+            ~border="1px solid black",
+            ~bottom="0",
+            ~left="66%",
+            ~position="absolute",
+            ~top="0",
+            ~width="2px",
+            ~zIndex="1",
+            (),
+          )}
+        />
+        <span
+          style={ReactDOM.Style.make(
+            ~background="white",
+            ~border="1px solid black",
+            ~height="2px",
+            ~left="0",
+            ~position="absolute",
+            ~right="0",
+            ~top="33%",
+            ~zIndex="1",
+            (),
+          )}
+        />
+        <span
+          style={ReactDOM.Style.make(
+            ~background="white",
+            ~border="1px solid black",
+            ~height="2px",
+            ~left="0",
+            ~position="absolute",
+            ~right="0",
+            ~top="66%",
+            ~zIndex="1",
+            (),
+          )}
+        />
+      </div>
+    }
+
     let view = state => {
       <div>
         {switch state.maybeImgSrc {
-        | Some(src) => <img src />
+        | Some(src) => viewThumbnail(src)
         | None => React.null
         }}
       </div>

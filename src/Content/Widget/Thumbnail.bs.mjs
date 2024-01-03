@@ -112,11 +112,65 @@ function Thumbnail$Preview(props) {
   React.useEffect((function () {
           
         }), []);
+  var viewThumbnail = function (src) {
+    return React.createElement("div", {
+                style: {
+                  height: "180px",
+                  margin: "0 auto",
+                  position: "relative",
+                  width: "320px"
+                }
+              }, React.createElement("img", {
+                    src: src
+                  }), React.createElement("span", {
+                    style: {
+                      background: "white",
+                      border: "1px solid black",
+                      bottom: "0",
+                      left: "33%",
+                      position: "absolute",
+                      top: "0",
+                      width: "2px",
+                      zIndex: "1"
+                    }
+                  }), React.createElement("span", {
+                    style: {
+                      background: "white",
+                      border: "1px solid black",
+                      bottom: "0",
+                      left: "66%",
+                      position: "absolute",
+                      top: "0",
+                      width: "2px",
+                      zIndex: "1"
+                    }
+                  }), React.createElement("span", {
+                    style: {
+                      background: "white",
+                      border: "1px solid black",
+                      height: "2px",
+                      left: "0",
+                      position: "absolute",
+                      right: "0",
+                      top: "33%",
+                      zIndex: "1"
+                    }
+                  }), React.createElement("span", {
+                    style: {
+                      background: "white",
+                      border: "1px solid black",
+                      height: "2px",
+                      left: "0",
+                      position: "absolute",
+                      right: "0",
+                      top: "66%",
+                      zIndex: "1"
+                    }
+                  }));
+  };
   var view = function (state) {
     var src = state.maybeImgSrc;
-    return React.createElement("div", undefined, src !== undefined ? React.createElement("img", {
-                      src: src
-                    }) : null);
+    return React.createElement("div", undefined, src !== undefined ? viewThumbnail(src) : null);
   };
   var match$1 = queryResult.data;
   if (match$1 === undefined) {
