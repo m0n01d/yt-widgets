@@ -13,6 +13,16 @@ let query = _ => {
 
 type msg = SetImgSrc(string) | NoOp
 type model = {maybeImgSrc: option<string>}
+
+let view = state => {
+  <div>
+    {switch state.maybeImgSrc {
+    | Some(src) => <img src />
+    | None => React.null
+    }}
+  </div>
+}
+
 let update = (state: model, msg) =>
   switch msg {
   | NoOp => state
@@ -21,7 +31,11 @@ let update = (state: model, msg) =>
 module Preview = {
   @react.component
   let make = () => {
-    let initialState = {maybeImgSrc: None}
+    let initialImgSrc =
+      document
+      ->Document.querySelector(thumbnailImgSelector)
+      ->Option.flatMap(img => img->Element.getAttribute("src"))
+    let initialState = {maybeImgSrc: initialImgSrc}
     let (state, dispatch) = React.useReducer(update, initialState)
     let queryResult = ReactQuery.useQuery({
       queryFn: query,
@@ -33,8 +47,22 @@ module Preview = {
 
     let stillPickerWatcher = (mutationList, obs) => {
       //watch for stills to change `selected`
-      Js.log2("still", mutationList)
-      let maybeSelectedStill =
+      // if nodename == 'TCP-THUMBNAIL-UPLOADER' and 'selected
+      let hasSelectedUserThumbnail: bool = mutationList->Js.Array2.some(mutation => {
+        let target = MutationRecord.target(mutation)
+        let name = target->Node.nodeName->Js.String2.toLocaleLowerCase
+        let attr = MutationRecord.attributeName(mutation)
+        let isSelected =
+          target->Element.ofNode->Option.map(el => el->Element.hasAttribute("selected"))
+        Js.log3("asdf", name, isSelected)
+        attr == Some("selected") && name == "ytcp-thumbnail-uploader" && isSelected == Some(true)
+      })
+      Js.log2("hasuserthumb", hasSelectedUserThumbnail)
+      let maybeSelectedStill = if hasSelectedUserThumbnail {
+        document
+        ->Document.querySelector(thumbnailImgSelector)
+        ->Option.flatMap(img => img->Element.getAttribute("src"))
+      } else {
         mutationList
         ->Js.Array2.map(MutationRecord.target)
         ->Js.Array2.find(target => {
@@ -44,14 +72,12 @@ module Preview = {
             ->Option.flatMap(node => node->Element.getAttribute("aria-selected"))
           attribute == Some("true")
         })
-        ->Option.flatMap(target => {
-          target
-          ->Element.ofNode
-          ->Option.flatMap(el => Element.querySelector(el, "img"))
-          ->Option.flatMap(img => img->Element.getAttribute("src"))
-        })
+        ->Option.flatMap(Element.ofNode)
+        ->Option.flatMap(el => Element.querySelector(el, "img"))
+        ->Option.flatMap(img => img->Element.getAttribute("src"))
+      }
 
-      switch maybeSelectedStill {
+      switch (maybeSelectedStill: option<string>) {
       | Some(img) => dispatch(SetImgSrc(img))
       | None => ()
       }
@@ -75,7 +101,6 @@ module Preview = {
     }
     switch queryResult {
     | {data: Some([sidePanelEl, stillPickerEl, thumbnailImgEl]), _} => {
-        Js.log("got em")
         let stillPickerObserver = MutationObserver.make(stillPickerWatcher)
 
         MutationObserver.observe(

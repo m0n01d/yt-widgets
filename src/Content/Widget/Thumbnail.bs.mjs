@@ -30,6 +30,13 @@ function query(param) {
                 }));
 }
 
+function view(state) {
+  var src = state.maybeImgSrc;
+  return React.createElement("div", undefined, src !== undefined ? React.createElement("img", {
+                    src: src
+                  }) : null);
+}
+
 function update(state, msg) {
   if (msg) {
     return {
@@ -41,9 +48,13 @@ function update(state, msg) {
 }
 
 function Thumbnail$Preview(props) {
-  var match = React.useReducer(update, {
-        maybeImgSrc: undefined
-      });
+  var initialImgSrc = Belt_Option.flatMap(Caml_option.nullable_to_opt(document.querySelector(thumbnailImgSelector)), (function (img) {
+          return Caml_option.nullable_to_opt(img.getAttribute("src"));
+        }));
+  var initialState = {
+    maybeImgSrc: initialImgSrc
+  };
+  var match = React.useReducer(update, initialState);
   var dispatch = match[1];
   var queryResult = ReactQuery$1.useQuery({
         queryKey: ["Thumbnail.Preview"],
@@ -62,21 +73,35 @@ function Thumbnail$Preview(props) {
                 }))
       });
   var stillPickerWatcher = function (mutationList, obs) {
-    console.log("still", mutationList);
-    var maybeSelectedStill = Belt_Option.flatMap(Caml_option.undefined_to_opt(mutationList.map(function (prim) {
-                    return prim.target;
-                  }).find(function (target) {
-                  var attribute = Belt_Option.flatMap(Webapi__Dom__Element.ofNode(target), (function (node) {
-                          return Caml_option.nullable_to_opt(node.getAttribute("aria-selected"));
-                        }));
-                  return Caml_obj.equal(attribute, "true");
-                })), (function (target) {
-            return Belt_Option.flatMap(Belt_Option.flatMap(Webapi__Dom__Element.ofNode(target), (function (el) {
-                              return Caml_option.nullable_to_opt(el.querySelector("img"));
-                            })), (function (img) {
-                          return Caml_option.nullable_to_opt(img.getAttribute("src"));
-                        }));
-          }));
+    var hasSelectedUserThumbnail = mutationList.some(function (mutation) {
+          var target = mutation.target;
+          var name = target.nodeName.toLocaleLowerCase();
+          var attr = mutation.attributeName;
+          var isSelected = Belt_Option.map(Webapi__Dom__Element.ofNode(target), (function (el) {
+                  return el.hasAttribute("selected");
+                }));
+          console.log("asdf", name, isSelected);
+          if (Caml_obj.equal((attr == null) ? undefined : Caml_option.some(attr), "selected") && name === "ytcp-thumbnail-uploader") {
+            return Caml_obj.equal(isSelected, true);
+          } else {
+            return false;
+          }
+        });
+    console.log("hasuserthumb", hasSelectedUserThumbnail);
+    var maybeSelectedStill = hasSelectedUserThumbnail ? Belt_Option.flatMap(Caml_option.nullable_to_opt(document.querySelector(thumbnailImgSelector)), (function (img) {
+              return Caml_option.nullable_to_opt(img.getAttribute("src"));
+            })) : Belt_Option.flatMap(Belt_Option.flatMap(Belt_Option.flatMap(Caml_option.undefined_to_opt(mutationList.map(function (prim) {
+                              return prim.target;
+                            }).find(function (target) {
+                            var attribute = Belt_Option.flatMap(Webapi__Dom__Element.ofNode(target), (function (node) {
+                                    return Caml_option.nullable_to_opt(node.getAttribute("aria-selected"));
+                                  }));
+                            return Caml_obj.equal(attribute, "true");
+                          })), Webapi__Dom__Element.ofNode), (function (el) {
+                  return Caml_option.nullable_to_opt(el.querySelector("img"));
+                })), (function (img) {
+              return Caml_option.nullable_to_opt(img.getAttribute("src"));
+            }));
     if (maybeSelectedStill !== undefined) {
       Curry._1(dispatch, /* SetImgSrc */{
             _0: maybeSelectedStill
@@ -102,7 +127,6 @@ function Thumbnail$Preview(props) {
   }
   var sidePanelEl = match$1[0];
   var stillPickerEl = match$1[1];
-  console.log("got em");
   var stillPickerObserver = new MutationObserver(stillPickerWatcher);
   stillPickerObserver.observe(stillPickerEl, {
         attributes: true,
@@ -132,6 +156,7 @@ export {
   thumbnailImgSelector ,
   stillPickerSelector ,
   query ,
+  view ,
   update ,
   Preview ,
   client ,
