@@ -164,26 +164,6 @@ module Preview = {
       })
     }
 
-    let thumbnailImgWatcher = (mutationList: array<MutationRecord.t>, observer) => {
-      let srcChanged = mutationList->Js.Array2.some(mutation => {
-        let attributeName = mutation->MutationRecord.attributeName
-        switch attributeName {
-        | Some("src") => true
-        | _ => false
-        }
-      })
-      if srcChanged {
-        Js.log("should be preped")
-        // FileReader.fileToDataUrl(src => {
-        //   Js.log2("huh", src)
-        // })
-      }
-      //   let maybeFile = document->Document.quer
-      //   let previewFile = () => {
-      //     let done = src => {}
-      //     FileReader.fileToDataUrl(file, done)
-      //   }
-    }
     React.useEffect0(() => {
       None
     })
@@ -203,18 +183,12 @@ module Preview = {
           dispatch(SetThumbnailEl(thumbnailImgEl))
         }
         let stillPickerObserver = MutationObserver.make(stillPickerWatcher)
-        let thumbnailImgObserver = MutationObserver.make(thumbnailImgWatcher)
         Js.log2("x", thumbnailUploader)
 
         MutationObserver.observe(
           stillPickerObserver,
           stillPickerEl,
           {"attributes": true, "childList": true, "subtree": true},
-        )
-        MutationObserver.observe(
-          thumbnailImgObserver,
-          thumbnailUploader,
-          {"attributes": true, "childList": false, "subtree": true},
         )
 
         ReactDOM.createPortal(view(state), sidePanelEl)

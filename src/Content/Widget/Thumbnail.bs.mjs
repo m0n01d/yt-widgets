@@ -199,21 +199,6 @@ function Thumbnail$Preview(props) {
           }
         });
   };
-  var thumbnailImgWatcher = function (mutationList, observer) {
-    var srcChanged = mutationList.some(function (mutation) {
-          var attributeName = mutation.attributeName;
-          if ((attributeName == null) || attributeName !== "src") {
-            return false;
-          } else {
-            return true;
-          }
-        });
-    if (srcChanged) {
-      console.log("should be preped");
-      return ;
-    }
-    
-  };
   React.useEffect((function () {
           
         }), []);
@@ -240,16 +225,10 @@ function Thumbnail$Preview(props) {
         });
   }
   var stillPickerObserver = new MutationObserver(stillPickerWatcher);
-  var thumbnailImgObserver = new MutationObserver(thumbnailImgWatcher);
   console.log("x", thumbnailUploader);
   stillPickerObserver.observe(stillPickerEl, {
         attributes: true,
         childList: true,
-        subtree: true
-      });
-  thumbnailImgObserver.observe(thumbnailUploader, {
-        attributes: true,
-        childList: false,
         subtree: true
       });
   return ReactDom.createPortal(view(state), sidePanelEl);
