@@ -18,15 +18,75 @@ var thumbnailImgSelector = "ytcp-thumbnail-uploader img#img-with-fallback";
 
 var stillPickerSelector = "#still-picker";
 
+var thumbnailUploader = "ytcp-thumbnail-uploader";
+
 function query(param) {
   return Promise.all([
                 sidePanelSelector,
                 stillPickerSelector,
-                thumbnailImgSelector
+                thumbnailImgSelector,
+                thumbnailUploader
               ].map(function (selector) {
                   return Js_promise2.then(Ui.queryDom(undefined, selector, 3), (function (el) {
                                 return el;
                               }));
+                }));
+}
+
+function viewThumbnail(src) {
+  return React.createElement("div", {
+              style: {
+                height: "180px",
+                margin: "0 auto",
+                position: "relative",
+                width: "320px"
+              }
+            }, React.createElement("img", {
+                  src: src
+                }), React.createElement("span", {
+                  style: {
+                    background: "white",
+                    border: "1px solid black",
+                    bottom: "0",
+                    left: "33%",
+                    position: "absolute",
+                    top: "0",
+                    width: "2px",
+                    zIndex: "1"
+                  }
+                }), React.createElement("span", {
+                  style: {
+                    background: "white",
+                    border: "1px solid black",
+                    bottom: "0",
+                    left: "66%",
+                    position: "absolute",
+                    top: "0",
+                    width: "2px",
+                    zIndex: "1"
+                  }
+                }), React.createElement("span", {
+                  style: {
+                    background: "white",
+                    border: "1px solid black",
+                    height: "2px",
+                    left: "0",
+                    position: "absolute",
+                    right: "0",
+                    top: "33%",
+                    zIndex: "1"
+                  }
+                }), React.createElement("span", {
+                  style: {
+                    background: "white",
+                    border: "1px solid black",
+                    height: "2px",
+                    left: "0",
+                    position: "absolute",
+                    right: "0",
+                    top: "66%",
+                    zIndex: "1"
+                  }
                 }));
 }
 
@@ -38,12 +98,18 @@ function view(state) {
 }
 
 function update(state, msg) {
-  if (msg) {
+  if (typeof msg === "number") {
+    return state;
+  } else if (msg.TAG === /* SetThumbnailEl */0) {
     return {
-            maybeImgSrc: msg._0
+            maybeThumbnailEl: Caml_option.some(msg._0),
+            maybeImgSrc: state.maybeImgSrc
           };
   } else {
-    return state;
+    return {
+            maybeThumbnailEl: state.maybeThumbnailEl,
+            maybeImgSrc: msg._0
+          };
   }
 }
 
@@ -52,10 +118,12 @@ function Thumbnail$Preview(props) {
           return Caml_option.nullable_to_opt(img.getAttribute("src"));
         }));
   var initialState = {
+    maybeThumbnailEl: undefined,
     maybeImgSrc: initialImgSrc
   };
   var match = React.useReducer(update, initialState);
   var dispatch = match[1];
+  var state = match[0];
   var queryResult = ReactQuery$1.useQuery({
         queryKey: ["Thumbnail.Preview"],
         queryFn: query,
@@ -73,121 +141,118 @@ function Thumbnail$Preview(props) {
                 }))
       });
   var stillPickerWatcher = function (mutationList, obs) {
-    var hasSelectedUserThumbnail = mutationList.some(function (mutation) {
+    mutationList.forEach(function (mutation) {
           var target = mutation.target;
-          var name = target.nodeName.toLocaleLowerCase();
+          var node = Webapi__Dom__Element.ofNode(target);
+          var name = target.nodeName;
           var attr = mutation.attributeName;
-          var isSelected = Belt_Option.map(Webapi__Dom__Element.ofNode(target), (function (el) {
-                  return el.hasAttribute("selected");
+          var uploaderIsSelected = Belt_Option.flatMap(node, (function (el) {
+                  return Caml_option.nullable_to_opt(el.getAttribute("selected"));
                 }));
-          console.log("asdf", name, isSelected);
-          if (Caml_obj.equal((attr == null) ? undefined : Caml_option.some(attr), "selected") && name === "ytcp-thumbnail-uploader") {
-            return Caml_obj.equal(isSelected, true);
+          var isSelected = Belt_Option.flatMap(node, (function (node) {
+                  return Caml_option.nullable_to_opt(node.getAttribute("aria-selected"));
+                }));
+          var match = Caml_obj.equal(node, state.maybeThumbnailEl);
+          var exit = 0;
+          if (name === "YTCP-THUMBNAIL-UPLOADER" && uploaderIsSelected !== undefined && uploaderIsSelected === "" && !(attr == null)) {
+            if (attr === "selected") {
+              var src = Belt_Option.flatMap(Belt_Option.flatMap(node, (function (el) {
+                          return Caml_option.nullable_to_opt(el.querySelector("img"));
+                        })), (function (img) {
+                      return Caml_option.nullable_to_opt(img.getAttribute("src"));
+                    }));
+              return Belt_Option.mapWithDefault(src, undefined, (function (src) {
+                            Curry._1(dispatch, {
+                                  TAG: /* SetImgSrc */1,
+                                  _0: src
+                                });
+                          }));
+            }
+            exit = 2;
           } else {
-            return false;
+            exit = 2;
+          }
+          if (exit === 2 && isSelected === "true") {
+            var src$1 = Belt_Option.flatMap(Belt_Option.flatMap(node, (function (el) {
+                        return Caml_option.nullable_to_opt(el.querySelector("img"));
+                      })), (function (img) {
+                    return Caml_option.nullable_to_opt(img.getAttribute("src"));
+                  }));
+            return Belt_Option.mapWithDefault(src$1, undefined, (function (src) {
+                          Curry._1(dispatch, {
+                                TAG: /* SetImgSrc */1,
+                                _0: src
+                              });
+                        }));
+          }
+          if ((attr == null) || !(attr === "src" && match)) {
+            return ;
+          } else {
+            return Belt_Option.mapWithDefault(Belt_Option.flatMap(state.maybeThumbnailEl, (function (el) {
+                              return Caml_option.nullable_to_opt(el.getAttribute("src"));
+                            })), undefined, (function (src) {
+                          Curry._1(dispatch, {
+                                TAG: /* SetImgSrc */1,
+                                _0: src
+                              });
+                        }));
           }
         });
-    console.log("hasuserthumb", hasSelectedUserThumbnail);
-    var maybeSelectedStill = hasSelectedUserThumbnail ? Belt_Option.flatMap(Caml_option.nullable_to_opt(document.querySelector(thumbnailImgSelector)), (function (img) {
-              return Caml_option.nullable_to_opt(img.getAttribute("src"));
-            })) : Belt_Option.flatMap(Belt_Option.flatMap(Belt_Option.flatMap(Caml_option.undefined_to_opt(mutationList.map(function (prim) {
-                              return prim.target;
-                            }).find(function (target) {
-                            var attribute = Belt_Option.flatMap(Webapi__Dom__Element.ofNode(target), (function (node) {
-                                    return Caml_option.nullable_to_opt(node.getAttribute("aria-selected"));
-                                  }));
-                            return Caml_obj.equal(attribute, "true");
-                          })), Webapi__Dom__Element.ofNode), (function (el) {
-                  return Caml_option.nullable_to_opt(el.querySelector("img"));
-                })), (function (img) {
-              return Caml_option.nullable_to_opt(img.getAttribute("src"));
-            }));
-    if (maybeSelectedStill !== undefined) {
-      Curry._1(dispatch, /* SetImgSrc */{
-            _0: maybeSelectedStill
-          });
+  };
+  var thumbnailImgWatcher = function (mutationList, observer) {
+    var srcChanged = mutationList.some(function (mutation) {
+          var attributeName = mutation.attributeName;
+          if ((attributeName == null) || attributeName !== "src") {
+            return false;
+          } else {
+            return true;
+          }
+        });
+    if (srcChanged) {
+      console.log("should be preped");
+      return ;
     }
-    console.log("att", maybeSelectedStill);
+    
   };
   React.useEffect((function () {
           
         }), []);
-  var viewThumbnail = function (src) {
-    return React.createElement("div", {
-                style: {
-                  height: "180px",
-                  margin: "0 auto",
-                  position: "relative",
-                  width: "320px"
-                }
-              }, React.createElement("img", {
-                    src: src
-                  }), React.createElement("span", {
-                    style: {
-                      background: "white",
-                      border: "1px solid black",
-                      bottom: "0",
-                      left: "33%",
-                      position: "absolute",
-                      top: "0",
-                      width: "2px",
-                      zIndex: "1"
-                    }
-                  }), React.createElement("span", {
-                    style: {
-                      background: "white",
-                      border: "1px solid black",
-                      bottom: "0",
-                      left: "66%",
-                      position: "absolute",
-                      top: "0",
-                      width: "2px",
-                      zIndex: "1"
-                    }
-                  }), React.createElement("span", {
-                    style: {
-                      background: "white",
-                      border: "1px solid black",
-                      height: "2px",
-                      left: "0",
-                      position: "absolute",
-                      right: "0",
-                      top: "33%",
-                      zIndex: "1"
-                    }
-                  }), React.createElement("span", {
-                    style: {
-                      background: "white",
-                      border: "1px solid black",
-                      height: "2px",
-                      left: "0",
-                      position: "absolute",
-                      right: "0",
-                      top: "66%",
-                      zIndex: "1"
-                    }
-                  }));
-  };
   var view = function (state) {
     var src = state.maybeImgSrc;
     return React.createElement("div", undefined, src !== undefined ? viewThumbnail(src) : null);
   };
+  console.log("q", queryResult);
   var match$1 = queryResult.data;
   if (match$1 === undefined) {
     return null;
   }
-  if (match$1.length !== 3) {
+  if (match$1.length !== 4) {
     return null;
   }
   var sidePanelEl = match$1[0];
   var stillPickerEl = match$1[1];
+  var thumbnailImgEl = match$1[2];
+  var thumbnailUploader = match$1[3];
+  if (undefined === state.maybeThumbnailEl) {
+    Curry._1(dispatch, {
+          TAG: /* SetThumbnailEl */0,
+          _0: thumbnailImgEl
+        });
+  }
   var stillPickerObserver = new MutationObserver(stillPickerWatcher);
+  var thumbnailImgObserver = new MutationObserver(thumbnailImgWatcher);
+  console.log("x", thumbnailUploader);
   stillPickerObserver.observe(stillPickerEl, {
         attributes: true,
         childList: true,
         subtree: true
       });
-  return ReactDom.createPortal(view(match[0]), sidePanelEl);
+  thumbnailImgObserver.observe(thumbnailUploader, {
+        attributes: true,
+        childList: false,
+        subtree: true
+      });
+  return ReactDom.createPortal(view(state), sidePanelEl);
 }
 
 var Preview = {
@@ -209,7 +274,9 @@ export {
   sidePanelSelector ,
   thumbnailImgSelector ,
   stillPickerSelector ,
+  thumbnailUploader ,
   query ,
+  viewThumbnail ,
   view ,
   update ,
   Preview ,
