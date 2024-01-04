@@ -1,15 +1,13 @@
 open Webapi.Dom
 open Belt
 
-//<ytcp-thumbnail-uploader> existingThumbnailDownloadUrl
-//transfer.blob_
+// menu for switching between 3rds and swatch
 let sidePanelSelector = "ytcp-video-metadata-editor-sidepanel"
 let thumbnailImgSelector = "ytcp-thumbnail-uploader img#img-with-fallback"
 let stillPickerSelector = "#still-picker"
-let thumbnailUploader = "ytcp-thumbnail-uploader"
 
 let query = _ => {
-  [sidePanelSelector, stillPickerSelector, thumbnailImgSelector, thumbnailUploader]
+  [sidePanelSelector, stillPickerSelector, thumbnailImgSelector]
   ->Js.Array2.map(selector => Ui.queryDom(None, selector, 3)->Js.Promise2.then(el => el))
   ->Js.Promise2.all
 }
@@ -98,25 +96,6 @@ let update = (state: model, msg) =>
   | SetImgSrc(src) => {...state, maybeImgSrc: Some(src)}
   }
 
-// let previewFile = () => {
-//   let preview = document.querySelector("img")
-//   let file = document.querySelector("input[type=file]").files[0]
-//   let reader = FileReader.make()
-
-//   reader.addEventListener(
-//     "load",
-//     () => {
-//       // convert image file to base64 string
-//       preview.src = reader.result
-//     },
-//     false,
-//   )
-
-//   if file {
-//     reader.readAsDataURL(file)
-//   }
-// }
-
 module Preview = {
   @react.component
   let make = () => {
@@ -178,12 +157,11 @@ module Preview = {
     }
     Js.log2("q", queryResult)
     switch queryResult {
-    | {data: Some([sidePanelEl, stillPickerEl, thumbnailImgEl, thumbnailUploader]), _} => {
+    | {data: Some([sidePanelEl, stillPickerEl, thumbnailImgEl]), _} => {
         if None == state.maybeThumbnailEl {
           dispatch(SetThumbnailEl(thumbnailImgEl))
         }
         let stillPickerObserver = MutationObserver.make(stillPickerWatcher)
-        Js.log2("x", thumbnailUploader)
 
         MutationObserver.observe(
           stillPickerObserver,
