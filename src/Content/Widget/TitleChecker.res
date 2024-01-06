@@ -15,22 +15,28 @@ let pause = () => {
 
 exception TestError(string)
 
-let rec queryDomHelp = async (selector, n): promise<Dom.element> => {
+let rec queryDomHelp = async (maybeAncestor, selector, n): promise<Dom.element> => {
   if n < 0 {
     Js.Promise2.reject(TestError("Not Found"))
   } else {
     let wait = await pause()
-    let maybeEl: option<Dom.element> = Document.querySelector(document, selector)
+    let maybeEl: option<Dom.element> = maybeAncestor->Option.mapWithDefault(
+      Document.querySelector(document, selector),
+      dialog => {
+        dialog->Element.querySelector(selector)
+      },
+    )
     switch maybeEl {
-    | None => await queryDomHelp(selector, n - 1)
+    | None => await queryDomHelp(maybeAncestor, selector, n - 1)
     | Some(el) => Js.Promise2.resolve(el)
     }
   }
 }
-let query = _ => {
-  let videoTitleElQuery = queryDomHelp("ytcp-video-title", 5)->Js.Promise2.then(el => el)
+let query = (maybeUploadDialog, _) => {
+  let videoTitleElQuery =
+    queryDomHelp(maybeUploadDialog, "ytcp-video-title", 5)->Js.Promise2.then(el => el)
   let videoTitleInputElQuery =
-    queryDomHelp("ytcp-social-suggestion-input", 5)->Js.Promise2.then(el => el)
+    queryDomHelp(maybeUploadDialog, "ytcp-social-suggestion-input", 5)->Js.Promise2.then(el => el)
   Js.Promise2.all([videoTitleElQuery, videoTitleInputElQuery])
 }
 let ytSelector = "ytcp-video-title" // element where we'll inject <TitleChecker />
@@ -51,7 +57,7 @@ let viewOverLimit =
 
 module TitleChecker = {
   @react.component
-  let make = (): React.element => {
+  let make = (~maybeUploadDialog: option<Dom.element>): React.element => {
     let (state, setState) = React.useState(_ => UnderLimit(0.0))
 
     let viewProgress = (len: float) => {
@@ -96,7 +102,7 @@ module TitleChecker = {
     let observer = MutationObserver.make(watcher)
 
     let queryResult = ReactQuery.useQuery({
-      queryFn: query,
+      queryFn: query(maybeUploadDialog),
       queryKey: ["titlechecker"],
       refetchOnMount: ReactQuery.refetchOnMount(#bool(true)),
       refetchOnWindowFocus: ReactQuery.refetchOnWindowFocus(#bool(false)),
@@ -128,8 +134,8 @@ module TitleChecker = {
 let client = ReactQuery.Provider.createClient()
 
 @react.component
-let make = () => {
+let make = (~maybeUploadDialog) => {
   <ReactQuery.Provider client>
-    <TitleChecker />
+    <TitleChecker maybeUploadDialog />
   </ReactQuery.Provider>
 }

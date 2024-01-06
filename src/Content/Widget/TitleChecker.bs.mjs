@@ -30,7 +30,7 @@ function pause(param) {
 
 var TestError = /* @__PURE__ */Caml_exceptions.create("TitleChecker.TestError");
 
-async function queryDomHelp(selector, n) {
+async function queryDomHelp(maybeAncestor, selector, n) {
   if (n < 0) {
     return Promise.reject({
                 RE_EXN_ID: TestError,
@@ -38,19 +38,21 @@ async function queryDomHelp(selector, n) {
               });
   }
   await pause(undefined);
-  var maybeEl = document.querySelector(selector);
-  if (maybeEl == null) {
-    return await queryDomHelp(selector, n - 1 | 0);
+  var maybeEl = Belt_Option.mapWithDefault(maybeAncestor, Caml_option.nullable_to_opt(document.querySelector(selector)), (function (dialog) {
+          return Caml_option.nullable_to_opt(dialog.querySelector(selector));
+        }));
+  if (maybeEl !== undefined) {
+    return Promise.resolve(Caml_option.valFromOption(maybeEl));
   } else {
-    return Promise.resolve(maybeEl);
+    return await queryDomHelp(maybeAncestor, selector, n - 1 | 0);
   }
 }
 
-function query(param) {
-  var videoTitleElQuery = Js_promise2.then(queryDomHelp("ytcp-video-title", 5), (function (el) {
+function query(maybeUploadDialog, param) {
+  var videoTitleElQuery = Js_promise2.then(queryDomHelp(maybeUploadDialog, "ytcp-video-title", 5), (function (el) {
           return el;
         }));
-  var videoTitleInputElQuery = Js_promise2.then(queryDomHelp("ytcp-social-suggestion-input", 5), (function (el) {
+  var videoTitleInputElQuery = Js_promise2.then(queryDomHelp(maybeUploadDialog, "ytcp-social-suggestion-input", 5), (function (el) {
           return el;
         }));
   return Promise.all([
@@ -70,6 +72,7 @@ var viewOverLimit = React.createElement("div", {
     }, "Your title is a little long there, pal...");
 
 function TitleChecker$TitleChecker(props) {
+  var maybeUploadDialog = props.maybeUploadDialog;
   var match = React.useState(function () {
         return {
                 TAG: /* UnderLimit */1,
@@ -127,7 +130,9 @@ function TitleChecker$TitleChecker(props) {
   var observer = new MutationObserver(watcher);
   var queryResult = ReactQuery$1.useQuery({
         queryKey: ["titlechecker"],
-        queryFn: query,
+        queryFn: (function (param) {
+            return query(maybeUploadDialog, param);
+          }),
         staleTime: Caml_option.some(ReactQuery.time({
                   NAME: "number",
                   VAL: 1
@@ -171,7 +176,7 @@ function TitleChecker$TitleChecker(props) {
         RE_EXN_ID: "Match_failure",
         _1: [
           "TitleChecker.res",
-          106,
+          112,
           4
         ],
         Error: new Error()
@@ -187,7 +192,9 @@ var client = new ReactQuery$1.QueryClient();
 function TitleChecker$1(props) {
   return React.createElement(ReactQuery$1.QueryClientProvider, {
               client: client,
-              children: React.createElement(TitleChecker$TitleChecker, {})
+              children: React.createElement(TitleChecker$TitleChecker, {
+                    maybeUploadDialog: props.maybeUploadDialog
+                  })
             });
 }
 
