@@ -18,14 +18,11 @@ var thumbnailImgSelector = "ytcp-thumbnail-uploader img#img-with-fallback";
 
 var stillPickerSelector = "#still-picker";
 
-var thumbnailUploader = "ytcp-thumbnail-uploader";
-
 function query(param) {
   return Promise.all([
                 sidePanelSelector,
                 stillPickerSelector,
-                thumbnailImgSelector,
-                thumbnailUploader
+                thumbnailImgSelector
               ].map(function (selector) {
                   return Js_promise2.then(Ui.queryDom(undefined, selector, 3), (function (el) {
                                 return el;
@@ -211,13 +208,12 @@ function Thumbnail$Preview(props) {
   if (match$1 === undefined) {
     return null;
   }
-  if (match$1.length !== 4) {
+  if (match$1.length !== 3) {
     return null;
   }
   var sidePanelEl = match$1[0];
   var stillPickerEl = match$1[1];
   var thumbnailImgEl = match$1[2];
-  var thumbnailUploader = match$1[3];
   if (undefined === state.maybeThumbnailEl) {
     Curry._1(dispatch, {
           TAG: /* SetThumbnailEl */0,
@@ -225,7 +221,6 @@ function Thumbnail$Preview(props) {
         });
   }
   var stillPickerObserver = new MutationObserver(stillPickerWatcher);
-  console.log("x", thumbnailUploader);
   stillPickerObserver.observe(stillPickerEl, {
         attributes: true,
         childList: true,
@@ -253,7 +248,6 @@ export {
   sidePanelSelector ,
   thumbnailImgSelector ,
   stillPickerSelector ,
-  thumbnailUploader ,
   query ,
   viewThumbnail ,
   view ,
