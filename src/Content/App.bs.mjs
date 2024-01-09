@@ -3,6 +3,7 @@
 import * as Curry from "rescript/lib/es6/curry.js";
 import * as React from "react";
 import * as Js_string from "rescript/lib/es6/js_string.js";
+import * as Thumbnail from "./Widget/Thumbnail.bs.mjs";
 import * as Belt_Array from "rescript/lib/es6/belt_Array.js";
 import * as Belt_Option from "rescript/lib/es6/belt_Option.js";
 import * as Caml_option from "rescript/lib/es6/caml_option.js";
@@ -70,7 +71,7 @@ var app = Belt_Option.map(Caml_option.nullable_to_opt($$document.querySelector("
               });
           port.onMessage.addListener(onMessageListener);
           var bodyWatcher = function (mutationList, observer) {
-            var dialog = Belt_Array.forEach(mutationList, (function (mutation) {
+            Belt_Array.forEach(mutationList, (function (mutation) {
                     var hasRemovedDialog = Array.prototype.slice.call(mutation.removedNodes).some(function (el) {
                           var name = el.nodeName.toLowerCase();
                           return name === "ytcp-uploads-dialog";
@@ -119,17 +120,14 @@ var app = Belt_Option.map(Caml_option.nullable_to_opt($$document.querySelector("
                           _0: target
                         });
                   }));
-            console.log("dialog added", dialog);
           };
           var titleElWatcher = function (mutationList, observer) {
-            console.log("title changed", mutationList);
             var title = Belt_Option.mapWithDefault(Belt_Option.map(Belt_Array.get(mutationList, 0), (function (prim) {
                         return prim.target;
                       })), "", (function (prim) {
                     return prim.textContent;
                   }));
             var route = Js_string.split(" - ", title);
-            console.log("route", route);
             if (route.length !== 2) {
               return Curry._1(dispatch, {
                           TAG: /* SetPage */1,
@@ -167,11 +165,6 @@ var app = Belt_Option.map(Caml_option.nullable_to_opt($$document.querySelector("
                             titleObserver.disconnect();
                           });
                 }), []);
-          var detailsPage = function (param) {
-            return [JsxPPXReactSupport.createElementWithKey("details-page", TitleChecker.make, {
-                          maybeUploadDialog: undefined
-                        })];
-          };
           var dialogWidgets = function (dialog) {
             return [JsxPPXReactSupport.createElementWithKey("upload-dialog", TitleChecker.make, {
                           maybeUploadDialog: Webapi__Dom__Element.ofNode(dialog)
@@ -179,15 +172,26 @@ var app = Belt_Option.map(Caml_option.nullable_to_opt($$document.querySelector("
           };
           var match$2 = state.currentPage;
           var match$3 = state.maybeUploadDialog;
-          var widgets = match$2 ? (
-              match$3 !== undefined ? dialogWidgets(Caml_option.valFromOption(match$3)) : []
-            ) : (
-              match$3 !== undefined ? (
-                  match$3 !== undefined ? dialogWidgets(Caml_option.valFromOption(match$3)) : []
-                ) : detailsPage(undefined)
-            );
-          console.log("which widgets", widgets);
-          return widgets;
+          if (match$2) {
+            if (match$3 !== undefined) {
+              return dialogWidgets(Caml_option.valFromOption(match$3));
+            } else {
+              return [];
+            }
+          } else if (match$3 !== undefined) {
+            if (match$3 !== undefined) {
+              return dialogWidgets(Caml_option.valFromOption(match$3));
+            } else {
+              return [];
+            }
+          } else {
+            return [
+                    JsxPPXReactSupport.createElementWithKey("details-page", TitleChecker.make, {
+                          maybeUploadDialog: undefined
+                        }),
+                    React.createElement(Thumbnail.make, {})
+                  ];
+          }
         };
         var root = Client.createRoot(dummy);
         root.render(React.createElement(App, {}));
