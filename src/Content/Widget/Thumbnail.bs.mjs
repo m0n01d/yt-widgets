@@ -138,57 +138,52 @@ function Thumbnail$Preview(props) {
                 }))
       });
   var stillPickerWatcher = function (mutationList, observer) {
-    mutationList.forEach(function (mutation) {
-          var target = mutation.target;
-          var node = Webapi__Dom__Element.ofNode(target);
-          var name = target.nodeName.toLocaleLowerCase();
-          var attrName = mutation.attributeName;
-          var isSelected = Belt_Option.flatMap(node, (function (node) {
-                  return Caml_option.nullable_to_opt(node.getAttribute("aria-selected"));
-                }));
-          var uploaderIsSelected = Belt_Option.flatMap(node, (function (el) {
-                  return Caml_option.nullable_to_opt(el.getAttribute("selected"));
-                }));
-          var match = Caml_obj.equal(node, state.maybeThumbnailEl);
-          var exit = 0;
-          var exit$1 = 0;
-          if (name === "ytcp-thumbnail-uploader" && !((attrName == null) || !(attrName === "selected" && uploaderIsSelected === ""))) {
-            exit = 2;
-          } else {
-            exit$1 = 3;
-          }
-          if (exit$1 === 3) {
-            exit = isSelected === "true" ? 2 : 1;
-          }
-          switch (exit) {
-            case 1 :
-                if ((attrName == null) || !(attrName === "src" && match)) {
-                  return ;
-                } else {
-                  return Belt_Option.mapWithDefault(Belt_Option.flatMap(state.maybeThumbnailEl, (function (el) {
-                                    return Caml_option.nullable_to_opt(el.getAttribute("src"));
-                                  })), undefined, (function (src) {
-                                Curry._1(dispatch, {
-                                      TAG: /* SetImgSrc */0,
-                                      _0: src
-                                    });
+    var maybeSrc = mutationList.reduce((function (acc, mutation) {
+            var target = mutation.target;
+            var node = Webapi__Dom__Element.ofNode(target);
+            var name = target.nodeName.toLocaleLowerCase();
+            var attrName = mutation.attributeName;
+            var isSelected = Belt_Option.flatMap(node, (function (node) {
+                    return Caml_option.nullable_to_opt(node.getAttribute("aria-selected"));
+                  }));
+            var uploaderIsSelected = Belt_Option.flatMap(node, (function (el) {
+                    return Caml_option.nullable_to_opt(el.getAttribute("selected"));
+                  }));
+            var match = Caml_obj.equal(node, state.maybeThumbnailEl);
+            var exit = 0;
+            var exit$1 = 0;
+            if (name === "ytcp-thumbnail-uploader" && !((attrName == null) || !(attrName === "selected" && uploaderIsSelected === ""))) {
+              exit = 2;
+            } else {
+              exit$1 = 3;
+            }
+            if (exit$1 === 3) {
+              exit = isSelected === "true" ? 2 : 1;
+            }
+            switch (exit) {
+              case 1 :
+                  if ((attrName == null) || !(attrName === "src" && match)) {
+                    return acc;
+                  } else {
+                    return Belt_Option.flatMap(state.maybeThumbnailEl, (function (el) {
+                                  return Caml_option.nullable_to_opt(el.getAttribute("src"));
+                                }));
+                  }
+              case 2 :
+                  return Belt_Option.flatMap(Belt_Option.flatMap(node, (function (el) {
+                                    return Caml_option.nullable_to_opt(el.querySelector("img"));
+                                  })), (function (img) {
+                                return Caml_option.nullable_to_opt(img.getAttribute("src"));
                               }));
-                }
-            case 2 :
-                var src = Belt_Option.flatMap(Belt_Option.flatMap(node, (function (el) {
-                            return Caml_option.nullable_to_opt(el.querySelector("img"));
-                          })), (function (img) {
-                        return Caml_option.nullable_to_opt(img.getAttribute("src"));
-                      }));
-                return Belt_Option.mapWithDefault(src, undefined, (function (src) {
-                              Curry._1(dispatch, {
-                                    TAG: /* SetImgSrc */0,
-                                    _0: src
-                                  });
-                            }));
-            
-          }
-        });
+              
+            }
+          }), undefined);
+    Belt_Option.mapWithDefault(maybeSrc, undefined, (function (src) {
+            Curry._1(dispatch, {
+                  TAG: /* SetImgSrc */0,
+                  _0: src
+                });
+          }));
   };
   var match$1 = queryResult.data;
   if (match$1 === undefined) {

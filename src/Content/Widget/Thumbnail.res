@@ -111,7 +111,7 @@ module Preview = {
     })
 
     let stillPickerWatcher = (mutationList, observer) => {
-      mutationList->Js.Array2.forEach(mutation => {
+      let maybeSrc = mutationList->Js.Array2.reduce((acc, mutation) => {
         let target = mutation->MutationRecord.target
         let node = Element.ofNode(target)
         let name = target->Node.nodeName->Js.String2.toLocaleLowerCase
@@ -121,20 +121,16 @@ module Preview = {
 
         switch (name, attrName, uploaderIsSelected, node == state.maybeThumbnailEl, isSelected) {
         | ("ytcp-thumbnail-uploader", Some("selected"), Some(""), _, _)
-        | (_, _, _, _, Some("true")) => {
-            let src =
-              node
-              ->Option.flatMap(el => Element.querySelector(el, "img"))
-              ->Option.flatMap(img => img->Element.getAttribute("src"))
-            src->Option.mapWithDefault((), src => dispatch(SetImgSrc(src)))
-          }
+        | (_, _, _, _, Some("true")) =>
+          node
+          ->Option.flatMap(el => Element.querySelector(el, "img"))
+          ->Option.flatMap(img => img->Element.getAttribute("src"))
         | (_, Some("src"), _, true, _) =>
-          state.maybeThumbnailEl
-          ->Option.flatMap(el => el->Element.getAttribute("src"))
-          ->Option.mapWithDefault((), src => dispatch(SetImgSrc(src)))
-        | _ => ()
+          state.maybeThumbnailEl->Option.flatMap(el => el->Element.getAttribute("src"))
+        | _ => acc
         }
-      })
+      }, None)
+      maybeSrc->Option.mapWithDefault((), src => dispatch(SetImgSrc(src)))
     }
 
     switch queryResult {
@@ -142,7 +138,6 @@ module Preview = {
         if None == state.maybeThumbnailEl {
           dispatch(SetThumbnailEl(thumbnailImgEl))
         }
-        Js.log("Hello thumbnail")
         let stillPickerObserver = MutationObserver.make(stillPickerWatcher)
         MutationObserver.observe(
           stillPickerObserver,
