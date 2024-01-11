@@ -11,88 +11,130 @@ let query = _ => {
   ->Js.Promise2.all
 }
 
-type model = {maybeThumbnailEl: option<Dom.element>, maybeImgSrc: option<string>}
+type someColors = array<array<int>>
 
-type msg = SetImgSrc(string) | SetThumbnailEl(Dom.element)
-let update = (state: model, action: msg) => {
-  switch action {
-  | SetImgSrc(src) => {...state, maybeImgSrc: Some(src)}
-  | SetThumbnailEl(el) => {...state, maybeThumbnailEl: Some(el)}
-  }
-}
+module Palette = {
+  @module("color.js") external prominent: string => promise<someColors> = "prominent"
 
-let viewThumbnail = src => {
-  <div
-    style={ReactDOM.Style.make(
-      ~position="relative",
-      ~width="320px",
-      ~height="180px",
-      ~margin="0 auto",
-      (),
-    )}>
-    <img src />
-    <span
-      style={ReactDOM.Style.make(
-        ~background="white",
-        ~border="1px solid black",
-        ~bottom="0",
-        ~left="33%",
-        ~position="absolute",
-        ~top="0",
-        ~width="2px",
-        ~zIndex="1",
-        (),
-      )}
-    />
-    <span
-      style={ReactDOM.Style.make(
-        ~background="white",
-        ~border="1px solid black",
-        ~bottom="0",
-        ~left="66%",
-        ~position="absolute",
-        ~top="0",
-        ~width="2px",
-        ~zIndex="1",
-        (),
-      )}
-    />
-    <span
-      style={ReactDOM.Style.make(
-        ~background="white",
-        ~border="1px solid black",
-        ~height="2px",
-        ~left="0",
-        ~position="absolute",
-        ~right="0",
-        ~top="33%",
-        ~zIndex="1",
-        (),
-      )}
-    />
-    <span
-      style={ReactDOM.Style.make(
-        ~background="white",
-        ~border="1px solid black",
-        ~height="2px",
-        ~left="0",
-        ~position="absolute",
-        ~right="0",
-        ~top="66%",
-        ~zIndex="1",
-        (),
-      )}
-    />
-  </div>
-}
-let view = state => {
-  switch state.maybeImgSrc {
-  | Some(src) => viewThumbnail(src)
-  | None => React.null
+  @react.component
+  let make = (~src) => {
+    Js.log2("make palette", src)
+    let (maybeColors: someColors, setColors) = React.useState(_ => [])
+
+    React.useEffect1(() => {
+      Js.log2("change palette", src)
+      let colors =
+        prominent(src)
+        ->Js.Promise2.then(c => {
+          setColors(_ => c)
+          Js.Promise2.resolve(c)
+        })
+        ->ignore
+      None
+    }, [src])
+    <div style={ReactDOM.Style.make(~display="flex", ())}>
+      {maybeColors
+      ->Js.Array2.map(color => {
+        let c = `rgb(${Js.Array.joinWith(",", color)}`
+        <span
+          style={ReactDOM.Style.make(
+            ~background=c,
+            ~flex="1 0 0",
+            ~height="50px",
+            ~width="1/3",
+            (),
+          )}
+        />
+      })
+      ->React.array}
+    </div>
   }
 }
 
 module Preview = {
+  type model = {maybeThumbnailEl: option<Dom.element>, maybeImgSrc: option<string>}
+
+  type msg = SetImgSrc(string) | SetThumbnailEl(Dom.element)
+  let update = (state: model, action: msg) => {
+    switch action {
+    | SetImgSrc(src) => {...state, maybeImgSrc: Some(src)}
+    | SetThumbnailEl(el) => {...state, maybeThumbnailEl: Some(el)}
+    }
+  }
+  let viewThumbnail = src => {
+    <div
+      style={ReactDOM.Style.make(
+        ~position="relative",
+        ~width="320px",
+        ~height="180px",
+        ~margin="0 auto",
+        (),
+      )}>
+      <img src />
+      <span
+        style={ReactDOM.Style.make(
+          ~background="white",
+          ~border="1px solid black",
+          ~bottom="0",
+          ~left="33%",
+          ~position="absolute",
+          ~top="0",
+          ~width="2px",
+          ~zIndex="1",
+          (),
+        )}
+      />
+      <span
+        style={ReactDOM.Style.make(
+          ~background="white",
+          ~border="1px solid black",
+          ~bottom="0",
+          ~left="66%",
+          ~position="absolute",
+          ~top="0",
+          ~width="2px",
+          ~zIndex="1",
+          (),
+        )}
+      />
+      <span
+        style={ReactDOM.Style.make(
+          ~background="white",
+          ~border="1px solid black",
+          ~height="2px",
+          ~left="0",
+          ~position="absolute",
+          ~right="0",
+          ~top="33%",
+          ~zIndex="1",
+          (),
+        )}
+      />
+      <span
+        style={ReactDOM.Style.make(
+          ~background="white",
+          ~border="1px solid black",
+          ~height="2px",
+          ~left="0",
+          ~position="absolute",
+          ~right="0",
+          ~top="66%",
+          ~zIndex="1",
+          (),
+        )}
+      />
+    </div>
+  }
+  let view = state => {
+    let children = switch state.maybeImgSrc {
+    | Some(src) => {
+        Js.log2("src changed", src)
+        [viewThumbnail(src), <Palette src />]
+      }
+    | _ => []
+    }
+    React.array(children)
+  }
   @react.component
   let make = () => {
     let initialImgSrc =

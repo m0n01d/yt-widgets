@@ -4,6 +4,8 @@ import * as Ui from "../Ui.bs.mjs";
 import * as Curry from "rescript/lib/es6/curry.js";
 import * as React from "react";
 import * as Caml_obj from "rescript/lib/es6/caml_obj.js";
+import * as Js_array from "rescript/lib/es6/js_array.js";
+import * as ColorJs from "color.js";
 import * as ReactDom from "react-dom";
 import * as ReactQuery from "@rescriptbr/react-query/src/ReactQuery.bs.mjs";
 import * as Belt_Option from "rescript/lib/es6/belt_Option.js";
@@ -29,6 +31,43 @@ function query(param) {
                               }));
                 }));
 }
+
+function Thumbnail$Palette(props) {
+  var src = props.src;
+  console.log("make palette", src);
+  var match = React.useState(function () {
+        return [];
+      });
+  var setColors = match[1];
+  React.useEffect((function () {
+          console.log("change palette", src);
+          Js_promise2.then(ColorJs.prominent(src), (function (c) {
+                  Curry._1(setColors, (function (param) {
+                          return c;
+                        }));
+                  return Promise.resolve(c);
+                }));
+        }), [src]);
+  return React.createElement("div", {
+              style: {
+                display: "flex"
+              }
+            }, match[0].map(function (color) {
+                  var c = "rgb(" + Js_array.joinWith(",", color) + "";
+                  return React.createElement("span", {
+                              style: {
+                                background: c,
+                                height: "50px",
+                                width: "1/3",
+                                flex: "1 0 0"
+                              }
+                            });
+                }));
+}
+
+var Palette = {
+  make: Thumbnail$Palette
+};
 
 function update(state, action) {
   if (action.TAG === /* SetImgSrc */0) {
@@ -104,9 +143,15 @@ function viewThumbnail(src) {
 function view(state) {
   var src = state.maybeImgSrc;
   if (src !== undefined) {
-    return viewThumbnail(src);
+    console.log("src changed", src);
+    return [
+            viewThumbnail(src),
+            React.createElement(Thumbnail$Palette, {
+                  src: src
+                })
+          ];
   } else {
-    return null;
+    return [];
   }
 }
 
@@ -201,7 +246,6 @@ function Thumbnail$Preview(props) {
           _0: thumbnailImgEl
         });
   }
-  console.log("Hello thumbnail");
   var stillPickerObserver = new MutationObserver(stillPickerWatcher);
   stillPickerObserver.observe(stillPickerEl, {
         attributes: true,
@@ -212,6 +256,9 @@ function Thumbnail$Preview(props) {
 }
 
 var Preview = {
+  update: update,
+  viewThumbnail: viewThumbnail,
+  view: view,
   make: Thumbnail$Preview
 };
 
@@ -231,9 +278,7 @@ export {
   stillPickerSelector ,
   thumbnailImgSelector ,
   query ,
-  update ,
-  viewThumbnail ,
-  view ,
+  Palette ,
   Preview ,
   client ,
   make ,
