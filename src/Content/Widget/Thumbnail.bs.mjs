@@ -45,12 +45,13 @@ function Thumbnail$Palette(props) {
                   Curry._1(setColors, (function (param) {
                           return c;
                         }));
-                  return Promise.resolve(c);
+                  return Promise.resolve(undefined);
                 }));
         }), [src]);
   return React.createElement("div", {
               style: {
-                display: "flex"
+                display: "flex",
+                margin: "1rem 0"
               }
             }, match[0].map(function (color) {
                   var c = "rgb(" + Js_array.joinWith(",", color) + "";

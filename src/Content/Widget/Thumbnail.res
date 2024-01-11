@@ -23,16 +23,15 @@ module Palette = {
 
     React.useEffect1(() => {
       Js.log2("change palette", src)
-      let colors =
-        prominent(src)
-        ->Js.Promise2.then(c => {
-          setColors(_ => c)
-          Js.Promise2.resolve(c)
-        })
-        ->ignore
+      prominent(src)
+      ->Js.Promise2.then(c => {
+        setColors(_ => c)
+        Js.Promise2.resolve()
+      })
+      ->ignore
       None
     }, [src])
-    <div style={ReactDOM.Style.make(~display="flex", ())}>
+    <div style={ReactDOM.Style.make(~display="flex", ~margin="1rem 0", ())}>
       {maybeColors
       ->Js.Array2.map(color => {
         let c = `rgb(${Js.Array.joinWith(",", color)}`
