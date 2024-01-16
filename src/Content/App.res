@@ -13,7 +13,9 @@ type page = Details | Other
 
 type msg = RemovedDialog | SetDialog(Dom.Node.t) | SetPage(page)
 
-type model = {currentPage: page, maybeUploadDialog: option<Dom.Node.t>}
+type remote = {descriptionTemplates: Description.Templates.t}
+
+type model = {currentPage: page, maybeUploadDialog: option<Dom.Node.t>, remote: remote}
 
 let update = (state: model, action: msg) => {
   switch action {
@@ -39,14 +41,24 @@ let app = Document.querySelector(document, "title")->Option.map(titleEl => {
       | ["Video details", _] => Details
       | _ => Other
       }
-      let initialState = {currentPage: initialPage, maybeUploadDialog: None}
+      let initialState = {
+        currentPage: initialPage,
+        maybeUploadDialog: None,
+        remote: {descriptionTemplates: Map.Dict.empty},
+      }
       let (state, dispatch) = React.useReducer(update, initialState)
 
-      let onMessageListener = port => {
-        Js.log(port)
-      }
-      let port = Chrome.Runtime.connect({name: "yt-widgets-content"})
-      Chrome.Runtime.Port.addListener(port, onMessageListener)
+      React.useEffect0(() => {
+        let onMessageListener = portMsg => {
+          Js.log2("app chrome port inbound", portMsg)
+        }
+        let port = Chrome.Runtime.connect({name: "yt-widgets-content"})
+        Chrome.Runtime.Port.addListener(port, onMessageListener)
+        let message: Chrome.Runtime.Port.message = {body: "ready"}
+        port->Chrome.Runtime.Port.postMessage(message)
+
+        None
+      })
 
       let bodyWatcher = (mutationList, observer) => {
         let dialog = mutationList->Array.forEach(mutation => {
@@ -119,6 +131,7 @@ let app = Document.querySelector(document, "title")->Option.map(titleEl => {
       let detailsPage = () => [
         <TitleChecker maybeUploadDialog=None key="details-page" />,
         <Thumbnail />,
+        <Description.Templates model=state.remote.descriptionTemplates />,
       ]
       let dialogWidgets = dialog => [
         <TitleChecker maybeUploadDialog={Element.ofNode(dialog)} key="upload-dialog" />,

@@ -201,7 +201,6 @@ function Thumbnail$Preview(props) {
           _0: thumbnailImgEl
         });
   }
-  console.log("Hello thumbnail");
   var stillPickerObserver = new MutationObserver(stillPickerWatcher);
   stillPickerObserver.observe(stillPickerEl, {
         attributes: true,

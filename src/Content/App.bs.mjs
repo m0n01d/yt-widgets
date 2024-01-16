@@ -7,6 +7,7 @@ import * as Thumbnail from "./Widget/Thumbnail.bs.mjs";
 import * as Belt_Array from "rescript/lib/es6/belt_Array.js";
 import * as Belt_Option from "rescript/lib/es6/belt_Option.js";
 import * as Caml_option from "rescript/lib/es6/caml_option.js";
+import * as Description from "./Widget/Description.bs.mjs";
 import * as TitleChecker from "./Widget/TitleChecker.bs.mjs";
 import * as Client from "react-dom/client";
 import * as JsxPPXReactSupport from "rescript/lib/es6/jsxPPXReactSupport.js";
@@ -27,17 +28,20 @@ function update(state, action) {
   if (typeof action === "number") {
     return {
             currentPage: state.currentPage,
-            maybeUploadDialog: undefined
+            maybeUploadDialog: undefined,
+            remote: state.remote
           };
   } else if (action.TAG === /* SetDialog */0) {
     return {
             currentPage: state.currentPage,
-            maybeUploadDialog: Caml_option.some(action._0)
+            maybeUploadDialog: Caml_option.some(action._0),
+            remote: state.remote
           };
   } else {
     return {
             currentPage: action._0,
-            maybeUploadDialog: state.maybeUploadDialog
+            maybeUploadDialog: state.maybeUploadDialog,
+            remote: state.remote
           };
   }
 }
@@ -56,20 +60,29 @@ var app = Belt_Option.map(Caml_option.nullable_to_opt($$document.querySelector("
             var match = route[0];
             initialPage = match === "Video details" ? /* Details */0 : /* Other */1;
           }
+          var initialState_remote = {
+            descriptionTemplates: undefined
+          };
           var initialState = {
             currentPage: initialPage,
-            maybeUploadDialog: undefined
+            maybeUploadDialog: undefined,
+            remote: initialState_remote
           };
           var match$1 = React.useReducer(update, initialState);
           var dispatch = match$1[1];
           var state = match$1[0];
-          var onMessageListener = function (port) {
-            console.log(port);
-          };
-          var port = chrome.runtime.connect({
-                name: "yt-widgets-content"
-              });
-          port.onMessage.addListener(onMessageListener);
+          React.useEffect((function () {
+                  var onMessageListener = function (portMsg) {
+                    console.log("app chrome port inbound", portMsg);
+                  };
+                  var port = chrome.runtime.connect({
+                        name: "yt-widgets-content"
+                      });
+                  port.onMessage.addListener(onMessageListener);
+                  port.postMessage({
+                        body: "ready"
+                      });
+                }), []);
           var bodyWatcher = function (mutationList, observer) {
             Belt_Array.forEach(mutationList, (function (mutation) {
                     var hasRemovedDialog = Array.prototype.slice.call(mutation.removedNodes).some(function (el) {
@@ -189,7 +202,10 @@ var app = Belt_Option.map(Caml_option.nullable_to_opt($$document.querySelector("
                     JsxPPXReactSupport.createElementWithKey("details-page", TitleChecker.make, {
                           maybeUploadDialog: undefined
                         }),
-                    React.createElement(Thumbnail.make, {})
+                    React.createElement(Thumbnail.make, {}),
+                    React.createElement(Description.Templates.make, {
+                          model: state.remote.descriptionTemplates
+                        })
                   ];
           }
         };
