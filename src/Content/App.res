@@ -54,7 +54,7 @@ let app = Document.querySelector(document, "title")->Option.map(titleEl => {
         }
         let port = Chrome.Runtime.connect({name: "yt-widgets-content"})
         Chrome.Runtime.Port.addListener(port, onMessageListener)
-        let message: Chrome.Runtime.Port.message = {body: "ready"}
+        let message: Chrome.Runtime.Port.message<'a> = {payload: None, tag: "ready"}
         port->Chrome.Runtime.Port.postMessage(message)
 
         None
@@ -131,7 +131,7 @@ let app = Document.querySelector(document, "title")->Option.map(titleEl => {
       let detailsPage = () => [
         <TitleChecker maybeUploadDialog=None key="details-page" />,
         <Thumbnail />,
-        <Description.Templates model=state.remote.descriptionTemplates />,
+        <Description model=state.remote.descriptionTemplates />,
       ]
       let dialogWidgets = dialog => [
         <TitleChecker maybeUploadDialog={Element.ofNode(dialog)} key="upload-dialog" />,

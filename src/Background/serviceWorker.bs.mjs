@@ -17,9 +17,10 @@ chrome.runtime.onConnect.addListener(function (port) {
       if (match === "yt-widgets-content") {
         Belt_Map.set(listeners, port.name, port);
         port.onMessage.addListener(function (portMsg) {
-              if (portMsg.body === "ready") {
+              if (portMsg.tag === "ready") {
                 port.postMessage({
-                      body: "testing 123"
+                      payload: "test",
+                      tag: "testing 123"
                     });
               } else {
                 throw {

@@ -12,9 +12,9 @@ Chrome.Runtime.OnConnect.addListener(port => {
       listeners->Map.set(port.name, port)->ignore
       port->Chrome.Runtime.Port.addListener(portMsg => {
         switch portMsg {
-        | {body: "ready"} => {
+        | {payload: _, tag: "ready"} => {
             // async fetch and then post message with data
-            let message: Chrome.Runtime.Port.message = {body: "testing 123"}
+            let message: Chrome.Runtime.Port.message<'a> = {payload: "test", tag: "testing 123"}
             port->Chrome.Runtime.Port.postMessage(message)
           }
         }

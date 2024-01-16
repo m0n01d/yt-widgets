@@ -13,3 +13,8 @@ module Templates = {
     React.null
   }
 }
+
+@react.component
+let make = (~model) => {
+  <Templates model />
+}

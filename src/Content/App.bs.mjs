@@ -80,7 +80,8 @@ var app = Belt_Option.map(Caml_option.nullable_to_opt($$document.querySelector("
                       });
                   port.onMessage.addListener(onMessageListener);
                   port.postMessage({
-                        body: "ready"
+                        payload: undefined,
+                        tag: "ready"
                       });
                 }), []);
           var bodyWatcher = function (mutationList, observer) {
@@ -203,7 +204,7 @@ var app = Belt_Option.map(Caml_option.nullable_to_opt($$document.querySelector("
                           maybeUploadDialog: undefined
                         }),
                     React.createElement(Thumbnail.make, {}),
-                    React.createElement(Description.Templates.make, {
+                    React.createElement(Description.make, {
                           model: state.remote.descriptionTemplates
                         })
                   ];
