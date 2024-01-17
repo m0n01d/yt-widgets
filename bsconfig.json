@@ -15,6 +15,7 @@
   "suffix": ".bs.mjs",
   "jsx": { "version": 4, "mode": "classic" },
   "bs-dependencies": [
+    "@dusty-phillips/rescript-dexie",
     "@rescript/react",
     "@rescriptbr/react-query",
     "rescript-webapi"
