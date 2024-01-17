@@ -7,6 +7,7 @@ import * as Schema from "../Data/Schema.bs.mjs";
 import * as Belt_Id from "rescript/lib/es6/belt_Id.js";
 import * as Belt_Map from "rescript/lib/es6/belt_Map.js";
 import * as Caml_obj from "rescript/lib/es6/caml_obj.js";
+import * as Description from "../Content/Widget/Description.bs.mjs";
 import * as Js_promise2 from "rescript/lib/es6/js_promise2.js";
 import * as Version$Dexie from "@dusty-phillips/rescript-dexie/src/Version.bs.mjs";
 
@@ -34,45 +35,16 @@ var IntCmp = Belt_Id.MakeComparable({
 var listeners = Belt_Map.make(IntCmp);
 
 chrome.runtime.onConnect.addListener(function (port) {
-      var match = port.name;
-      if (match === "yt-widgets-content") {
-        Belt_Map.set(listeners, port.name, port);
-        port.onMessage.addListener(function (portMsg) {
-              if (portMsg.tag === "ready") {
-                Js_promise2.then(Curry._1(Table.DescriptionTemplate.toArray, dexie), (function (descriptionTemplates) {
-                        console.log("from db", descriptionTemplates);
-                        var message = {
-                          payload: descriptionTemplates,
-                          tag: "testing 123"
-                        };
-                        port.postMessage(message);
-                        return Promise.resolve(undefined);
-                      }));
-              } else {
-                throw {
-                      RE_EXN_ID: "Match_failure",
-                      _1: [
-                        "ServiceWorker.res",
-                        28,
-                        8
-                      ],
-                      Error: new Error()
-                    };
-              }
-              console.log("msg");
-              console.log(portMsg);
-            });
-      } else {
-        throw {
-              RE_EXN_ID: "Match_failure",
-              _1: [
-                "ServiceWorker.res",
-                24,
-                2
-              ],
-              Error: new Error()
-            };
-      }
+      Belt_Map.set(listeners, port.name, port);
+      Js_promise2.then(Curry._1(Table.DescriptionTemplate.toArray, dexie), (function (descriptionTemplates) {
+              console.log("from db", descriptionTemplates);
+              var message = {
+                payload: descriptionTemplates,
+                tag: "init"
+              };
+              port.postMessage(message);
+              return Promise.resolve(undefined);
+            }));
       console.log("connected", port);
     });
 

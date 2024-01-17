@@ -21,30 +21,23 @@ module IntCmp = Id.MakeComparable({
 let listeners = Map.make(~id=module(IntCmp))
 
 Chrome.Runtime.OnConnect.addListener(port => {
+  let descriptionTemplatesPort = Description.Templates.name
   switch port.name {
-  | "yt-widgets-content" => {
+  | descriptionTemplatesPort => {
+      // on connect - send data to widget
       listeners->Map.set(port.name, port)->ignore
-      port->Chrome.Runtime.Port.addListener(portMsg => {
-        switch portMsg {
-        | {payload: _, tag: "ready"} =>
-          Table.DescriptionTemplate.toArray(dexie)
-          ->Js.Promise2.then(
-            descriptionTemplates => {
-              Js.log2("from db", descriptionTemplates)
-              let message: Chrome.Runtime.Port.message<'a> = {
-                payload: descriptionTemplates,
-                tag: "testing 123",
-              }
-              port->Chrome.Runtime.Port.postMessage(message)
-              Js.Promise2.resolve()
-            },
-          )
-          ->ignore
-        // async fetch and then post message with data
+      Table.DescriptionTemplate.toArray(dexie)
+      ->Js.Promise2.then(descriptionTemplates => {
+        Js.log2("from db", descriptionTemplates)
+        let message: Chrome.Runtime.Port.message<'a> = {
+          payload: descriptionTemplates,
+          tag: "init",
         }
-        Js.log("msg")
-        Js.log(portMsg)
+        port->Chrome.Runtime.Port.postMessage(message)
+        Js.Promise2.resolve()
       })
+      ->ignore
+      // async fetch and then post message with data
     }
   }
   Js.log2("connected", port)
