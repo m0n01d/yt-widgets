@@ -1,17 +1,17 @@
 open Belt
 
 let dexie = Dexie.Database.make(`hello dexie 1`)
-let schema = [Schema.DescriptionTemplate.Category.schema, Schema.DescriptionTemplate.schema]
+let schema = [Schema.DescriptionSnippet.Category.schema, Schema.DescriptionSnippet.schema]
 dexie->Dexie.Database.version(1)->Dexie.Version.stores(schema)->ignore
 
 dexie->Dexie.Database.opendb->ignore
 
-let x = dexie->Table.DescriptionTemplateCategory.put({
+let x = dexie->Table.DescriptionSnippetCategory.put({
   id: Some(0),
   name: "default",
 })
 
-let p = dexie->Table.DescriptionTemplate.put({
+let p = dexie->Table.DescriptionSnippet.put({
   id: Some(41),
   body: "test",
   category_id: 0,
@@ -27,16 +27,16 @@ module IntCmp = Id.MakeComparable({
 let listeners = Map.make(~id=module(IntCmp))
 
 Chrome.Runtime.OnConnect.addListener(port => {
-  let descriptionTemplatesPort = Description.Templates.name
+  let descriptionSnippetsPort = Description.Snippets.name
   switch port.name {
-  | descriptionTemplatesPort => {
+  | descriptionSnippetsPort => {
       // on connect - send data to widget
       listeners->Map.set(port.name, port)->ignore
-      Table.DescriptionTemplate.toArray(dexie)
-      ->Js.Promise2.then(descriptionTemplates => {
-        Js.log2("from db", descriptionTemplates)
+      Table.DescriptionSnippet.toArray(dexie)
+      ->Js.Promise2.then(descriptionSnippets => {
+        Js.log2("from db", descriptionSnippets)
         let message: Chrome.Runtime.Port.message<'a> = {
-          payload: descriptionTemplates,
+          payload: descriptionSnippets,
           tag: "init",
         }
         port->Chrome.Runtime.Port.postMessage(message)

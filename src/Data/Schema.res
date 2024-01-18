@@ -1,11 +1,11 @@
-module DescriptionTemplate = {
+module DescriptionSnippet = {
   module Category = {
     type id = int
     type t = {
       id: option<int>,
       name: string,
     }
-    let tableName = "DescriptionTemplate.Category"
+    let tableName = "DescriptionSnippet.Category"
     let fields = "++id,name"
     let schema = (tableName, fields)
   }
@@ -25,7 +25,7 @@ module DescriptionTemplate = {
     id: option<int>,
     name: string,
   }
-  let tableName = "DescriptionTemplate"
+  let tableName = "DescriptionSnippet"
   let fields = "++id,body,category_id,date,name"
 
   let schema = (tableName, fields)

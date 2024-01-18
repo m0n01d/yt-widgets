@@ -14,20 +14,20 @@ import * as Version$Dexie from "@dusty-phillips/rescript-dexie/src/Version.bs.mj
 var dexie = new Dexie("hello dexie 1");
 
 var schema = [
-  Schema.DescriptionTemplate.Category.schema,
-  Schema.DescriptionTemplate.schema
+  Schema.DescriptionSnippet.Category.schema,
+  Schema.DescriptionSnippet.schema
 ];
 
 Version$Dexie.stores(dexie.version(1), schema);
 
 dexie.open();
 
-var x = Curry._2(Table.DescriptionTemplateCategory.put, dexie, {
+var x = Curry._2(Table.DescriptionSnippetCategory.put, dexie, {
       id: 0,
       name: "default"
     });
 
-var p = Curry._2(Table.DescriptionTemplate.put, dexie, {
+var p = Curry._2(Table.DescriptionSnippet.put, dexie, {
       body: "test",
       category_id: 0,
       date: new Date(),
@@ -45,10 +45,10 @@ var listeners = Belt_Map.make(IntCmp);
 
 chrome.runtime.onConnect.addListener(function (port) {
       Belt_Map.set(listeners, port.name, port);
-      Js_promise2.then(Curry._1(Table.DescriptionTemplate.toArray, dexie), (function (descriptionTemplates) {
-              console.log("from db", descriptionTemplates);
+      Js_promise2.then(Curry._1(Table.DescriptionSnippet.toArray, dexie), (function (descriptionSnippets) {
+              console.log("from db", descriptionSnippets);
               var message = {
-                payload: descriptionTemplates,
+                payload: descriptionSnippets,
                 tag: "init"
               };
               port.postMessage(message);

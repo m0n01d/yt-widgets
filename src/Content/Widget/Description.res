@@ -1,17 +1,17 @@
 open Belt
 
-type template = {body: string}
-module Templates = {
-  let name = "Description.Templates"
+type snippet = {body: string}
+module Snippets = {
+  let name = "Description.Snippets"
   module IntCmp = Belt.Id.MakeComparable({
     type t = string
     let cmp = (a, b) => Pervasives.compare(a, b)
   })
 
-  type t = Map.Dict.t<string, template, IntCmp.t>
+  type t = Map.Dict.t<string, snippet, IntCmp.t>
 
   @react.component
-  let make = (~model) => {
+  let make = () => {
     let (state, setState) = React.useState(() => [])
     React.useEffect0(() => {
       let onMessageListener: Chrome.Runtime.Port.message<'a> => unit = ({payload, tag}) => {
@@ -38,6 +38,6 @@ module Templates = {
 }
 
 @react.component
-let make = (~model) => {
-  <Templates model />
+let make = () => {
+  <Snippets />
 }

@@ -3,14 +3,14 @@
 import * as Schema from "./Schema.bs.mjs";
 import * as Table$Dexie from "@dusty-phillips/rescript-dexie/src/Table.bs.mjs";
 
-var DescriptionTemplateCategory = Table$Dexie.MakeTable(Schema.DescriptionTemplate.Category);
+var DescriptionSnippetCategory = Table$Dexie.MakeTable(Schema.DescriptionSnippet.Category);
 
-var DescriptionTemplate = Table$Dexie.MakeTable({
-      tableName: Schema.DescriptionTemplate.tableName
+var DescriptionSnippet = Table$Dexie.MakeTable({
+      tableName: Schema.DescriptionSnippet.tableName
     });
 
 export {
-  DescriptionTemplateCategory ,
-  DescriptionTemplate ,
+  DescriptionSnippetCategory ,
+  DescriptionSnippet ,
 }
-/* DescriptionTemplateCategory Not a pure module */
+/* DescriptionSnippetCategory Not a pure module */

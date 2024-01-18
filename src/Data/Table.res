@@ -1,2 +1,2 @@
-module DescriptionTemplateCategory = Dexie.Table.MakeTable(Schema.DescriptionTemplate.Category)
-module DescriptionTemplate = Dexie.Table.MakeTable(Schema.DescriptionTemplate)
+module DescriptionSnippetCategory = Dexie.Table.MakeTable(Schema.DescriptionSnippet.Category)
+module DescriptionSnippet = Dexie.Table.MakeTable(Schema.DescriptionSnippet)

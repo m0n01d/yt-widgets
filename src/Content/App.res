@@ -13,9 +13,7 @@ type page = Details | Other
 
 type msg = RemovedDialog | SetDialog(Dom.Node.t) | SetPage(page)
 
-type remote = {descriptionTemplates: Description.Templates.t}
-
-type model = {currentPage: page, maybeUploadDialog: option<Dom.Node.t>, remote: remote}
+type model = {currentPage: page, maybeUploadDialog: option<Dom.Node.t>}
 
 let update = (state: model, action: msg) => {
   switch action {
@@ -44,7 +42,6 @@ let app = Document.querySelector(document, "title")->Option.map(titleEl => {
       let initialState = {
         currentPage: initialPage,
         maybeUploadDialog: None,
-        remote: {descriptionTemplates: Map.Dict.empty},
       }
       let (state, dispatch) = React.useReducer(update, initialState)
 
@@ -131,7 +128,7 @@ let app = Document.querySelector(document, "title")->Option.map(titleEl => {
       let detailsPage = () => [
         <TitleChecker maybeUploadDialog=None key="details-page" />,
         <Thumbnail />,
-        <Description model=state.remote.descriptionTemplates />,
+        <Description />,
       ]
       let dialogWidgets = dialog => [
         <TitleChecker maybeUploadDialog={Element.ofNode(dialog)} key="upload-dialog" />,

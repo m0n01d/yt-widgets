@@ -7,7 +7,7 @@ import * as Caml_obj from "rescript/lib/es6/caml_obj.js";
 import * as ReactDom from "react-dom";
 import * as Belt_Option from "rescript/lib/es6/belt_Option.js";
 
-var name = "Description.Templates";
+var name = "Description.Snippets";
 
 var cmp = Caml_obj.compare;
 
@@ -15,7 +15,7 @@ var IntCmp = Belt_Id.MakeComparable({
       cmp: cmp
     });
 
-function Description$Templates(props) {
+function Description$Snippets(props) {
   var match = React.useState(function () {
         return [];
       });
@@ -55,22 +55,20 @@ function Description$Templates(props) {
   }
 }
 
-var Templates = {
+var Snippets = {
   name: name,
   IntCmp: IntCmp,
-  make: Description$Templates
+  make: Description$Snippets
 };
 
 function Description(props) {
-  return React.createElement(Description$Templates, {
-              model: props.model
-            });
+  return React.createElement(Description$Snippets, {});
 }
 
 var make = Description;
 
 export {
-  Templates ,
+  Snippets ,
   make ,
 }
 /* IntCmp Not a pure module */

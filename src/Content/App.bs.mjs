@@ -28,20 +28,17 @@ function update(state, action) {
   if (typeof action === "number") {
     return {
             currentPage: state.currentPage,
-            maybeUploadDialog: undefined,
-            remote: state.remote
+            maybeUploadDialog: undefined
           };
   } else if (action.TAG === /* SetDialog */0) {
     return {
             currentPage: state.currentPage,
-            maybeUploadDialog: Caml_option.some(action._0),
-            remote: state.remote
+            maybeUploadDialog: Caml_option.some(action._0)
           };
   } else {
     return {
             currentPage: action._0,
-            maybeUploadDialog: state.maybeUploadDialog,
-            remote: state.remote
+            maybeUploadDialog: state.maybeUploadDialog
           };
   }
 }
@@ -60,13 +57,9 @@ var app = Belt_Option.map(Caml_option.nullable_to_opt($$document.querySelector("
             var match = route[0];
             initialPage = match === "Video details" ? /* Details */0 : /* Other */1;
           }
-          var initialState_remote = {
-            descriptionTemplates: undefined
-          };
           var initialState = {
             currentPage: initialPage,
-            maybeUploadDialog: undefined,
-            remote: initialState_remote
+            maybeUploadDialog: undefined
           };
           var match$1 = React.useReducer(update, initialState);
           var dispatch = match$1[1];
@@ -204,9 +197,7 @@ var app = Belt_Option.map(Caml_option.nullable_to_opt($$document.querySelector("
                           maybeUploadDialog: undefined
                         }),
                     React.createElement(Thumbnail.make, {}),
-                    React.createElement(Description.make, {
-                          model: state.remote.descriptionTemplates
-                        })
+                    React.createElement(Description.make, {})
                   ];
           }
         };
