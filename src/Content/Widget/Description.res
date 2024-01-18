@@ -2,13 +2,7 @@ open Belt
 
 type snippet = {body: string}
 module Snippets = {
-  let name = "Description.Snippets"
-  module IntCmp = Belt.Id.MakeComparable({
-    type t = string
-    let cmp = (a, b) => Pervasives.compare(a, b)
-  })
-
-  type t = Map.Dict.t<string, snippet, IntCmp.t>
+  let name = Schema.DescriptionSnippet.tableName // tableName and Port name match for easy lookup
 
   @react.component
   let make = () => {

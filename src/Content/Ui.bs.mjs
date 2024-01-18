@@ -6,9 +6,9 @@ import * as Caml_exceptions from "rescript/lib/es6/caml_exceptions.js";
 
 var LinearProgress = {};
 
-function pause(param) {
+function pause() {
   return new Promise((function (resolve, reject) {
-                setTimeout((function (param) {
+                setTimeout((function () {
                         resolve(undefined);
                       }), 500);
               }));
@@ -23,7 +23,7 @@ async function queryDom(maybeAncestor, selector, n) {
                 _1: "Not Found"
               });
   }
-  await pause(undefined);
+  await pause();
   var maybeEl = Belt_Option.mapWithDefault(maybeAncestor, Caml_option.nullable_to_opt(document.querySelector(selector)), (function (dialog) {
           return Caml_option.nullable_to_opt(dialog.querySelector(selector));
         }));

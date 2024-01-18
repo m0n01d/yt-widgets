@@ -13,11 +13,14 @@
     }
   ],
   "suffix": ".bs.mjs",
-  "jsx": { "version": 4, "mode": "classic" },
+  "jsx": { "version": 4 },
   "bs-dependencies": [
+    "@rescript/core",
+    "@rescript-mui/material",
     "@dusty-phillips/rescript-dexie",
     "@rescript/react",
     "@rescriptbr/react-query",
     "rescript-webapi"
-  ]
+  ],
+  "bsc-flags": ["-open RescriptCore"]
 }

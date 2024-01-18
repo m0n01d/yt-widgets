@@ -1,5 +1,3 @@
-open Belt
-
 let dexie = Dexie.Database.make(`hello dexie 1`)
 let schema = [Schema.DescriptionSnippet.Category.schema, Schema.DescriptionSnippet.schema]
 dexie->Dexie.Database.version(1)->Dexie.Version.stores(schema)->ignore
@@ -19,12 +17,7 @@ let p = dexie->Table.DescriptionSnippet.put({
   date: Js.Date.make(),
 })
 
-module IntCmp = Id.MakeComparable({
-  type t = string
-  let cmp = (a, b) => Pervasives.compare(a, b)
-})
-
-let listeners = Map.make(~id=module(IntCmp))
+let listeners = Map.make()
 
 Chrome.Runtime.OnConnect.addListener(port => {
   let descriptionSnippetsPort = Description.Snippets.name

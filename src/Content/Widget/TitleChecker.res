@@ -1,6 +1,4 @@
 open Webapi.Dom
-open Belt
-@module external colors: 'a = "@mui/material/colors"
 
 let observerConfig = {
   "attributes": false,
@@ -8,7 +6,7 @@ let observerConfig = {
   "subtree": true,
 }
 
-let query = (maybeUploadDialog, _) => {
+let query = maybeUploadDialog => _ => {
   let videoTitleElQuery =
     Ui.queryDom(maybeUploadDialog, "ytcp-video-title", 5)->Js.Promise2.then(el => el)
   let videoTitleInputElQuery =
@@ -39,17 +37,23 @@ module TitleChecker = {
     let viewProgress = (len: float) => {
       let w_ = len /. 60.0 *. 100.0
       let w = Js.Math.min_float(w_, 100.0)
-      let width = Float.toString(w) ++ "%"
-      let backgroundColor = if len > 60.0 {
-        colors["red"]["500"]
+      let backgroundColor: string = if len > 60.0 {
+        Mui.Colors.red["500"]
       } else if len > 42.0 {
-        colors["yellow"]["300"]
+        Mui.Colors.yellow["300"]
       } else {
-        colors["green"]["300"]
+        Mui.Colors.green["300"]
       }
-      <div style={ReactDOM.Style.make(~color=backgroundColor, ())}>
-        <Ui.LinearProgress color="inherit" value=w variant="determinate" />
-      </div>
+      <Mui.LinearProgress
+        sx={Mui.Sx.array([
+          Mui.Sx.Array.obj({
+            color: Mui.System.Value.String(backgroundColor),
+          }),
+        ])}
+        color=Inherit
+        value={Float.toInt(w)}
+        variant=Determinate
+      />
     }
 
     let view = {
