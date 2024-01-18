@@ -1,14 +1,20 @@
 open Belt
 
 let dexie = Dexie.Database.make(`hello dexie 1`)
-let schema = [Schema.DescriptionTemplate.schema]
+let schema = [Schema.DescriptionTemplate.Category.schema, Schema.DescriptionTemplate.schema]
 dexie->Dexie.Database.version(1)->Dexie.Version.stores(schema)->ignore
 
 dexie->Dexie.Database.opendb->ignore
 
+let x = dexie->Table.DescriptionTemplateCategory.put({
+  id: Some(0),
+  name: "default",
+})
+
 let p = dexie->Table.DescriptionTemplate.put({
   id: Some(41),
   body: "test",
+  category_id: 0,
   name: "fake",
   date: Js.Date.make(),
 })

@@ -3,9 +3,14 @@
 import * as Schema from "./Schema.bs.mjs";
 import * as Table$Dexie from "@dusty-phillips/rescript-dexie/src/Table.bs.mjs";
 
-var DescriptionTemplate = Table$Dexie.MakeTable(Schema.DescriptionTemplate);
+var DescriptionTemplateCategory = Table$Dexie.MakeTable(Schema.DescriptionTemplate.Category);
+
+var DescriptionTemplate = Table$Dexie.MakeTable({
+      tableName: Schema.DescriptionTemplate.tableName
+    });
 
 export {
+  DescriptionTemplateCategory ,
   DescriptionTemplate ,
 }
-/* DescriptionTemplate Not a pure module */
+/* DescriptionTemplateCategory Not a pure module */

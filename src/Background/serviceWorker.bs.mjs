@@ -13,14 +13,23 @@ import * as Version$Dexie from "@dusty-phillips/rescript-dexie/src/Version.bs.mj
 
 var dexie = new Dexie("hello dexie 1");
 
-var schema = [Schema.DescriptionTemplate.schema];
+var schema = [
+  Schema.DescriptionTemplate.Category.schema,
+  Schema.DescriptionTemplate.schema
+];
 
 Version$Dexie.stores(dexie.version(1), schema);
 
 dexie.open();
 
+var x = Curry._2(Table.DescriptionTemplateCategory.put, dexie, {
+      id: 0,
+      name: "default"
+    });
+
 var p = Curry._2(Table.DescriptionTemplate.put, dexie, {
       body: "test",
+      category_id: 0,
       date: new Date(),
       id: 41,
       name: "fake"
@@ -51,6 +60,7 @@ chrome.runtime.onConnect.addListener(function (port) {
 export {
   dexie ,
   schema ,
+  x ,
   p ,
   IntCmp ,
   listeners ,

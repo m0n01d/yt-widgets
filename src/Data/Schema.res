@@ -1,4 +1,14 @@
 module DescriptionTemplate = {
+  module Category = {
+    type id = int
+    type t = {
+      id: option<int>,
+      name: string,
+    }
+    let tableName = "DescriptionTemplate.Category"
+    let fields = "++id,name"
+    let schema = (tableName, fields)
+  }
   type id = int
   /*
      {
@@ -10,12 +20,13 @@ module DescriptionTemplate = {
  */
   type t = {
     body: string,
+    category_id: Category.id,
     date: Js.Date.t,
     id: option<int>,
     name: string,
   }
-  let tableName = "description-template"
-  let fields = "++id,body,date,name"
+  let tableName = "DescriptionTemplate"
+  let fields = "++id,body,category_id,date,name"
 
   let schema = (tableName, fields)
 }
