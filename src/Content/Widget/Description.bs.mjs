@@ -27,8 +27,16 @@ import TableContainer from "@mui/material/TableContainer";
 
 var videoDescriptionSelector = "ytcp-video-description";
 
+var videoDescriptionTextboxSelector = [
+    videoDescriptionSelector,
+    "#textbox"
+  ].join(" ");
+
 function query(param) {
-  return Promise.all([videoDescriptionSelector].map(function (selector) {
+  return Promise.all([
+                videoDescriptionSelector,
+                videoDescriptionTextboxSelector
+              ].map(function (selector) {
                   return Js_promise2.then(Ui.queryDom(undefined, selector, 3), (function (el) {
                                 return el;
                               }));
@@ -58,6 +66,16 @@ function update(state, action) {
           };
   }
   var snippet = action._0;
+  var el = document.querySelector(videoDescriptionTextboxSelector);
+  if (!(el == null)) {
+    var html = el.innerText;
+    var newHtml = [
+        html,
+        "\n",
+        snippet.body
+      ].join("");
+    el.innerText = newHtml;
+  }
   return {
           maybeDialog: state.maybeDialog,
           selectedSnippets: state.selectedSnippets,
@@ -114,7 +132,7 @@ function Description$Snippets(props) {
                     RE_EXN_ID: "Match_failure",
                     _1: [
                       "Description.res",
-                      49,
+                      62,
                       8
                     ],
                     Error: new Error()
@@ -127,6 +145,9 @@ function Description$Snippets(props) {
               });
           port.onMessage.addListener(onMessageListener);
         }), []);
+  React.useEffect((function () {
+          
+        }), [state.selectedSnippets]);
   var viewActivateBtn = JsxRuntime.jsx(Button, {
         children: "Add Snippet",
         onClick: (function (param) {
@@ -257,10 +278,12 @@ function Description$Snippets(props) {
   if (match$1 === undefined) {
     return null;
   }
-  if (match$1.length !== 1) {
+  if (match$1.length !== 2) {
     return null;
   }
   var el = match$1[0];
+  var videoDescriptionTextboxEl = match$1[1];
+  console.log(videoDescriptionTextboxEl);
   return ReactDom.createPortal(view(state), el);
 }
 
@@ -283,9 +306,10 @@ var make = Description;
 
 export {
   videoDescriptionSelector ,
+  videoDescriptionTextboxSelector ,
   query ,
   Snippets ,
   client ,
   make ,
 }
-/* client Not a pure module */
+/* videoDescriptionTextboxSelector Not a pure module */

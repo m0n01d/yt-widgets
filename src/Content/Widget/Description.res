@@ -1,6 +1,9 @@
+open Webapi
+open Webapi.Dom
 let videoDescriptionSelector = "ytcp-video-description"
+let videoDescriptionTextboxSelector = [videoDescriptionSelector, "#textbox"]->Array.joinWith(" ")
 let query = _ => {
-  [videoDescriptionSelector]
+  [videoDescriptionSelector, videoDescriptionTextboxSelector]
   ->Js.Array2.map(selector => Ui.queryDom(None, selector, 3)->Js.Promise2.then(el => el))
   ->Js.Promise2.all
 }
@@ -25,15 +28,25 @@ module Snippets = {
     | GotSnippets(newSnippets) => {...state, snippets: newSnippets->Array.map(s => (s, false))}
     | OpenDialog => {...state, maybeDialog: Some()}
     | SelectedSnippet(snippet) => {
-        ...state,
-        snippets: state.snippets->Array.map(foo => {
-          let (s, isSelected) = foo
-          if snippet.id == s.id {
-            (s, true)
-          } else {
-            (s, isSelected)
+        switch document->Document.querySelector(videoDescriptionTextboxSelector) {
+        | None => ()
+        | Some(el) => {
+            let html = el->Element.innerText
+            let newHtml = [html, "\n", snippet.body]->Array.joinWith("")
+            el->Element.setInnerText(newHtml)
           }
-        }),
+        }
+        {
+          ...state,
+          snippets: state.snippets->Array.map(foo => {
+            let (s, isSelected) = foo
+            if snippet.id == s.id {
+              (s, true)
+            } else {
+              (s, isSelected)
+            }
+          }),
+        }
       }
     }
   }
@@ -71,6 +84,10 @@ module Snippets = {
 
       None
     })
+
+    React.useEffect(() => {
+      None
+    }, [state.selectedSnippets])
 
     let viewActivateBtn = {
       <Mui.Button
@@ -159,7 +176,10 @@ module Snippets = {
     })
 
     switch queryResult {
-    | {data: Some([el]), _} => ReactDOM.createPortal(view(state), el)
+    | {data: Some([el, videoDescriptionTextboxEl]), _} => {
+        Js.log(videoDescriptionTextboxEl)
+        ReactDOM.createPortal(view(state), el)
+      }
     | _ => React.null
     }
   }
