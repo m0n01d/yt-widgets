@@ -20,6 +20,9 @@ import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
 import TableHead from "@mui/material/TableHead";
 import TextField from "@mui/material/TextField";
+import IconButton from "@mui/material/IconButton";
+import Input from "@mui/icons-material/Input";
+import EditNote from "@mui/icons-material/EditNote";
 import TableContainer from "@mui/material/TableContainer";
 
 var videoDescriptionSelector = "ytcp-video-description";
@@ -38,39 +41,80 @@ function update(state, action) {
   if (typeof action !== "object") {
     return {
             maybeDialog: Caml_option.some(undefined),
+            selectedSnippets: state.selectedSnippets,
             snippets: state.snippets
           };
-  } else {
+  }
+  if (action.TAG === "GotSnippets") {
     return {
             maybeDialog: state.maybeDialog,
-            snippets: action._0
+            selectedSnippets: state.selectedSnippets,
+            snippets: action._0.map(function (s) {
+                  return [
+                          s,
+                          false
+                        ];
+                })
           };
   }
+  var snippet = action._0;
+  return {
+          maybeDialog: state.maybeDialog,
+          selectedSnippets: state.selectedSnippets,
+          snippets: state.snippets.map(function (foo) {
+                var s = foo[0];
+                if (snippet.id === s.id) {
+                  return [
+                          s,
+                          true
+                        ];
+                } else {
+                  return [
+                          s,
+                          foo[1]
+                        ];
+                }
+              })
+        };
 }
 
 function Description$Snippets(props) {
+  var initialState_selectedSnippets = new Set();
   var initialState_snippets = [];
   var initialState = {
     maybeDialog: undefined,
+    selectedSnippets: initialState_selectedSnippets,
     snippets: initialState_snippets
   };
   var match = React.useReducer(update, initialState);
   var dispatch = match[1];
   var state = match[0];
+  console.log("state", state);
   React.useEffect((function () {
           var onMessageListener = function (param) {
             var tag = param.tag;
             if (tag === "init") {
+              var snippets = param.payload.map(function (snippet) {
+                    var d = snippet.date.toString();
+                    var date = new Date(d);
+                    return {
+                            body: snippet.body,
+                            category_id: snippet.category_id,
+                            date: date,
+                            id: snippet.id,
+                            name: snippet.name
+                          };
+                  });
               dispatch({
                     TAG: "GotSnippets",
-                    _0: param.payload
+                    _0: snippets
                   });
             } else {
               throw {
                     RE_EXN_ID: "Match_failure",
                     _1: [
                       "Description.res",
-                      29,
+                      49,
                       8
                     ],
                     Error: new Error()
@@ -95,26 +139,56 @@ function Description$Snippets(props) {
         },
         variant: "contained"
       });
-  var viewRow = function (snippet) {
+  var viewRow = function (param) {
+    var isSelected = param[1];
+    var snippet = param[0];
+    console.log("disabled", isSelected);
     return JsxRuntime.jsxs(React.Fragment, {
                 children: [
-                  JsxRuntime.jsx(TableRow, {
-                        children: Caml_option.some(JsxRuntime.jsx(TableCell, {
-                                  children: Caml_option.some(snippet.name)
-                                }))
+                  JsxRuntime.jsxs(TableRow, {
+                        children: [
+                          JsxRuntime.jsxs(TableCell, {
+                                children: [
+                                  JsxRuntime.jsx(IconButton, {
+                                        children: Caml_option.some(JsxRuntime.jsx(Input, {})),
+                                        onClick: (function (param) {
+                                            dispatch({
+                                                  TAG: "SelectedSnippet",
+                                                  _0: snippet
+                                                });
+                                          }),
+                                        disabled: isSelected
+                                      }),
+                                  JsxRuntime.jsx(IconButton, {
+                                        children: Caml_option.some(JsxRuntime.jsx(EditNote, {}))
+                                      })
+                                ]
+                              }),
+                          JsxRuntime.jsx(TableCell, {
+                                children: Caml_option.some(snippet.name)
+                              }),
+                          JsxRuntime.jsx(TableCell, {
+                                children: Caml_option.some(snippet.body.slice(0, 12))
+                              }),
+                          JsxRuntime.jsx(TableCell, {
+                                children: Caml_option.some(snippet.date.toLocaleDateString())
+                              })
+                        ]
                       }),
                   JsxRuntime.jsx(TableRow, {
-                        children: Caml_option.some(JsxRuntime.jsx(TableCell, {
-                                  children: Caml_option.some(JsxRuntime.jsx(Collapse, {
-                                            unmountOnExit: true,
-                                            children: Caml_option.some(JsxRuntime.jsx(Box, {
-                                                      children: Caml_option.some(JsxRuntime.jsx(TextField, {
-                                                                defaultValue: Caml_option.some(snippet.body),
-                                                                multiline: true
-                                                              }))
-                                                    })),
-                                            in: true
-                                          }))
+                        children: Caml_option.some(JsxRuntime.jsx("td", {
+                                  children: JsxRuntime.jsx(Collapse, {
+                                        unmountOnExit: true,
+                                        children: Caml_option.some(JsxRuntime.jsx(Box, {
+                                                  children: Caml_option.some(JsxRuntime.jsx(TextField, {
+                                                            defaultValue: Caml_option.some(snippet.body),
+                                                            fullWidth: true,
+                                                            multiline: true
+                                                          }))
+                                                })),
+                                        in: true
+                                      }),
+                                  colSpan: 4
                                 }))
                       })
                 ]
@@ -125,10 +199,19 @@ function Description$Snippets(props) {
                 children: Caml_option.some(JsxRuntime.jsxs(Table, {
                           children: [
                             JsxRuntime.jsx(TableHead, {
-                                  children: Caml_option.some(JsxRuntime.jsx(TableRow, {
-                                            children: Caml_option.some(JsxRuntime.jsx(TableCell, {
-                                                      children: "Column 1"
-                                                    }))
+                                  children: Caml_option.some(JsxRuntime.jsxs(TableRow, {
+                                            children: [
+                                              JsxRuntime.jsx(TableCell, {}),
+                                              JsxRuntime.jsx(TableCell, {
+                                                    children: "Name"
+                                                  }),
+                                              JsxRuntime.jsx(TableCell, {
+                                                    children: "Body"
+                                                  }),
+                                              JsxRuntime.jsx(TableCell, {
+                                                    children: "Date"
+                                                  })
+                                            ]
                                           }))
                                 }),
                             JsxRuntime.jsx(TableBody, {
@@ -141,7 +224,9 @@ function Description$Snippets(props) {
   var viewDialog = function () {
     return JsxRuntime.jsx(Dialog, {
                 open: true,
-                children: Caml_option.some(viewCollapsibleTable(state.snippets))
+                children: Caml_option.some(viewCollapsibleTable(state.snippets)),
+                fullWidth: true,
+                maxWidth: "md"
               });
   };
   var view = function (state) {

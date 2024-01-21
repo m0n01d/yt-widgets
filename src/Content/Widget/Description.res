@@ -9,25 +9,57 @@ type snippet = {body: string}
 module Snippets = {
   let name = Schema.DescriptionSnippet.tableName // tableName and Port name match for easy lookup
 
-  type model = {maybeDialog: option<unit>, snippets: array<Schema.DescriptionSnippet.t>}
+  type model = {
+    maybeDialog: option<unit>,
+    selectedSnippets: Set.t<Schema.DescriptionSnippet.id>,
+    snippets: array<(Schema.DescriptionSnippet.t, bool)>,
+  }
 
-  type msg = GotSnippets(array<Schema.DescriptionSnippet.t>) | OpenDialog
+  type msg =
+    | GotSnippets(array<Schema.DescriptionSnippet.t>)
+    | OpenDialog
+    | SelectedSnippet(Schema.DescriptionSnippet.t)
 
   let update = (state: model, action: msg) => {
     switch action {
-    | GotSnippets(newSnippets) => {...state, snippets: newSnippets}
+    | GotSnippets(newSnippets) => {...state, snippets: newSnippets->Array.map(s => (s, false))}
     | OpenDialog => {...state, maybeDialog: Some()}
+    | SelectedSnippet(snippet) => {
+        ...state,
+        snippets: state.snippets->Array.map(foo => {
+          let (s, isSelected) = foo
+          if snippet.id == s.id {
+            (s, true)
+          } else {
+            (s, isSelected)
+          }
+        }),
+      }
     }
   }
 
   @react.component
   let make = () => {
-    let initialState = {maybeDialog: None, snippets: []}
+    let initialState = {maybeDialog: None, selectedSnippets: Set.make(), snippets: []}
     let (state, dispatch) = React.useReducer(update, initialState)
+
+    Js.log2("state", state)
     React.useEffect0(() => {
       let onMessageListener: Chrome.Runtime.Port.message<'a> => unit = ({payload, tag}) => {
         switch tag {
-        | "init" => dispatch(GotSnippets(payload))
+        | "init" => {
+            let snippets = payload->Js.Array2.map((snippet: Schema.DescriptionSnippet.t) => {
+              let d = snippet.date->Js.Date.toString
+              let date = Js.Date.fromString(d)
+              // Hack to get around the fact that it type checks
+              // but the `date` field gets converted to a string when coming over the Port
+              // create a new date from the old stringified date so that
+              // date functions work properly
+
+              {...snippet, date}
+            })
+            dispatch(GotSnippets(snippets))
+          }
         }
         Js.log2("app chrome port inbound", tag)
       }
@@ -53,20 +85,36 @@ module Snippets = {
       </Mui.Button>
     }
 
-    let viewRow = (snippet: Schema.DescriptionSnippet.t) => {
+    let viewRow = ((snippet: Schema.DescriptionSnippet.t, isSelected)) => {
       let open_ = true
+      let disabled = isSelected
+      Js.log2("disabled", disabled)
       <React.Fragment>
         <Mui.TableRow>
+          <Mui.TableCell>
+            <Mui.IconButton disabled onClick={_ => dispatch(SelectedSnippet(snippet))}>
+              <Ui.Icon.Input />
+            </Mui.IconButton>
+            <Mui.IconButton>
+              <Ui.Icon.EditNote />
+            </Mui.IconButton>
+          </Mui.TableCell>
           <Mui.TableCell> {snippet.name->React.string} </Mui.TableCell>
+          <Mui.TableCell>
+            {snippet.body->String.slice(~start=0, ~end=12)->React.string}
+          </Mui.TableCell>
+          <Mui.TableCell> {snippet.date->Js.Date.toLocaleDateString->React.string} </Mui.TableCell>
         </Mui.TableRow>
         <Mui.TableRow>
-          <Mui.TableCell>
+          <td colSpan={4}>
             <Mui.Collapse in_={open_} unmountOnExit={true}>
               <Mui.Box>
-                <Mui.TextField defaultValue={snippet.body->React.string} multiline={true} />
+                <Mui.TextField
+                  defaultValue={snippet.body->React.string} fullWidth={true} multiline={true}
+                />
               </Mui.Box>
             </Mui.Collapse>
-          </Mui.TableCell>
+          </td>
         </Mui.TableRow>
       </React.Fragment>
     }
@@ -76,7 +124,10 @@ module Snippets = {
         <Mui.Table>
           <Mui.TableHead>
             <Mui.TableRow>
-              <Mui.TableCell> {"Column 1"->React.string} </Mui.TableCell>
+              <Mui.TableCell />
+              <Mui.TableCell> {"Name"->React.string} </Mui.TableCell>
+              <Mui.TableCell> {"Body"->React.string} </Mui.TableCell>
+              <Mui.TableCell> {"Date"->React.string} </Mui.TableCell>
             </Mui.TableRow>
           </Mui.TableHead>
           <Mui.TableBody> {snippets->Js.Array2.map(viewRow)->React.array} </Mui.TableBody>
@@ -84,7 +135,9 @@ module Snippets = {
       </Mui.TableContainer>
     }
     let viewDialog = () => {
-      <Mui.Dialog open_={true}> {state.snippets->viewCollapsibleTable} </Mui.Dialog>
+      <Mui.Dialog fullWidth={true} maxWidth={Md} open_={true}>
+        {state.snippets->viewCollapsibleTable}
+      </Mui.Dialog>
     }
 
     let view = state => {

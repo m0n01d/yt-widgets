@@ -22,7 +22,7 @@ module DescriptionSnippet = {
     body: string,
     category_id: Category.id,
     date: Js.Date.t,
-    id: option<int>,
+    id: int,
     name: string,
   }
   let tableName = "DescriptionSnippet"

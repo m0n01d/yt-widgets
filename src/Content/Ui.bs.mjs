@@ -4,7 +4,14 @@ import * as Belt_Option from "rescript/lib/es6/belt_Option.js";
 import * as Caml_option from "rescript/lib/es6/caml_option.js";
 import * as Caml_exceptions from "rescript/lib/es6/caml_exceptions.js";
 
-var LinearProgress = {};
+var EditNote = {};
+
+var Input = {};
+
+var Icon = {
+  EditNote: EditNote,
+  Input: Input
+};
 
 function pause() {
   return new Promise((function (resolve, reject) {
@@ -35,7 +42,7 @@ async function queryDom(maybeAncestor, selector, n) {
 }
 
 export {
-  LinearProgress ,
+  Icon ,
   pause ,
   TestError ,
   queryDom ,
