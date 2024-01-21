@@ -33,6 +33,7 @@
     "@dusty-phillips/rescript-zora": "^4.0.0",
     "@emotion/react": "^11.11.3",
     "@emotion/styled": "^11.11.0",
+    "@mui/icons-material": "^5.15.5",
     "@mui/material": "^5.15.2",
     "@rescript-mui/material": "^5.0.0-alpha.13",
     "@rescript/core": "^0.6.0",
