@@ -28,7 +28,8 @@ var p = Table.DescriptionSnippet.put(dexie, {
       category_id: 0,
       date: new Date(),
       id: 41,
-      name: "fake"
+      name: "Lorem Ipsum generator",
+      order: 1
     });
 
 var listeners = new Map();

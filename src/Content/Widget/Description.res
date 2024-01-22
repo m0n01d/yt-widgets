@@ -13,47 +13,50 @@ module Snippets = {
   let name = Schema.DescriptionSnippet.tableName // tableName and Port name match for easy lookup
 
   type model = {
+    expandedSnippet: option<Schema.DescriptionSnippet.t>,
     maybeDialog: option<unit>,
-    selectedSnippets: Set.t<Schema.DescriptionSnippet.id>,
-    snippets: array<(Schema.DescriptionSnippet.t, bool)>,
+    maybeTextbox: option<Dom.Element.t>,
+    selectedSnippet: option<Schema.DescriptionSnippet.t>,
+    snippets: array<Schema.DescriptionSnippet.t>,
   }
 
   type msg =
+    | ClosedDialog
+    | ExpandedSnippet(Schema.DescriptionSnippet.t)
     | GotSnippets(array<Schema.DescriptionSnippet.t>)
+    | GotTextbox(Dom.Element.t)
     | OpenDialog
     | SelectedSnippet(Schema.DescriptionSnippet.t)
+    | SnippetFlushed
 
   let update = (state: model, action: msg) => {
     switch action {
-    | GotSnippets(newSnippets) => {...state, snippets: newSnippets->Array.map(s => (s, false))}
-    | OpenDialog => {...state, maybeDialog: Some()}
-    | SelectedSnippet(snippet) => {
-        switch document->Document.querySelector(videoDescriptionTextboxSelector) {
-        | None => ()
-        | Some(el) => {
-            let html = el->Element.innerText
-            let newHtml = [html, "\n", snippet.body]->Array.joinWith("")
-            el->Element.setInnerText(newHtml)
-          }
-        }
-        {
-          ...state,
-          snippets: state.snippets->Array.map(foo => {
-            let (s, isSelected) = foo
-            if snippet.id == s.id {
-              (s, true)
-            } else {
-              (s, isSelected)
-            }
-          }),
-        }
+    | ClosedDialog => {...state, maybeDialog: None}
+    | ExpandedSnippet(snippet) => {
+        ...state,
+        expandedSnippet: if None == state.expandedSnippet {
+          Some(snippet)
+        } else {
+          None
+        },
       }
+    | GotSnippets(newSnippets) => {...state, snippets: newSnippets->Array.map(s => s)}
+    | GotTextbox(textbox) => {...state, maybeTextbox: Some(textbox)}
+    | OpenDialog => {...state, maybeDialog: Some()}
+    | SelectedSnippet(snippet) => {...state, selectedSnippet: Some(snippet)}
+    | SnippetFlushed => {...state, selectedSnippet: None}
     }
   }
 
   @react.component
   let make = () => {
-    let initialState = {maybeDialog: None, selectedSnippets: Set.make(), snippets: []}
+    let initialState = {
+      expandedSnippet: None,
+      maybeDialog: None,
+      maybeTextbox: None,
+      selectedSnippet: None,
+      snippets: [],
+    }
     let (state, dispatch) = React.useReducer(update, initialState)
 
     Js.log2("state", state)
@@ -85,9 +88,20 @@ module Snippets = {
       None
     })
 
-    React.useEffect(() => {
+    React.useEffectOnEveryRender(() => {
+      Js.log("every render")
+      switch (state.maybeTextbox, state.selectedSnippet) {
+      | (Some(textbox), Some(snippet)) => {
+          let oldText = textbox->Dom.Element.innerText
+          let newText = [oldText, snippet.body]->Array.joinWith("\n-\n")
+          textbox->Dom.Element.setInnerText(newText)
+          dispatch(SnippetFlushed)
+          Js.log("write to textbox")
+        }
+      | _ => Js.log("nothing to do...")
+      }
       None
-    }, [state.selectedSnippets])
+    })
 
     let viewActivateBtn = {
       <Mui.Button
@@ -101,59 +115,37 @@ module Snippets = {
         {"Add Snippet"->React.string}
       </Mui.Button>
     }
-
-    let viewRow = ((snippet: Schema.DescriptionSnippet.t, isSelected)) => {
-      let open_ = true
-      let disabled = isSelected
-      Js.log2("disabled", disabled)
+    let viewRow = (snippet: Schema.DescriptionSnippet.t) => {
       <React.Fragment>
-        <Mui.TableRow>
-          <Mui.TableCell>
-            <Mui.IconButton disabled onClick={_ => dispatch(SelectedSnippet(snippet))}>
+        <Mui.ListItem
+          secondaryAction={<Mui.IconButton onClick={_ => dispatch(ExpandedSnippet(snippet))}>
+            <Ui.Icon.Input />
+          </Mui.IconButton>}>
+          <Mui.ListItemButton onClick={_ => dispatch(SelectedSnippet(snippet))}>
+            <Mui.ListItemIcon>
               <Ui.Icon.Input />
-            </Mui.IconButton>
-            <Mui.IconButton>
-              <Ui.Icon.EditNote />
-            </Mui.IconButton>
-          </Mui.TableCell>
-          <Mui.TableCell> {snippet.name->React.string} </Mui.TableCell>
-          <Mui.TableCell>
-            {snippet.body->String.slice(~start=0, ~end=12)->React.string}
-          </Mui.TableCell>
-          <Mui.TableCell> {snippet.date->Js.Date.toLocaleDateString->React.string} </Mui.TableCell>
-        </Mui.TableRow>
-        <Mui.TableRow>
-          <td colSpan={4}>
-            <Mui.Collapse in_={open_} unmountOnExit={true}>
-              <Mui.Box>
-                <Mui.TextField
-                  defaultValue={snippet.body->React.string} fullWidth={true} multiline={true}
-                />
-              </Mui.Box>
-            </Mui.Collapse>
-          </td>
-        </Mui.TableRow>
+            </Mui.ListItemIcon>
+            <Mui.ListItemText primary={snippet.name->React.string} />
+          </Mui.ListItemButton>
+        </Mui.ListItem>
+        <Mui.Collapse in_={Some(snippet) == state.expandedSnippet}>
+          <Mui.Box sx={Mui.Sx.obj({padding: Mui.System.Value.String("1rem 1.3rem")})}>
+            <Mui.Typography variant={Body1}> {snippet.body->React.string} </Mui.Typography>
+          </Mui.Box>
+        </Mui.Collapse>
       </React.Fragment>
     }
-
-    let viewCollapsibleTable = snippets => {
-      <Mui.TableContainer>
-        <Mui.Table>
-          <Mui.TableHead>
-            <Mui.TableRow>
-              <Mui.TableCell />
-              <Mui.TableCell> {"Name"->React.string} </Mui.TableCell>
-              <Mui.TableCell> {"Body"->React.string} </Mui.TableCell>
-              <Mui.TableCell> {"Date"->React.string} </Mui.TableCell>
-            </Mui.TableRow>
-          </Mui.TableHead>
-          <Mui.TableBody> {snippets->Js.Array2.map(viewRow)->React.array} </Mui.TableBody>
-        </Mui.Table>
-      </Mui.TableContainer>
+    let viewSnippets = snippets => {
+      <Mui.List
+        subheader={<Mui.ListSubheader> {"Select snippets"->React.string} </Mui.ListSubheader>}>
+        {snippets->Array.map(viewRow)->React.array}
+      </Mui.List>
     }
+
     let viewDialog = () => {
-      <Mui.Dialog fullWidth={true} maxWidth={Md} open_={true}>
-        {state.snippets->viewCollapsibleTable}
+      <Mui.Dialog
+        fullWidth={true} onClose={(_, _) => dispatch(ClosedDialog)} maxWidth={Xs} open_={true}>
+        {state.snippets->viewSnippets}
       </Mui.Dialog>
     }
 
@@ -177,6 +169,9 @@ module Snippets = {
 
     switch queryResult {
     | {data: Some([el, videoDescriptionTextboxEl]), _} => {
+        if None == state.maybeTextbox {
+          dispatch(GotTextbox(videoDescriptionTextboxEl))
+        }
         Js.log(videoDescriptionTextboxEl)
         ReactDOM.createPortal(view(state), el)
       }

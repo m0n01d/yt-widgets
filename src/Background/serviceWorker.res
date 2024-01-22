@@ -10,11 +10,12 @@ let x = dexie->Table.DescriptionSnippetCategory.put({
 })
 
 let p = dexie->Table.DescriptionSnippet.put({
-  id: 41,
   body: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
   category_id: 0,
-  name: "fake",
   date: Js.Date.make(),
+  id: 41,
+  name: "Lorem Ipsum generator",
+  order: 1,
 })
 
 let listeners = Map.make()

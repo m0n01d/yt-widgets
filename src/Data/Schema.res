@@ -24,6 +24,7 @@ module DescriptionSnippet = {
     date: Js.Date.t,
     id: int,
     name: string,
+    order: int,
   }
   let tableName = "DescriptionSnippet"
   let fields = "++id,body,category_id,date,name"
