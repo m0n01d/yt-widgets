@@ -95,6 +95,8 @@ module Snippets = {
           let oldText = textbox->Dom.Element.innerText
           let newText = [oldText, snippet.body]->Array.joinWith("\n-\n")
           textbox->Dom.Element.setInnerText(newText)
+          let ev = Dom.Event.make("input")
+          textbox->Dom.Element.dispatchEvent(ev)->ignore
           dispatch(SnippetFlushed)
           Js.log("write to textbox")
         }

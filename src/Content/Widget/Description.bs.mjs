@@ -180,6 +180,8 @@ function Description$Snippets(props) {
               match$1.body
             ].join("\n-\n");
           textbox.innerText = newText;
+          var ev = new Event("input");
+          textbox.dispatchEvent(ev);
           dispatch("SnippetFlushed");
           console.log("write to textbox");
         } else {
