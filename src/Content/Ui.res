@@ -6,6 +6,16 @@ module Icon = {
     @module("@mui/icons-material/EditNote") @react.component
     external make: unit => React.element = "default"
   }
+  module Expand = {
+    module Less = {
+      @module("@mui/icons-material/ExpandLess") @react.component
+      external make: unit => React.element = "default"
+    }
+    module More = {
+      @module("@mui/icons-material/ExpandMore") @react.component
+      external make: unit => React.element = "default"
+    }
+  }
   module Input = {
     @module("@mui/icons-material/Input") @react.component
     external make: unit => React.element = "default"

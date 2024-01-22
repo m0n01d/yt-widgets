@@ -24,6 +24,8 @@ import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
 import ListSubheader from "@mui/material/ListSubheader";
 import ListItemButton from "@mui/material/ListItemButton";
+import ExpandLess from "@mui/icons-material/ExpandLess";
+import ExpandMore from "@mui/icons-material/ExpandMore";
 
 var videoDescriptionSelector = "ytcp-video-description";
 
@@ -197,6 +199,7 @@ function Description$Snippets(props) {
         variant: "contained"
       });
   var viewRow = function (snippet) {
+    var isExpanded = Caml_obj.equal(snippet, state.expandedSnippet);
     return JsxRuntime.jsxs(React.Fragment, {
                 children: [
                   JsxRuntime.jsx(ListItem, {
@@ -217,7 +220,7 @@ function Description$Snippets(props) {
                                     })
                                 })),
                         secondaryAction: Caml_option.some(JsxRuntime.jsx(IconButton, {
-                                  children: Caml_option.some(JsxRuntime.jsx(Input, {})),
+                                  children: Caml_option.some(isExpanded ? JsxRuntime.jsx(ExpandLess, {}) : JsxRuntime.jsx(ExpandMore, {})),
                                   onClick: (function (param) {
                                       dispatch({
                                             TAG: "ExpandedSnippet",
@@ -236,7 +239,7 @@ function Description$Snippets(props) {
                                     padding: "1rem 1.3rem"
                                   }
                                 })),
-                        in: Caml_obj.equal(snippet, state.expandedSnippet)
+                        in: isExpanded
                       })
                 ]
               });

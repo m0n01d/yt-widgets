@@ -116,10 +116,15 @@ module Snippets = {
       </Mui.Button>
     }
     let viewRow = (snippet: Schema.DescriptionSnippet.t) => {
+      let isExpanded = Some(snippet) == state.expandedSnippet
       <React.Fragment>
         <Mui.ListItem
           secondaryAction={<Mui.IconButton onClick={_ => dispatch(ExpandedSnippet(snippet))}>
-            <Ui.Icon.Input />
+            {if isExpanded {
+              <Ui.Icon.Expand.Less />
+            } else {
+              <Ui.Icon.Expand.More />
+            }}
           </Mui.IconButton>}>
           <Mui.ListItemButton onClick={_ => dispatch(SelectedSnippet(snippet))}>
             <Mui.ListItemIcon>
@@ -128,7 +133,7 @@ module Snippets = {
             <Mui.ListItemText primary={snippet.name->React.string} />
           </Mui.ListItemButton>
         </Mui.ListItem>
-        <Mui.Collapse in_={Some(snippet) == state.expandedSnippet}>
+        <Mui.Collapse in_={isExpanded}>
           <Mui.Box sx={Mui.Sx.obj({padding: Mui.System.Value.String("1rem 1.3rem")})}>
             <Mui.Typography variant={Body1}> {snippet.body->React.string} </Mui.Typography>
           </Mui.Box>

@@ -6,10 +6,20 @@ import * as Caml_exceptions from "rescript/lib/es6/caml_exceptions.js";
 
 var EditNote = {};
 
+var Less = {};
+
+var More = {};
+
+var Expand = {
+  Less: Less,
+  More: More
+};
+
 var Input = {};
 
 var Icon = {
   EditNote: EditNote,
+  Expand: Expand,
   Input: Input
 };
 
