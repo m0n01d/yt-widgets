@@ -1,15 +1,38 @@
 open Webapi.Dom
 open Belt
 
-module LinearProgress = {
-  @module("@mui/material") @react.component
-  external make: (~variant: string, ~color: string, ~value: float) => React.element =
-    "LinearProgress"
+module Icon = {
+  module Description = {
+    @module("@mui/icons-material/Description") @react.component
+    external make: unit => React.element = "default"
+  }
+  module EditNote = {
+    @module("@mui/icons-material/EditNote") @react.component
+    external make: unit => React.element = "default"
+  }
+  module Expand = {
+    module Less = {
+      @module("@mui/icons-material/ExpandLess") @react.component
+      external make: unit => React.element = "default"
+    }
+    module More = {
+      @module("@mui/icons-material/ExpandMore") @react.component
+      external make: unit => React.element = "default"
+    }
+  }
+  module Input = {
+    @module("@mui/icons-material/Input") @react.component
+    external make: unit => React.element = "default"
+  }
+  module NoteAdd = {
+    @module("@mui/icons-material/NoteAdd") @react.component
+    external make: unit => React.element = "default"
+  }
 }
 
 let pause = () => {
   Js.Promise2.make((~resolve, ~reject) => {
-    let wait = Js.Global.setTimeout(_ => resolve(. None), 500)
+    let wait = Js.Global.setTimeout(_ => resolve(None), 500)
   })
 }
 

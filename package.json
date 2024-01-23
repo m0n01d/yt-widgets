@@ -5,13 +5,13 @@
   "main": "vite.config.js",
   "type": "module",
   "scripts": {
-    "prebuild": "rescript",
-    "build": "npm run build-widgets && vite build",
+    "prebuild": "rescript build -with-deps",
+    "build": "npm run build-widgets && npm run build-serviceWorker && vite build",
     "postbuild": "npm run bundle-script",
+    "build-serviceWorker": "vite build --config vite.bg.js",
     "build-widgets": "vite build --config vite.widgets.js",
     "bundle-script": "cp app/extension/manifest.json dist/manifest.json & npm run mv-ext-assets",
-    "mv-ext-assets": "npm run mv-bg && npm run mv-popup",
-    "mv-bg": "cp -r src/Background/. dist/background",
+    "mv-ext-assets": "npm run mv-popup",
     "mv-popup": "cp -r src/Popup/ext/. dist/popup",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -19,20 +19,26 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "@rescript/react": "^0.11.0",
+    "@rescript/react": "^0.12.0",
     "@rescriptbr/react-query": "^1.1.0",
     "@tanstack/react-query": "^5.15.0",
     "@vitejs/plugin-react": "^4.2.1",
     "elm-debug-transformer": "^1.2.1",
-    "rescript": "^10.1.4",
+    "rescript": "^11.0.0",
     "vite": "^4.5.1",
     "vite-plugin-elm": "^2.8.0"
   },
   "dependencies": {
+    "@dusty-phillips/rescript-dexie": "^0.4.0",
+    "@dusty-phillips/rescript-zora": "^4.0.0",
     "@emotion/react": "^11.11.3",
     "@emotion/styled": "^11.11.0",
+    "@mui/icons-material": "^5.15.5",
     "@mui/material": "^5.15.2",
     "color.js": "^1.2.0",
+    "@rescript-mui/material": "^5.0.0-alpha.13",
+    "@rescript/core": "^0.6.0",
+    "dexie": "^3.2.4",
     "rescript-webapi": "^0.9.0"
   }
 }

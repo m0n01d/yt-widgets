@@ -1,6 +1,23 @@
 open Webapi
 open Webapi.Dom
-open Belt
+
+@module("@mui/material/colors")
+external pink: 'a = "pink"
+
+let theme = outerTheme =>
+  Mui.Theme.create({
+    ...outerTheme,
+    palette: {
+      primary: {
+        main: pink["500"],
+      },
+      secondary: {
+        main: "#9c27b0",
+      },
+    },
+    typography: {fontSize: 16.0},
+  })
+
 let observerConfig = {
   "attributes": true,
   "childList": true,
@@ -39,14 +56,23 @@ let app = Document.querySelector(document, "title")->Option.map(titleEl => {
       | ["Video details", _] => Details
       | _ => Other
       }
-      let initialState = {currentPage: initialPage, maybeUploadDialog: None}
+      let initialState = {
+        currentPage: initialPage,
+        maybeUploadDialog: None,
+      }
       let (state, dispatch) = React.useReducer(update, initialState)
 
-      let onMessageListener = port => {
-        Js.log(port)
-      }
-      let port = Chrome.Runtime.connect({name: "yt-widgets-content"})
-      Chrome.Runtime.Port.addListener(port, onMessageListener)
+      React.useEffect0(() => {
+        let onMessageListener = portMsg => {
+          Js.log2("app chrome port inbound", portMsg)
+        }
+        let port = Chrome.Runtime.connect({name: "yt-widgets-content"})
+        Chrome.Runtime.Port.addListener(port, onMessageListener)
+        let message: Chrome.Runtime.Port.message<'a> = {payload: None, tag: "ready"}
+        port->Chrome.Runtime.Port.postMessage(message)
+
+        None
+      })
 
       let bodyWatcher = (mutationList, observer) => {
         let dialog = mutationList->Array.forEach(mutation => {
@@ -119,6 +145,7 @@ let app = Document.querySelector(document, "title")->Option.map(titleEl => {
       let detailsPage = () => [
         <TitleChecker maybeUploadDialog=None key="details-page" />,
         <Thumbnail />,
+        <Description />,
       ]
       let dialogWidgets = dialog => [
         <TitleChecker maybeUploadDialog={Element.ofNode(dialog)} key="upload-dialog" />,
@@ -134,5 +161,10 @@ let app = Document.querySelector(document, "title")->Option.map(titleEl => {
   }
 
   let root = ReactDOM.Client.createRoot(dummy)
-  ReactDOM.Client.Root.render(root, <App />)
+  ReactDOM.Client.Root.render(
+    root,
+    <Mui.ThemeProvider theme=Func(theme)>
+      <App />
+    </Mui.ThemeProvider>,
+  )
 })

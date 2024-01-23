@@ -4,11 +4,34 @@ import * as Belt_Option from "rescript/lib/es6/belt_Option.js";
 import * as Caml_option from "rescript/lib/es6/caml_option.js";
 import * as Caml_exceptions from "rescript/lib/es6/caml_exceptions.js";
 
-var LinearProgress = {};
+var Description = {};
 
-function pause(param) {
+var EditNote = {};
+
+var Less = {};
+
+var More = {};
+
+var Expand = {
+  Less: Less,
+  More: More
+};
+
+var Input = {};
+
+var NoteAdd = {};
+
+var Icon = {
+  Description: Description,
+  EditNote: EditNote,
+  Expand: Expand,
+  Input: Input,
+  NoteAdd: NoteAdd
+};
+
+function pause() {
   return new Promise((function (resolve, reject) {
-                setTimeout((function (param) {
+                setTimeout((function () {
                         resolve(undefined);
                       }), 500);
               }));
@@ -23,7 +46,7 @@ async function queryDom(maybeAncestor, selector, n) {
                 _1: "Not Found"
               });
   }
-  await pause(undefined);
+  await pause();
   var maybeEl = Belt_Option.mapWithDefault(maybeAncestor, Caml_option.nullable_to_opt(document.querySelector(selector)), (function (dialog) {
           return Caml_option.nullable_to_opt(dialog.querySelector(selector));
         }));
@@ -35,7 +58,7 @@ async function queryDom(maybeAncestor, selector, n) {
 }
 
 export {
-  LinearProgress ,
+  Icon ,
   pause ,
   TestError ,
   queryDom ,

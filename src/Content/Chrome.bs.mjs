@@ -3,10 +3,13 @@
 
 var Port = {};
 
+var OnConnect = {};
+
 var OnMessage = {};
 
 var Runtime = {
   Port: Port,
+  OnConnect: OnConnect,
   OnMessage: OnMessage
 };
 
