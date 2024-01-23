@@ -10,7 +10,6 @@ import * as Caml_option from "rescript/lib/es6/caml_option.js";
 import * as Js_promise2 from "rescript/lib/es6/js_promise2.js";
 import Box from "@mui/material/Box";
 import * as JsxRuntime from "react/jsx-runtime";
-import Icon from "@mui/material/Icon";
 import List from "@mui/material/List";
 import Button from "@mui/material/Button";
 import Dialog from "@mui/material/Dialog";
@@ -22,6 +21,7 @@ import Typography from "@mui/material/Typography";
 import Input from "@mui/icons-material/Input";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
+import NoteAdd from "@mui/icons-material/NoteAdd";
 import ListSubheader from "@mui/material/ListSubheader";
 import ListItemButton from "@mui/material/ListItemButton";
 import ExpandLess from "@mui/icons-material/ExpandLess";
@@ -129,7 +129,6 @@ function Description$Snippets(props) {
   var match = React.useReducer(update, initialState);
   var dispatch = match[1];
   var state = match[0];
-  console.log("state", state);
   React.useEffect((function () {
           var onMessageListener = function (param) {
             var tag = param.tag;
@@ -155,7 +154,7 @@ function Description$Snippets(props) {
                     RE_EXN_ID: "Match_failure",
                     _1: [
                       "Description.res",
-                      65,
+                      64,
                       8
                     ],
                     Error: new Error()
@@ -169,7 +168,6 @@ function Description$Snippets(props) {
           port.onMessage.addListener(onMessageListener);
         }), []);
   React.useEffect(function () {
-        console.log("every render");
         var match = state.maybeTextbox;
         var match$1 = state.selectedSnippet;
         if (match !== undefined && match$1 !== undefined) {
@@ -183,19 +181,17 @@ function Description$Snippets(props) {
           var ev = new Event("input");
           textbox.dispatchEvent(ev);
           dispatch("SnippetFlushed");
-          console.log("write to textbox");
-        } else {
-          console.log("nothing to do...");
         }
+        
       });
   var viewActivateBtn = JsxRuntime.jsx(Button, {
         children: "Add Snippet",
         onClick: (function (param) {
             dispatch("OpenDialog");
           }),
-        endIcon: Caml_option.some(JsxRuntime.jsx(Icon, {})),
+        endIcon: Caml_option.some(JsxRuntime.jsx(NoteAdd, {})),
         sx: {
-          width: "100px",
+          width: "130px",
           margin: "1rem 0"
         },
         variant: "contained"
@@ -211,7 +207,11 @@ function Description$Snippets(props) {
                                           children: Caml_option.some(JsxRuntime.jsx(Input, {}))
                                         }),
                                     JsxRuntime.jsx(ListItemText, {
-                                          primary: Caml_option.some(snippet.name)
+                                          primary: Caml_option.some(JsxRuntime.jsx(Typography, {
+                                                    fontSize: "1.6rem",
+                                                    variant: "subtitle1",
+                                                    children: Caml_option.some(snippet.name)
+                                                  }))
                                         })
                                   ],
                                   onClick: (function (param) {
@@ -234,11 +234,12 @@ function Description$Snippets(props) {
                   JsxRuntime.jsx(Collapse, {
                         children: Caml_option.some(JsxRuntime.jsx(Box, {
                                   children: Caml_option.some(JsxRuntime.jsx(Typography, {
+                                            fontSize: "1.2rem",
                                             variant: "body1",
                                             children: Caml_option.some(snippet.body)
                                           })),
                                   sx: {
-                                    padding: "1rem 1.3rem"
+                                    padding: "1rem 1.2rem"
                                   }
                                 })),
                         in: isExpanded
@@ -250,7 +251,11 @@ function Description$Snippets(props) {
     return JsxRuntime.jsx(List, {
                 children: Caml_option.some(snippets.map(viewRow)),
                 subheader: Caml_option.some(JsxRuntime.jsx(ListSubheader, {
-                          children: "Select snippets"
+                          children: Caml_option.some(JsxRuntime.jsx(Typography, {
+                                    padding: "1.2rem 0",
+                                    variant: "h5",
+                                    children: "Select snippets"
+                                  }))
                         }))
               });
   };
@@ -304,7 +309,6 @@ function Description$Snippets(props) {
           _0: videoDescriptionTextboxEl
         });
   }
-  console.log(videoDescriptionTextboxEl);
   return ReactDom.createPortal(view(state), el);
 }
 

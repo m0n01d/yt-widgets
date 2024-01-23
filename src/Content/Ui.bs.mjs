@@ -4,6 +4,8 @@ import * as Belt_Option from "rescript/lib/es6/belt_Option.js";
 import * as Caml_option from "rescript/lib/es6/caml_option.js";
 import * as Caml_exceptions from "rescript/lib/es6/caml_exceptions.js";
 
+var Description = {};
+
 var EditNote = {};
 
 var Less = {};
@@ -17,10 +19,14 @@ var Expand = {
 
 var Input = {};
 
+var NoteAdd = {};
+
 var Icon = {
+  Description: Description,
   EditNote: EditNote,
   Expand: Expand,
-  Input: Input
+  Input: Input,
+  NoteAdd: NoteAdd
 };
 
 function pause() {

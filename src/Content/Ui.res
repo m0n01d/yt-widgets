@@ -2,6 +2,10 @@ open Webapi.Dom
 open Belt
 
 module Icon = {
+  module Description = {
+    @module("@mui/icons-material/Description") @react.component
+    external make: unit => React.element = "default"
+  }
   module EditNote = {
     @module("@mui/icons-material/EditNote") @react.component
     external make: unit => React.element = "default"
@@ -18,6 +22,10 @@ module Icon = {
   }
   module Input = {
     @module("@mui/icons-material/Input") @react.component
+    external make: unit => React.element = "default"
+  }
+  module NoteAdd = {
+    @module("@mui/icons-material/NoteAdd") @react.component
     external make: unit => React.element = "default"
   }
 }

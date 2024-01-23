@@ -59,7 +59,6 @@ module Snippets = {
     }
     let (state, dispatch) = React.useReducer(update, initialState)
 
-    Js.log2("state", state)
     React.useEffect0(() => {
       let onMessageListener: Chrome.Runtime.Port.message<'a> => unit = ({payload, tag}) => {
         switch tag {
@@ -89,7 +88,6 @@ module Snippets = {
     })
 
     React.useEffectOnEveryRender(() => {
-      Js.log("every render")
       switch (state.maybeTextbox, state.selectedSnippet) {
       | (Some(textbox), Some(snippet)) => {
           let oldText = textbox->Dom.Element.innerText
@@ -98,20 +96,19 @@ module Snippets = {
           let ev = Dom.Event.make("input")
           textbox->Dom.Element.dispatchEvent(ev)->ignore
           dispatch(SnippetFlushed)
-          Js.log("write to textbox")
         }
-      | _ => Js.log("nothing to do...")
+      | _ => ()
       }
       None
     })
 
     let viewActivateBtn = {
       <Mui.Button
-        endIcon={<Mui.Icon />}
+        endIcon={<Ui.Icon.NoteAdd />}
         onClick={_ => dispatch(OpenDialog)}
         sx={Mui.Sx.obj({
           margin: Mui.System.Value.String("1rem 0"),
-          width: Mui.System.Value.String("100px"),
+          width: Mui.System.Value.String("130px"),
         })}
         variant={Contained}>
         {"Add Snippet"->React.string}
@@ -132,19 +129,30 @@ module Snippets = {
             <Mui.ListItemIcon>
               <Ui.Icon.Input />
             </Mui.ListItemIcon>
-            <Mui.ListItemText primary={snippet.name->React.string} />
+            <Mui.ListItemText
+              primary={<Mui.Typography
+                variant={Subtitle1} fontSize={"1.6rem"->Mui.System.Value.String}>
+                {snippet.name->React.string}
+              </Mui.Typography>}
+            />
           </Mui.ListItemButton>
         </Mui.ListItem>
         <Mui.Collapse in_={isExpanded}>
-          <Mui.Box sx={Mui.Sx.obj({padding: Mui.System.Value.String("1rem 1.3rem")})}>
-            <Mui.Typography variant={Body1}> {snippet.body->React.string} </Mui.Typography>
+          <Mui.Box sx={Mui.Sx.obj({padding: Mui.System.Value.String("1rem 1.2rem")})}>
+            <Mui.Typography variant={Body1} fontSize={"1.2rem"->Mui.System.Value.String}>
+              {snippet.body->React.string}
+            </Mui.Typography>
           </Mui.Box>
         </Mui.Collapse>
       </React.Fragment>
     }
     let viewSnippets = snippets => {
       <Mui.List
-        subheader={<Mui.ListSubheader> {"Select snippets"->React.string} </Mui.ListSubheader>}>
+        subheader={<Mui.ListSubheader>
+          <Mui.Typography variant={H5} padding={"1.2rem 0"->Mui.System.Value.String}>
+            {"Select snippets"->React.string}
+          </Mui.Typography>
+        </Mui.ListSubheader>}>
         {snippets->Array.map(viewRow)->React.array}
       </Mui.List>
     }
@@ -179,7 +187,6 @@ module Snippets = {
         if None == state.maybeTextbox {
           dispatch(GotTextbox(videoDescriptionTextboxEl))
         }
-        Js.log(videoDescriptionTextboxEl)
         ReactDOM.createPortal(view(state), el)
       }
     | _ => React.null
