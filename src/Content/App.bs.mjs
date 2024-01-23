@@ -10,6 +10,7 @@ import * as Core__Option from "@rescript/core/src/Core__Option.bs.mjs";
 import * as TitleChecker from "./Widget/TitleChecker.bs.mjs";
 import * as Client from "react-dom/client";
 import * as JsxRuntime from "react/jsx-runtime";
+import * as Colors from "@mui/material/colors";
 import * as Styles from "@mui/material/styles";
 import * as Webapi__Dom__Element from "rescript-webapi/src/Webapi/Dom/Webapi__Dom__Element.bs.mjs";
 import * as Webapi__Dom__Document from "rescript-webapi/src/Webapi/Dom/Webapi__Dom__Document.bs.mjs";
@@ -20,10 +21,10 @@ function theme(outerTheme) {
                 fontSize: 16.0
               }, newrecord.palette = {
                 primary: {
-                  main: "#5e35b1"
+                  main: Colors.pink[500]
                 },
                 secondary: {
-                  main: "#f50057"
+                  main: "#9c27b0"
                 }
               }, newrecord));
 }

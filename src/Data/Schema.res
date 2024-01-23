@@ -22,7 +22,7 @@ module DescriptionSnippet = {
     body: string,
     category_id: Category.id,
     date: Js.Date.t,
-    id: int,
+    id: option<int>,
     name: string,
     order: int,
   }

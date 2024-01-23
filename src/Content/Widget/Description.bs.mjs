@@ -79,8 +79,9 @@ function update(state, action) {
   } else {
     switch (action.TAG) {
       case "ExpandedSnippet" :
+          var snippet = action._0;
           return {
-                  expandedSnippet: undefined === state.expandedSnippet ? action._0 : undefined,
+                  expandedSnippet: state.expandedSnippet === undefined || !Caml_obj.equal(state.expandedSnippet, snippet) ? snippet : undefined,
                   maybeDialog: state.maybeDialog,
                   maybeTextbox: state.maybeTextbox,
                   selectedSnippet: state.selectedSnippet,
@@ -154,7 +155,7 @@ function Description$Snippets(props) {
                     RE_EXN_ID: "Match_failure",
                     _1: [
                       "Description.res",
-                      66,
+                      69,
                       8
                     ],
                     Error: new Error()
@@ -198,7 +199,7 @@ function Description$Snippets(props) {
       });
   var viewRow = function (snippet) {
     var isExpanded = Caml_obj.equal(snippet, state.expandedSnippet);
-    return JsxRuntime.jsxs(React.Fragment, {
+    return JsxRuntime.jsxs(Box, {
                 children: [
                   JsxRuntime.jsx(ListItem, {
                         children: Caml_option.some(JsxRuntime.jsxs(ListItemButton, {
@@ -233,6 +234,9 @@ function Description$Snippets(props) {
                   JsxRuntime.jsx(Collapse, {
                         children: Caml_option.some(JsxRuntime.jsx(Box, {
                                   children: Caml_option.some(JsxRuntime.jsx(Typography, {
+                                            style: {
+                                              whiteSpace: "pre-wrap"
+                                            },
                                             variant: "body1",
                                             children: Caml_option.some(snippet.body)
                                           })),
@@ -242,7 +246,11 @@ function Description$Snippets(props) {
                                 })),
                         in: isExpanded
                       })
-                ]
+                ],
+                sx: {
+                  borderBottom: 1.0,
+                  borderColor: "primary.main"
+                }
               });
   };
   var viewSnippets = function (snippets) {

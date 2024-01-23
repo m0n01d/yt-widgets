@@ -36,12 +36,15 @@ module Snippets = {
     | ClosedDialog => {...state, maybeDialog: None}
     | ExpandedSnippet(snippet) => {
         ...state,
-        expandedSnippet: if None == state.expandedSnippet {
+        expandedSnippet: if state.expandedSnippet == None {
           Some(snippet)
-        } else {
+        } else if state.expandedSnippet == Some(snippet) {
           None
+        } else {
+          Some(snippet)
         },
       }
+
     | GotSnippets(newSnippets) => {...state, snippets: newSnippets->Array.map(s => s)}
     | GotTextbox(textbox) => {...state, maybeTextbox: Some(textbox)}
     | OpenDialog => {...state, maybeDialog: Some()}
@@ -118,7 +121,11 @@ module Snippets = {
     }
     let viewRow = (snippet: Schema.DescriptionSnippet.t) => {
       let isExpanded = Some(snippet) == state.expandedSnippet
-      <React.Fragment>
+      <Mui.Box
+        sx={Mui.Sx.obj({
+          borderBottom: Mui.System.Value.Number(1.0),
+          borderColor: Mui.System.Value.PrimaryMain,
+        })}>
         <Mui.ListItem
           secondaryAction={<Mui.IconButton onClick={_ => dispatch(ExpandedSnippet(snippet))}>
             {if isExpanded {
@@ -140,10 +147,12 @@ module Snippets = {
         </Mui.ListItem>
         <Mui.Collapse in_={isExpanded}>
           <Mui.Box sx={Mui.Sx.obj({padding: Mui.System.Value.String("1rem 1.6rem")})}>
-            <Mui.Typography variant={Body1}> {snippet.body->React.string} </Mui.Typography>
+            <Mui.Typography variant={Body1} style={ReactDOM.Style.make(~whiteSpace="pre-wrap", ())}>
+              {snippet.body->React.string}
+            </Mui.Typography>
           </Mui.Box>
         </Mui.Collapse>
-      </React.Fragment>
+      </Mui.Box>
     }
     let viewSnippets = snippets => {
       <Mui.List

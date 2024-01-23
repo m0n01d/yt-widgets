@@ -1,15 +1,18 @@
 open Webapi
 open Webapi.Dom
 
+@module("@mui/material/colors")
+external pink: 'a = "pink"
+
 let theme = outerTheme =>
   Mui.Theme.create({
     ...outerTheme,
     palette: {
       primary: {
-        main: "#5e35b1",
+        main: pink["500"],
       },
       secondary: {
-        main: "#f50057",
+        main: "#9c27b0",
       },
     },
     typography: {fontSize: 16.0},

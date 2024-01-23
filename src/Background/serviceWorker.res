@@ -13,10 +13,27 @@ let p = dexie->Table.DescriptionSnippet.put({
   body: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
   category_id: 0,
   date: Js.Date.make(),
-  id: 41,
+  id: Some(41),
   name: "Lorem Ipsum generator",
   order: 1,
 })
+
+let body = `
+Subscribe if youre new!
+https://www.patreon.com/ElmForReactDevs
+https://elmforreactdevs.com
+`
+let p =
+  dexie
+  ->Table.DescriptionSnippet.put({
+    body,
+    category_id: 0,
+    date: Js.Date.make(),
+    id: Some(1),
+    name: "Subscribe!",
+    order: 2,
+  })
+  ->ignore
 
 let listeners = Map.make()
 
