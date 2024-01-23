@@ -41,27 +41,28 @@ function Thumbnail$Palette(props) {
   var setColors = match[1];
   React.useEffect((function () {
           Js_promise2.then(ColorJs.prominent(src), (function (theColorPalette) {
-                  Curry._1(setColors, (function (param) {
-                          return theColorPalette;
-                        }));
-                  return Promise.resolve(undefined);
+                  setColors(function (param) {
+                        return theColorPalette;
+                      });
+                  return Promise.resolve();
                 }));
         }), [src]);
-  return React.createElement("div", {
+  return JsxRuntime.jsx("div", {
+              children: match[0].map(function (color) {
+                    var bgColor = "rgb(" + Js_array.joinWith(",", color) + ")";
+                    return JsxRuntime.jsx("span", {
+                                style: {
+                                  background: bgColor,
+                                  height: "52px",
+                                  flex: "1 0 0"
+                                }
+                              });
+                  }),
               style: {
                 display: "flex",
                 margin: "1em 0"
               }
-            }, match[0].map(function (color) {
-                  var bgColor = "rgb(" + Js_array.joinWith(",", color) + ")";
-                  return React.createElement("span", {
-                              style: {
-                                background: bgColor,
-                                height: "52px",
-                                flex: "1 0 0"
-                              }
-                            });
-                }));
+            });
 }
 
 var Palette = {
@@ -151,7 +152,7 @@ function view(state) {
   if (src !== undefined) {
     return [
             viewThumbnail(src),
-            React.createElement(Thumbnail$Palette, {
+            JsxRuntime.jsx(Thumbnail$Palette, {
                   src: src
                 })
           ];
@@ -251,6 +252,7 @@ function Thumbnail$Preview(props) {
           _0: thumbnailImgEl
         });
   }
+  console.log("Hello thumbnail");
   var stillPickerObserver = new MutationObserver(stillPickerWatcher);
   stillPickerObserver.observe(stillPickerEl, {
         attributes: true,
