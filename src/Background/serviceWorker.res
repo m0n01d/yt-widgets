@@ -18,8 +18,7 @@ let p = dexie->Table.DescriptionSnippet.put({
   order: 1,
 })
 
-let body = `
-Subscribe if youre new!
+let body = `Subscribe if youre new!
 https://www.patreon.com/ElmForReactDevs
 https://elmforreactdevs.com
 `

@@ -8,7 +8,6 @@ let query = _ => {
   ->Js.Promise2.all
 }
 
-type snippet = {body: string}
 module Snippets = {
   let name = Schema.DescriptionSnippet.tableName // tableName and Port name match for easy lookup
 

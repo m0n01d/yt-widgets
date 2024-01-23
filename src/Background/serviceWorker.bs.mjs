@@ -32,7 +32,7 @@ Table.DescriptionSnippet.put(dexie, {
       order: 1
     });
 
-var body = "\nSubscribe if youre new!\nhttps://www.patreon.com/ElmForReactDevs\nhttps://elmforreactdevs.com\n";
+var body = "Subscribe if youre new!\nhttps://www.patreon.com/ElmForReactDevs\nhttps://elmforreactdevs.com\n";
 
 Table.DescriptionSnippet.put(dexie, {
       body: body,
