@@ -154,7 +154,7 @@ function Description$Snippets(props) {
                     RE_EXN_ID: "Match_failure",
                     _1: [
                       "Description.res",
-                      64,
+                      66,
                       8
                     ],
                     Error: new Error()
@@ -208,7 +208,6 @@ function Description$Snippets(props) {
                                         }),
                                     JsxRuntime.jsx(ListItemText, {
                                           primary: Caml_option.some(JsxRuntime.jsx(Typography, {
-                                                    fontSize: "1.6rem",
                                                     variant: "subtitle1",
                                                     children: Caml_option.some(snippet.name)
                                                   }))
@@ -234,12 +233,11 @@ function Description$Snippets(props) {
                   JsxRuntime.jsx(Collapse, {
                         children: Caml_option.some(JsxRuntime.jsx(Box, {
                                   children: Caml_option.some(JsxRuntime.jsx(Typography, {
-                                            fontSize: "1.2rem",
                                             variant: "body1",
                                             children: Caml_option.some(snippet.body)
                                           })),
                                   sx: {
-                                    padding: "1rem 1.2rem"
+                                    padding: "1rem 1.6rem"
                                   }
                                 })),
                         in: isExpanded

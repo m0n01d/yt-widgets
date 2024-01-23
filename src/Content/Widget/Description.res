@@ -13,6 +13,8 @@ module Snippets = {
   let name = Schema.DescriptionSnippet.tableName // tableName and Port name match for easy lookup
 
   type model = {
+    // @TODO clean up these maybes..
+    // how can we model this better?
     expandedSnippet: option<Schema.DescriptionSnippet.t>,
     maybeDialog: option<unit>,
     maybeTextbox: option<Dom.Element.t>,
@@ -130,18 +132,15 @@ module Snippets = {
               <Ui.Icon.Input />
             </Mui.ListItemIcon>
             <Mui.ListItemText
-              primary={<Mui.Typography
-                variant={Subtitle1} fontSize={"1.6rem"->Mui.System.Value.String}>
+              primary={<Mui.Typography variant={Subtitle1}>
                 {snippet.name->React.string}
               </Mui.Typography>}
             />
           </Mui.ListItemButton>
         </Mui.ListItem>
         <Mui.Collapse in_={isExpanded}>
-          <Mui.Box sx={Mui.Sx.obj({padding: Mui.System.Value.String("1rem 1.2rem")})}>
-            <Mui.Typography variant={Body1} fontSize={"1.2rem"->Mui.System.Value.String}>
-              {snippet.body->React.string}
-            </Mui.Typography>
+          <Mui.Box sx={Mui.Sx.obj({padding: Mui.System.Value.String("1rem 1.6rem")})}>
+            <Mui.Typography variant={Body1}> {snippet.body->React.string} </Mui.Typography>
           </Mui.Box>
         </Mui.Collapse>
       </React.Fragment>

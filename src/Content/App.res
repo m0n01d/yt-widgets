@@ -1,6 +1,20 @@
 open Webapi
 open Webapi.Dom
-open Belt
+
+let theme = outerTheme =>
+  Mui.Theme.create({
+    ...outerTheme,
+    palette: {
+      primary: {
+        main: "#5e35b1",
+      },
+      secondary: {
+        main: "#f50057",
+      },
+    },
+    typography: {fontSize: 16.0},
+  })
+
 let observerConfig = {
   "attributes": true,
   "childList": true,
@@ -144,5 +158,10 @@ let app = Document.querySelector(document, "title")->Option.map(titleEl => {
   }
 
   let root = ReactDOM.Client.createRoot(dummy)
-  ReactDOM.Client.Root.render(root, <App />)
+  ReactDOM.Client.Root.render(
+    root,
+    <Mui.ThemeProvider theme=Func(theme)>
+      <App />
+    </Mui.ThemeProvider>,
+  )
 })
