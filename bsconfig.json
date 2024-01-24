@@ -22,5 +22,8 @@
     "@rescriptbr/react-query",
     "rescript-webapi"
   ],
-  "bsc-flags": ["-open RescriptCore"]
+  "bsc-flags": ["-open RescriptCore"],
+  "warnings": {
+    "number": "a"
+  }
 }
