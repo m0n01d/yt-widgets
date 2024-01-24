@@ -214,7 +214,7 @@ function Description$Snippets(props) {
                           children: Caml_option.some(JsxRuntime.jsx(Typography, {
                                     padding: "1.2rem 0",
                                     variant: "h5",
-                                    children: "Select snippets"
+                                    children: "Select Snippets"
                                   }))
                         }))
               });

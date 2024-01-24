@@ -128,7 +128,7 @@ module Snippets = {
       <Mui.List
         subheader={<Mui.ListSubheader>
           <Mui.Typography variant={H5} padding={"1.2rem 0"->Mui.System.Value.String}>
-            {"Select snippets"->React.string}
+            {"Select Snippets"->React.string}
           </Mui.Typography>
         </Mui.ListSubheader>}>
         {snippets->Array.map(viewRow)->React.array}

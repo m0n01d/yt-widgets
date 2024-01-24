@@ -3,13 +3,72 @@
 import * as Hooks from "../Util/Hooks.bs.mjs";
 import * as React from "react";
 import * as Caml_option from "rescript/lib/es6/caml_option.js";
-import * as Core__Option from "@rescript/core/src/Core__Option.bs.mjs";
+import Box from "@mui/material/Box";
 import * as JsxRuntime from "react/jsx-runtime";
+import List from "@mui/material/List";
+import Collapse from "@mui/material/Collapse";
+import ListItem from "@mui/material/ListItem";
+import TextField from "@mui/material/TextField";
+import IconButton from "@mui/material/IconButton";
+import Typography from "@mui/material/Typography";
+import ListItemText from "@mui/material/ListItemText";
+import ListSubheader from "@mui/material/ListSubheader";
+import ExpandLess from "@mui/icons-material/ExpandLess";
 
 var name = "SnippetEditor";
 
 function update(state, action) {
   return state;
+}
+
+function viewSnippet(snippet) {
+  return JsxRuntime.jsxs(Box, {
+              children: [
+                JsxRuntime.jsx(ListItem, {
+                      children: Caml_option.some(JsxRuntime.jsx(ListItemText, {
+                                primary: Caml_option.some(JsxRuntime.jsx(Typography, {
+                                          variant: "subtitle1",
+                                          children: Caml_option.some(snippet.name)
+                                        }))
+                              })),
+                      secondaryAction: Caml_option.some(JsxRuntime.jsx(IconButton, {
+                                children: Caml_option.some(JsxRuntime.jsx(ExpandLess, {}))
+                              }))
+                    }),
+                JsxRuntime.jsx(Collapse, {
+                      children: Caml_option.some(JsxRuntime.jsxs(Box, {
+                                children: [
+                                  JsxRuntime.jsx(TextField, {
+                                        defaultValue: snippet.name,
+                                        label: "Name"
+                                      }),
+                                  JsxRuntime.jsx(TextField, {
+                                        defaultValue: snippet.body,
+                                        label: "Body",
+                                        multiline: true
+                                      })
+                                ],
+                                sx: {
+                                  padding: "1rem 1.6rem"
+                                }
+                              })),
+                      in: true
+                    })
+              ]
+            });
+}
+
+function view(snippets) {
+  return JsxRuntime.jsx(List, {
+              children: Caml_option.some(snippets.map(viewSnippet)),
+              subheader: Caml_option.some(JsxRuntime.jsx(ListSubheader, {
+                        children: Caml_option.some(JsxRuntime.jsx(Typography, {
+                                  padding: "1.2rem 0",
+                                  variant: "h5",
+                                  children: "Edit Snippets"
+                                }))
+                      }))
+            });
 }
 
 function SnippetEditor(props) {
@@ -18,9 +77,7 @@ function SnippetEditor(props) {
   };
   React.useReducer(update, initialState);
   var snippets = Hooks.DescriptionSnippet.useWhatever(name);
-  return JsxRuntime.jsx(JsxRuntime.Fragment, {
-              children: Caml_option.some(Core__Option.getWithDefault(JSON.stringify(snippets), "no"))
-            });
+  return view(snippets);
 }
 
 var make = SnippetEditor;
@@ -28,6 +85,8 @@ var make = SnippetEditor;
 export {
   name ,
   update ,
+  viewSnippet ,
+  view ,
   make ,
 }
 /* Hooks Not a pure module */
