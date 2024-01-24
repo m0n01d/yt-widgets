@@ -38,8 +38,25 @@ let listeners = Map.make()
 
 Chrome.Runtime.OnConnect.addListener(port => {
   let descriptionSnippetsPort = Description.Snippets.name
+  let descriptionSnippetsEditorPort = SnippetEditor.name
   switch port.name {
   | descriptionSnippetsPort => {
+      // on connect - send data to widget
+      listeners->Map.set(port.name, port)->ignore
+      Table.DescriptionSnippet.toArray(dexie)
+      ->Js.Promise2.then(descriptionSnippets => {
+        Js.log2("from db", descriptionSnippets)
+        let message: Chrome.Runtime.Port.message<'a> = {
+          payload: descriptionSnippets,
+          tag: "init",
+        }
+        port->Chrome.Runtime.Port.postMessage(message)
+        Js.Promise2.resolve()
+      })
+      ->ignore
+      // async fetch and then post message with data
+    }
+  | descriptionSnippetsEditorPort => {
       // on connect - send data to widget
       listeners->Map.set(port.name, port)->ignore
       Table.DescriptionSnippet.toArray(dexie)

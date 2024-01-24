@@ -18,20 +18,13 @@ let theme = outerTheme =>
     typography: {fontSize: 16.0},
   })
 
-module App = {
-  @react.component
-  let make = () => {
-    <> {"Hi"->React.string} </>
-  }
-}
-
 switch document->Document.querySelector("body") {
 | None => ()
 | Some(body) =>
   ReactDOM.Client.Root.render(
     ReactDOM.Client.createRoot(body),
     <Mui.ThemeProvider theme=Func(theme)>
-      <App />
+      <SnippetEditor />
     </Mui.ThemeProvider>,
   )
 }

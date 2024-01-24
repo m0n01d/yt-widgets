@@ -5,6 +5,7 @@ import Dexie from "dexie";
 import * as Schema from "../Data/Schema.bs.mjs";
 import * as Description from "../Content/Widget/Description.bs.mjs";
 import * as Js_promise2 from "rescript/lib/es6/js_promise2.js";
+import * as SnippetEditor from "../Popup/SnippetEditor.bs.mjs";
 import * as Version$Dexie from "@dusty-phillips/rescript-dexie/src/Version.bs.mjs";
 
 var dexie = new Dexie("hello dexie 1");
