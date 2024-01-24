@@ -62,7 +62,7 @@ var app = Core__Option.map(Caml_option.nullable_to_opt($$document.querySelector(
         var bodyEl = Core__Option.getWithDefault(Core__Option.flatMap(Webapi__Dom__Document.asHtmlDocument($$document), (function (prim) {
                     return Caml_option.nullable_to_opt(prim.body);
                   })), dummy);
-        var App = function (props) {
+        var ContentApp = function (props) {
           var pageTitle = titleEl.textContent;
           var route = Js_string.split(" - ", pageTitle);
           var initialPage;
@@ -216,7 +216,7 @@ var app = Core__Option.map(Caml_option.nullable_to_opt($$document.querySelector(
         };
         var root = Client.createRoot(dummy);
         root.render(JsxRuntime.jsx(Styles.ThemeProvider, {
-                  children: JsxRuntime.jsx(App, {}),
+                  children: JsxRuntime.jsx(ContentApp, {}),
                   theme: theme
                 }));
       }));

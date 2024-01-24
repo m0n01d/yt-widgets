@@ -6,7 +6,7 @@ const defaultConfig = {
     inlineDynamicImports: true,
     emptyOutDir: true, // runs first
     rollupOptions: {
-      input: "src/Content/App.bs.mjs",
+      input: "src/Content/ContentApp.bs.mjs",
       output: {
         assetFileNames: (asset) => {
           switch (asset.name) {

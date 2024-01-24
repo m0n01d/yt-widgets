@@ -6,7 +6,7 @@ const defaultConfig = {
     emptyOutDir: false,
     rollupOptions: {
       input: {
-        popup: "src/Popup/popup.jsx",
+        popup: "src/Popup/PopupApp.bs.mjs",
       },
       output: {
         assetFileNames: (asset) => {
