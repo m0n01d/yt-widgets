@@ -29,22 +29,28 @@ let viewSnippet = (snippet: Schema.DescriptionSnippet.t) => {
     </Mui.ListItem>
     <Mui.Collapse in_={isExpanded}>
       <Mui.Box sx={Mui.Sx.obj({padding: Mui.System.Value.String("1rem 1.6rem")})}>
-        <Mui.TextField label={"Name"->React.string} defaultValue={snippet.name} />
-        <Mui.TextField label={"Body"->React.string} multiline={true} defaultValue={snippet.body} />
+        <Mui.Stack spacing={Mui.Stack.Number(2.0)}>
+          <Mui.TextField label={"Name"->React.string} defaultValue={snippet.name} />
+          <Mui.TextField
+            label={"Body"->React.string} multiline={true} defaultValue={snippet.body}
+          />
+        </Mui.Stack>
       </Mui.Box>
     </Mui.Collapse>
   </Mui.Box>
 }
 
 let view = (snippets: array<Schema.DescriptionSnippet.t>) => {
-  <Mui.List
-    subheader={<Mui.ListSubheader>
-      <Mui.Typography variant={H5} padding={"1.2rem 0"->Mui.System.Value.String}>
-        {"Edit Snippets"->React.string}
-      </Mui.Typography>
-    </Mui.ListSubheader>}>
-    {snippets->Array.map(viewSnippet)->React.array}
-  </Mui.List>
+  <Mui.Paper elevation={1} style={ReactDOM.Style.make(~minWidth="720px", ())}>
+    <Mui.List
+      subheader={<Mui.ListSubheader>
+        <Mui.Typography variant={H5} padding={"1.2rem 0"->Mui.System.Value.String}>
+          {"Edit Snippets"->React.string}
+        </Mui.Typography>
+      </Mui.ListSubheader>}>
+      {snippets->Array.map(viewSnippet)->React.array}
+    </Mui.List>
+  </Mui.Paper>
 }
 @react.component
 let make = () => {

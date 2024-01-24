@@ -6,6 +6,8 @@ import * as Caml_option from "rescript/lib/es6/caml_option.js";
 import Box from "@mui/material/Box";
 import * as JsxRuntime from "react/jsx-runtime";
 import List from "@mui/material/List";
+import Paper from "@mui/material/Paper";
+import Stack from "@mui/material/Stack";
 import Collapse from "@mui/material/Collapse";
 import ListItem from "@mui/material/ListItem";
 import TextField from "@mui/material/TextField";
@@ -36,18 +38,21 @@ function viewSnippet(snippet) {
                               }))
                     }),
                 JsxRuntime.jsx(Collapse, {
-                      children: Caml_option.some(JsxRuntime.jsxs(Box, {
-                                children: [
-                                  JsxRuntime.jsx(TextField, {
-                                        defaultValue: snippet.name,
-                                        label: "Name"
-                                      }),
-                                  JsxRuntime.jsx(TextField, {
-                                        defaultValue: snippet.body,
-                                        label: "Body",
-                                        multiline: true
-                                      })
-                                ],
+                      children: Caml_option.some(JsxRuntime.jsx(Box, {
+                                children: Caml_option.some(JsxRuntime.jsxs(Stack, {
+                                          children: [
+                                            JsxRuntime.jsx(TextField, {
+                                                  defaultValue: snippet.name,
+                                                  label: "Name"
+                                                }),
+                                            JsxRuntime.jsx(TextField, {
+                                                  defaultValue: snippet.body,
+                                                  label: "Body",
+                                                  multiline: true
+                                                })
+                                          ],
+                                          spacing: 2.0
+                                        })),
                                 sx: {
                                   padding: "1rem 1.6rem"
                                 }
@@ -59,13 +64,19 @@ function viewSnippet(snippet) {
 }
 
 function view(snippets) {
-  return JsxRuntime.jsx(List, {
-              children: Caml_option.some(snippets.map(viewSnippet)),
-              subheader: Caml_option.some(JsxRuntime.jsx(ListSubheader, {
-                        children: Caml_option.some(JsxRuntime.jsx(Typography, {
-                                  padding: "1.2rem 0",
-                                  variant: "h5",
-                                  children: "Edit Snippets"
+  return JsxRuntime.jsx(Paper, {
+              style: {
+                minWidth: "720px"
+              },
+              elevation: 1,
+              children: Caml_option.some(JsxRuntime.jsx(List, {
+                        children: Caml_option.some(snippets.map(viewSnippet)),
+                        subheader: Caml_option.some(JsxRuntime.jsx(ListSubheader, {
+                                  children: Caml_option.some(JsxRuntime.jsx(Typography, {
+                                            padding: "1.2rem 0",
+                                            variant: "h5",
+                                            children: "Edit Snippets"
+                                          }))
                                 }))
                       }))
             });
