@@ -273,7 +273,10 @@ function Description$Snippets(props) {
                 maxWidth: "xs",
                 onClose: (function (param, param$1) {
                     dispatch("ClosedDialog");
-                  })
+                  }),
+                sx: {
+                  zIndex: 2206.0
+                }
               });
   };
   var view = function (state) {

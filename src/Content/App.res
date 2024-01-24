@@ -149,6 +149,8 @@ let app = Document.querySelector(document, "title")->Option.map(titleEl => {
       ]
       let dialogWidgets = dialog => [
         <TitleChecker maybeUploadDialog={Element.ofNode(dialog)} key="upload-dialog" />,
+        <Thumbnail />,
+        <Description />,
       ]
       let widgets = switch (state.currentPage, state.maybeUploadDialog) {
       | (Details, None) => detailsPage()

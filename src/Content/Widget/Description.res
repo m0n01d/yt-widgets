@@ -166,7 +166,11 @@ module Snippets = {
 
     let viewDialog = () => {
       <Mui.Dialog
-        fullWidth={true} onClose={(_, _) => dispatch(ClosedDialog)} maxWidth={Xs} open_={true}>
+        fullWidth={true}
+        onClose={(_, _) => dispatch(ClosedDialog)}
+        maxWidth={Xs}
+        open_={true}
+        sx={Mui.Sx.obj({zIndex: {Mui.System.Value.Number(2206.0)}})}>
         {state.snippets->viewSnippets}
       </Mui.Dialog>
     }

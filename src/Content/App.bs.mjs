@@ -203,9 +203,13 @@ var app = Core__Option.map(Caml_option.nullable_to_opt($$document.querySelector(
           }
           if (match$3 !== undefined) {
             var dialog = Caml_option.valFromOption(match$3);
-            return [JsxRuntime.jsx(TitleChecker.make, {
+            return [
+                    JsxRuntime.jsx(TitleChecker.make, {
                           maybeUploadDialog: Webapi__Dom__Element.ofNode(dialog)
-                        }, "upload-dialog")];
+                        }, "upload-dialog"),
+                    JsxRuntime.jsx(Thumbnail.make, {}),
+                    JsxRuntime.jsx(Description.make, {})
+                  ];
           } else {
             return [];
           }
