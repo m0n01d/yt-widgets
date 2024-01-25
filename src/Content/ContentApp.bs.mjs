@@ -80,17 +80,7 @@ var app = Core__Option.map(Caml_option.nullable_to_opt($$document.querySelector(
           var dispatch = match$1[1];
           var state = match$1[0];
           React.useEffect((function () {
-                  var onMessageListener = function (portMsg) {
-                    console.log("app chrome port inbound", portMsg);
-                  };
-                  var port = chrome.runtime.connect({
-                        name: "yt-widgets-content"
-                      });
-                  port.onMessage.addListener(onMessageListener);
-                  port.postMessage({
-                        payload: undefined,
-                        tag: "ready"
-                      });
+                  
                 }), []);
           var bodyWatcher = function (mutationList, observer) {
             mutationList.forEach(function (mutation) {

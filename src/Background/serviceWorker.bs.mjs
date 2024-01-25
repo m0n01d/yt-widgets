@@ -46,10 +46,6 @@ Table.DescriptionSnippet.put(dexie, {
 var listeners = new Map();
 
 chrome.runtime.onConnect.addListener(function (port) {
-      console.log("connected", {
-            name: port.name,
-            port: port
-          });
       port.onDisconnect.addListener(function () {
             port.disconnect();
             listeners.delete(port.name);
@@ -60,8 +56,8 @@ chrome.runtime.onConnect.addListener(function (port) {
             listeners.set(port.name, port);
             Js_promise2.then(Table.DescriptionSnippet.toArray(dexie), (function (descriptionSnippets) {
                     var message = {
-                      payload: descriptionSnippets,
-                      tag: "init"
+                      TAG: "GotSnippets",
+                      _0: descriptionSnippets
                     };
                     port.postMessage(message);
                     return Promise.resolve();
@@ -70,44 +66,32 @@ chrome.runtime.onConnect.addListener(function (port) {
         case "SnippetEditor" :
             listeners.set(port.name, port);
             port.onMessage.addListener(function (message) {
-                  var match = message.tag;
-                  switch (match) {
-                    case "Table.DescriptionSnippet.add" :
-                        var snippet = Schema.DescriptionSnippet.dateFix(message.payload);
-                        Core__Promise.$$catch(Table.DescriptionSnippet.add(dexie, snippet).then(function (d) {
-                                    return Table.DescriptionSnippet.toArray(dexie);
-                                  }).then(function (descriptionSnippets) {
-                                  var message = {
-                                    payload: descriptionSnippets,
-                                    tag: "init"
-                                  };
-                                  port.postMessage(message);
-                                  return Promise.resolve();
-                                }), (function (err) {
-                                console.log("err", err);
-                                return Promise.resolve();
-                              }));
-                        return ;
-                    case "Table.DescriptionSnippet.put" :
-                        var snippet$1 = message.payload;
-                        Table.DescriptionSnippet.put(dexie, snippet$1);
-                        return ;
-                    default:
-                      throw {
-                            RE_EXN_ID: "Match_failure",
-                            _1: [
-                              "ServiceWorker.res",
-                              65,
-                              8
-                            ],
-                            Error: new Error()
-                          };
+                  if (message.TAG === "TableAdd") {
+                    var snippet = Schema.DescriptionSnippet.dateFix(message._0);
+                    Core__Promise.$$catch(Table.DescriptionSnippet.add(dexie, snippet).then(function (d) {
+                                return Table.DescriptionSnippet.toArray(dexie);
+                              }).then(function (descriptionSnippets) {
+                              listeners.forEach(function (port_) {
+                                    var message = {
+                                      TAG: "GotSnippets",
+                                      _0: descriptionSnippets
+                                    };
+                                    port_.postMessage(message);
+                                  });
+                              return Promise.resolve();
+                            }), (function (err) {
+                            console.log("err", err);
+                            return Promise.resolve();
+                          }));
+                    return ;
                   }
+                  var snippet$1 = Schema.DescriptionSnippet.dateFix(message._0);
+                  Table.DescriptionSnippet.put(dexie, snippet$1);
                 });
             Js_promise2.then(Table.DescriptionSnippet.toArray(dexie), (function (descriptionSnippets) {
                     var message = {
-                      payload: descriptionSnippets,
-                      tag: "init"
+                      TAG: "GotSnippets",
+                      _0: descriptionSnippets
                     };
                     port.postMessage(message);
                     return Promise.resolve();
@@ -118,7 +102,7 @@ chrome.runtime.onConnect.addListener(function (port) {
                 RE_EXN_ID: "Match_failure",
                 _1: [
                   "ServiceWorker.res",
-                  45,
+                  44,
                   2
                 ],
                 Error: new Error()

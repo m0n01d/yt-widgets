@@ -34,7 +34,6 @@ function SnippetEditor(props) {
   var match = Hooks.DescriptionSnippet.useWhatever(name);
   var maybePort = match[1];
   var snippets_ = match[0];
-  console.log("SnippetEditor called port", maybePort);
   var update = function (state, action) {
     switch (action.TAG) {
       case "GotSnippets" :
@@ -73,10 +72,14 @@ function SnippetEditor(props) {
       case "Submitted" :
           var snippet$1 = action._0;
           Core__Option.mapWithDefault(maybePort, undefined, (function (port) {
-                  port.postMessage({
-                        payload: snippet$1,
-                        tag: snippet$1.id === undefined ? "Table.DescriptionSnippet.add" : "Table.DescriptionSnippet.put"
+                  var message = snippet$1.id === undefined ? ({
+                        TAG: "TableAdd",
+                        _0: snippet$1
+                      }) : ({
+                        TAG: "TablePut",
+                        _0: snippet$1
                       });
+                  port.postMessage(message);
                 }));
           return state;
       

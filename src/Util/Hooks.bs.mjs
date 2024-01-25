@@ -15,35 +15,18 @@ function useWhatever(name) {
           var port = chrome.runtime.connect({
                 name: name
               });
-          console.log("DescriptionSnippet.hook called");
-          var onMessageListener = function (param) {
-            var tag = param.tag;
-            var payload = param.payload;
-            if (tag === "init") {
-              console.log("HOOKS: snippets", payload);
-              var snippets = payload.map(Schema.DescriptionSnippet.dateFix);
-              setState(function (param) {
-                    return [
-                            snippets,
-                            port
-                          ];
-                  });
-            } else {
-              throw {
-                    RE_EXN_ID: "Match_failure",
-                    _1: [
-                      "Hooks.res",
-                      9,
-                      8
-                    ],
-                    Error: new Error()
-                  };
-            }
+          var onMessageListener = function (tag) {
+            var snippets = tag._0.map(Schema.DescriptionSnippet.dateFix);
+            setState(function (param) {
+                  return [
+                          snippets,
+                          port
+                        ];
+                });
             console.log("app chrome port inbound", tag);
           };
           port.onMessage.addListener(onMessageListener);
           return (function () {
-                    console.log("cleanup hook");
                     port.disconnect();
                   });
         }), []);

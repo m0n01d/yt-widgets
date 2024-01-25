@@ -4,6 +4,8 @@ let name = "SnippetEditor"
 type form = {newSnippet: Schema.DescriptionSnippet.t, snippets: array<Schema.DescriptionSnippet.t>}
 type model = {form: form}
 
+type tag = TableAdd(Schema.DescriptionSnippet.t) | TablePut(Schema.DescriptionSnippet.t)
+
 type msg =
   | GotSnippets(array<Schema.DescriptionSnippet.t>)
   | SetSnippet(Schema.DescriptionSnippet.t)
@@ -20,7 +22,6 @@ let make = () => {
     order: -1,
   }
   let (snippets_, maybePort) = Hooks.DescriptionSnippet.useWhatever(name)
-  Js.log2("SnippetEditor called port", maybePort)
   let update = (state: model, action: msg) => {
     switch action {
     | GotSnippets(snippets) => {...state, form: {newSnippet, snippets}}
@@ -42,14 +43,12 @@ let make = () => {
       }
     | Submitted(snippet) => {
         maybePort->Option.mapWithDefault((), port => {
-          port->Chrome.Runtime.Port.postMessage({
-            payload: snippet,
-            tag: if snippet.id == None {
-              "Table.DescriptionSnippet.add"
-            } else {
-              "Table.DescriptionSnippet.put"
-            },
-          })
+          let message = if snippet.id == None {
+            TableAdd(snippet)
+          } else {
+            TablePut(snippet)
+          }
+          port->Chrome.Runtime.Port.postMessage(message)
         })
         state
       }

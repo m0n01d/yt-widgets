@@ -2,7 +2,7 @@ module Runtime = {
   module Port = {
     type t = {name: string}
 
-    type message<'a> = {payload: 'a, tag: string}
+    type message<'a> = 'a
 
     @send @scope("onMessage") external addListener: (t, message<'a> => unit) => unit = "addListener"
     @send external postMessage: (t, message<'a>) => unit = "postMessage"

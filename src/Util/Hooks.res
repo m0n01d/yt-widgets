@@ -1,14 +1,14 @@
 module DescriptionSnippet = {
+  type tag = GotSnippets(array<Schema.DescriptionSnippet.t>)
+
   let useWhatever = name => {
     let (snippets, setState) = React.useState(_ => ([], None))
 
     React.useEffect0(() => {
       let port = Chrome.Runtime.connect({name: name})
-      Js.log("DescriptionSnippet.hook called")
-      let onMessageListener: Chrome.Runtime.Port.message<'a> => unit = ({payload, tag}) => {
+      let onMessageListener: Chrome.Runtime.Port.message<'a> => unit = tag => {
         switch tag {
-        | "init" => {
-            Js.log2("HOOKS: snippets", payload)
+        | GotSnippets(payload) => {
             let snippets = payload->Js.Array2.map(Schema.DescriptionSnippet.dateFix)
             setState(_ => (snippets, Some(port)))
           }
@@ -18,10 +18,8 @@ module DescriptionSnippet = {
 
       Chrome.Runtime.Port.addListener(port, onMessageListener)
 
-      // @TODO figure out clean up
       Some(
         () => {
-          Js.log("cleanup hook")
           port->Chrome.Runtime.Port.disconnect()
         },
       )
