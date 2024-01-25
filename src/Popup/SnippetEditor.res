@@ -124,24 +124,27 @@ let make = () => {
         } else {
           React.null
         }}
-        <Mui.Button type_=Submit variant=Contained> {"Save"->React.string} </Mui.Button>
+        <Mui.Button type_=Submit disabled={!isChanged} variant=Contained>
+          {"Save"->React.string}
+        </Mui.Button>
       </Mui.Box>
     </form>
   }
 
   let viewSnippet = ((snippet: Schema.DescriptionSnippet.t, isChanged)) => {
     let isExpanded = true
-    <Mui.Box>
+    <Mui.Card sx={Mui.Sx.obj({margin: Mui.System.Value.Number(2.0)})}>
       <Mui.ListItem
-        secondaryAction={<Mui.IconButton
-        //onClick={_ => dispatch(ExpandedSnippet(snippet))}
-        >
-          {if isExpanded {
-            <Ui.Icon.Expand.Less />
-          } else {
-            <Ui.Icon.Expand.More />
-          }}
-        </Mui.IconButton>}>
+      // secondaryAction={<Mui.IconButton
+      //onClick={_ => dispatch(ExpandedSnippet(snippet))}
+      // >
+      //   {if isExpanded {
+      //     <Ui.Icon.Expand.Less />
+      //   } else {
+      //     <Ui.Icon.Expand.More />
+      //   }}
+      // </Mui.IconButton>}
+      >
         <Mui.ListItemText
           primary={<Mui.Typography variant={Subtitle1}>
             {snippet.name->React.string}
@@ -153,16 +156,18 @@ let make = () => {
           {viewSnippetForm((snippet, isChanged))}
         </Mui.Box>
       </Mui.Collapse>
-    </Mui.Box>
+    </Mui.Card>
   }
 
   let view = () => {
-    <Mui.Paper elevation={1} style={ReactDOM.Style.make(~minWidth="720px", ())}>
+    <Mui.Paper elevation={0} style={ReactDOM.Style.make(~minWidth="720px", ())}>
       <Mui.List
         subheader={<Mui.ListSubheader>
-          <Mui.Typography variant={H5} padding={"1.2rem 0"->Mui.System.Value.String}>
-            {"Edit Snippets"->React.string}
-          </Mui.Typography>
+          <Mui.Box>
+            <Mui.Typography variant={H5} padding={"1.2rem 0"->Mui.System.Value.String}>
+              {"Edit Snippets"->React.string}
+            </Mui.Typography>
+          </Mui.Box>
         </Mui.ListSubheader>}>
         {[
           [viewSnippet((state.form.newSnippet, true))],

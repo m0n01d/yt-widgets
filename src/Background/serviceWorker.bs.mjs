@@ -23,15 +23,6 @@ var x = Table.DescriptionSnippetCategory.put(dexie, {
       name: "default"
     });
 
-Table.DescriptionSnippet.put(dexie, {
-      body: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
-      category_id: 0,
-      date: new Date(),
-      id: 41,
-      name: "Lorem Ipsum generator",
-      order: 1
-    });
-
 var body = "Subscribe if youre new!\nhttps://www.patreon.com/ElmForReactDevs\nhttps://elmforreactdevs.com\n";
 
 Table.DescriptionSnippet.put(dexie, {
@@ -113,7 +104,7 @@ chrome.runtime.onConnect.addListener(function (port) {
                 RE_EXN_ID: "Match_failure",
                 _1: [
                   "ServiceWorker.res",
-                  44,
+                  35,
                   2
                 ],
                 Error: new Error()

@@ -7,6 +7,7 @@ import * as Caml_option from "rescript/lib/es6/caml_option.js";
 import * as Core__Option from "@rescript/core/src/Core__Option.bs.mjs";
 import Box from "@mui/material/Box";
 import * as JsxRuntime from "react/jsx-runtime";
+import Card from "@mui/material/Card";
 import List from "@mui/material/List";
 import Paper from "@mui/material/Paper";
 import Button from "@mui/material/Button";
@@ -14,11 +15,9 @@ import Divider from "@mui/material/Divider";
 import Collapse from "@mui/material/Collapse";
 import ListItem from "@mui/material/ListItem";
 import TextField from "@mui/material/TextField";
-import IconButton from "@mui/material/IconButton";
 import Typography from "@mui/material/Typography";
 import ListItemText from "@mui/material/ListItemText";
 import ListSubheader from "@mui/material/ListSubheader";
-import ExpandLess from "@mui/icons-material/ExpandLess";
 
 var name = "SnippetEditor";
 
@@ -137,6 +136,7 @@ function SnippetEditor(props) {
               });
         }), [snippets_]);
   var viewSnippetForm = function (param) {
+    var isChanged = param[1];
     var snippet = param[0];
     var match = snippet.id === undefined ? [
         "New Snippet Text",
@@ -199,12 +199,13 @@ function SnippetEditor(props) {
                                   onClick: (function (param) {
                                       dispatch("UndoChanges");
                                     }),
-                                  disabled: !param[1],
+                                  disabled: !isChanged,
                                   variant: "text"
                                 }) : null,
                           JsxRuntime.jsx(Button, {
                                 children: "Save",
                                 type: "submit",
+                                disabled: !isChanged,
                                 variant: "contained"
                               })
                         ]
@@ -221,7 +222,10 @@ function SnippetEditor(props) {
   };
   var viewSnippet = function (param) {
     var snippet = param[0];
-    return JsxRuntime.jsxs(Box, {
+    return JsxRuntime.jsxs(Card, {
+                sx: {
+                  margin: 2.0
+                },
                 children: [
                   JsxRuntime.jsx(ListItem, {
                         children: Caml_option.some(JsxRuntime.jsx(ListItemText, {
@@ -229,9 +233,6 @@ function SnippetEditor(props) {
                                             variant: "subtitle1",
                                             children: Caml_option.some(snippet.name)
                                           }))
-                                })),
-                        secondaryAction: Caml_option.some(JsxRuntime.jsx(IconButton, {
-                                  children: Caml_option.some(JsxRuntime.jsx(ExpandLess, {}))
                                 }))
                       }),
                   JsxRuntime.jsx(Collapse, {
@@ -254,7 +255,7 @@ function SnippetEditor(props) {
                 style: {
                   minWidth: "720px"
                 },
-                elevation: 1,
+                elevation: 0,
                 children: Caml_option.some(JsxRuntime.jsx(List, {
                           children: Caml_option.some([
                                   [viewSnippet([
@@ -265,10 +266,12 @@ function SnippetEditor(props) {
                                   state.form.snippets.map(viewSnippet)
                                 ].flat()),
                           subheader: Caml_option.some(JsxRuntime.jsx(ListSubheader, {
-                                    children: Caml_option.some(JsxRuntime.jsx(Typography, {
-                                              padding: "1.2rem 0",
-                                              variant: "h5",
-                                              children: "Edit Snippets"
+                                    children: Caml_option.some(JsxRuntime.jsx(Box, {
+                                              children: Caml_option.some(JsxRuntime.jsx(Typography, {
+                                                        padding: "1.2rem 0",
+                                                        variant: "h5",
+                                                        children: "Edit Snippets"
+                                                      }))
                                             }))
                                   }))
                         }))
