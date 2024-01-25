@@ -231,7 +231,10 @@ function SnippetEditor(props) {
                         children: Caml_option.some(JsxRuntime.jsx(ListItemText, {
                                   primary: Caml_option.some(JsxRuntime.jsx(Typography, {
                                             variant: "subtitle1",
-                                            children: Caml_option.some(snippet.name)
+                                            children: Caml_option.some([
+                                                    "Edit -",
+                                                    snippet.name
+                                                  ].join(" "))
                                           }))
                                 }))
                       }),

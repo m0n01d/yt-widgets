@@ -147,7 +147,7 @@ let make = () => {
       >
         <Mui.ListItemText
           primary={<Mui.Typography variant={Subtitle1}>
-            {snippet.name->React.string}
+            {["Edit -", snippet.name]->Array.joinWith(" ")->React.string}
           </Mui.Typography>}
         />
       </Mui.ListItem>
