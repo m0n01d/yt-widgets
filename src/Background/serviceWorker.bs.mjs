@@ -86,7 +86,18 @@ chrome.runtime.onConnect.addListener(function (port) {
                     return ;
                   }
                   var snippet$1 = Schema.DescriptionSnippet.dateFix(message._0);
-                  Table.DescriptionSnippet.put(dexie, snippet$1);
+                  Table.DescriptionSnippet.put(dexie, snippet$1).then(function (d) {
+                          return Table.DescriptionSnippet.toArray(dexie);
+                        }).then(function (descriptionSnippets) {
+                        listeners.forEach(function (port_) {
+                              var message = {
+                                TAG: "GotSnippets",
+                                _0: descriptionSnippets
+                              };
+                              port_.postMessage(message);
+                            });
+                        return Promise.resolve();
+                      });
                 });
             Js_promise2.then(Table.DescriptionSnippet.toArray(dexie), (function (descriptionSnippets) {
                     var message = {

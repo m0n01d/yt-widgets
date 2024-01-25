@@ -10,6 +10,7 @@ import * as JsxRuntime from "react/jsx-runtime";
 import List from "@mui/material/List";
 import Paper from "@mui/material/Paper";
 import Button from "@mui/material/Button";
+import Divider from "@mui/material/Divider";
 import Collapse from "@mui/material/Collapse";
 import ListItem from "@mui/material/ListItem";
 import TextField from "@mui/material/TextField";
@@ -34,40 +35,81 @@ function SnippetEditor(props) {
   var match = Hooks.DescriptionSnippet.useWhatever(name);
   var maybePort = match[1];
   var snippets_ = match[0];
+  var initialState_form = {
+    newSnippet: newSnippet,
+    snippets: []
+  };
+  var initialState = {
+    form: initialState_form,
+    snippets: snippets_
+  };
   var update = function (state, action) {
+    if (typeof action !== "object") {
+      var oldForm = state.form;
+      var form_newSnippet = oldForm.newSnippet;
+      var form_snippets = snippets_.map(function (s) {
+            return [
+                    s,
+                    false
+                  ];
+          });
+      var form = {
+        newSnippet: form_newSnippet,
+        snippets: form_snippets
+      };
+      return {
+              form: form,
+              snippets: state.snippets
+            };
+    }
     switch (action.TAG) {
       case "GotSnippets" :
           return {
                   form: {
                     newSnippet: newSnippet,
-                    snippets: action._0
-                  }
+                    snippets: action._0.map(function (s) {
+                          return [
+                                  s,
+                                  false
+                                ];
+                        })
+                  },
+                  snippets: state.snippets
                 };
       case "SetSnippet" :
           var snippet = action._0;
-          var oldForm = state.form;
+          var oldForm$1 = state.form;
           if (snippet.id === undefined) {
             return {
                     form: {
                       newSnippet: snippet,
-                      snippets: oldForm.snippets
-                    }
+                      snippets: oldForm$1.snippets
+                    },
+                    snippets: state.snippets
                   };
           }
-          var snippets = oldForm.snippets.map(function (s) {
+          var snippets = oldForm$1.snippets.map(function (param) {
+                var s = param[0];
                 if (Caml_obj.equal(s.id, snippet.id)) {
-                  return snippet;
+                  return [
+                          snippet,
+                          true
+                        ];
                 } else {
-                  return s;
+                  return [
+                          s,
+                          param[1]
+                        ];
                 }
               });
-          var form_newSnippet = oldForm.newSnippet;
-          var form = {
-            newSnippet: form_newSnippet,
+          var form_newSnippet$1 = oldForm$1.newSnippet;
+          var form$1 = {
+            newSnippet: form_newSnippet$1,
             snippets: snippets
           };
           return {
-                  form: form
+                  form: form$1,
+                  snippets: state.snippets
                 };
       case "Submitted" :
           var snippet$1 = action._0;
@@ -85,12 +127,6 @@ function SnippetEditor(props) {
       
     }
   };
-  var initialState = {
-    form: {
-      newSnippet: newSnippet,
-      snippets: []
-    }
-  };
   var match$1 = React.useReducer(update, initialState);
   var dispatch = match$1[1];
   var state = match$1[0];
@@ -100,7 +136,8 @@ function SnippetEditor(props) {
                 _0: snippets_
               });
         }), [snippets_]);
-  var viewSnippetForm = function (snippet) {
+  var viewSnippetForm = function (param) {
+    var snippet = param[0];
     var match = snippet.id === undefined ? [
         "New Snippet Text",
         "New Snippet Name"
@@ -159,6 +196,10 @@ function SnippetEditor(props) {
                           undefined !== snippet.id ? JsxRuntime.jsx(Button, {
                                   children: "Undo Changes",
                                   type: "button",
+                                  onClick: (function (param) {
+                                      dispatch("UndoChanges");
+                                    }),
+                                  disabled: !param[1],
                                   variant: "text"
                                 }) : null,
                           JsxRuntime.jsx(Button, {
@@ -178,7 +219,8 @@ function SnippetEditor(props) {
                   })
               });
   };
-  var viewSnippet = function (snippet) {
+  var viewSnippet = function (param) {
+    var snippet = param[0];
     return JsxRuntime.jsxs(Box, {
                 children: [
                   JsxRuntime.jsx(ListItem, {
@@ -194,7 +236,10 @@ function SnippetEditor(props) {
                       }),
                   JsxRuntime.jsx(Collapse, {
                         children: Caml_option.some(JsxRuntime.jsx(Box, {
-                                  children: Caml_option.some(viewSnippetForm(snippet)),
+                                  children: Caml_option.some(viewSnippetForm([
+                                            snippet,
+                                            param[1]
+                                          ])),
                                   sx: {
                                     padding: "1rem 1.6rem"
                                   }
@@ -212,7 +257,11 @@ function SnippetEditor(props) {
                 elevation: 1,
                 children: Caml_option.some(JsxRuntime.jsx(List, {
                           children: Caml_option.some([
-                                  [viewSnippet(state.form.newSnippet)],
+                                  [viewSnippet([
+                                          state.form.newSnippet,
+                                          true
+                                        ])],
+                                  [JsxRuntime.jsx(Divider, {})],
                                   state.form.snippets.map(viewSnippet)
                                 ].flat()),
                           subheader: Caml_option.some(JsxRuntime.jsx(ListSubheader, {

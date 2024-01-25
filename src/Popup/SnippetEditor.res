@@ -1,8 +1,11 @@
 open Webapi.Dom
 let name = "SnippetEditor"
 
-type form = {newSnippet: Schema.DescriptionSnippet.t, snippets: array<Schema.DescriptionSnippet.t>}
-type model = {form: form}
+type form = {
+  newSnippet: Schema.DescriptionSnippet.t,
+  snippets: array<(Schema.DescriptionSnippet.t, bool)>,
+}
+type model = {form: form, snippets: array<Schema.DescriptionSnippet.t>}
 
 type tag = TableAdd(Schema.DescriptionSnippet.t) | TablePut(Schema.DescriptionSnippet.t)
 
@@ -10,6 +13,7 @@ type msg =
   | GotSnippets(array<Schema.DescriptionSnippet.t>)
   | SetSnippet(Schema.DescriptionSnippet.t)
   | Submitted(Schema.DescriptionSnippet.t)
+  | UndoChanges
 
 @react.component
 let make = () => {
@@ -21,20 +25,30 @@ let make = () => {
     name: "New Snippet",
     order: -1,
   }
+
   let (snippets_, maybePort) = Hooks.DescriptionSnippet.useWhatever(name)
+  let initialState = {
+    {
+      form: {newSnippet, snippets: []},
+      snippets: snippets_,
+    }
+  }
   let update = (state: model, action: msg) => {
     switch action {
-    | GotSnippets(snippets) => {...state, form: {newSnippet, snippets}}
+    | GotSnippets(snippets) => {
+        ...state,
+        form: {newSnippet, snippets: snippets->Array.map(s => (s, false))},
+      }
     | SetSnippet(snippet) => {
         let oldForm = state.form
         if snippet.id == None {
           {...state, form: {...oldForm, newSnippet: snippet}}
         } else {
-          let snippets = oldForm.snippets->Array.map(s => {
+          let snippets = oldForm.snippets->Array.map(((s, isChanged)) => {
             if s.id == snippet.id {
-              snippet
+              (snippet, true)
             } else {
-              s
+              (s, isChanged)
             }
           })
           let form = {...oldForm, snippets}
@@ -52,13 +66,14 @@ let make = () => {
         })
         state
       }
+    | UndoChanges => {
+        let oldForm = state.form
+        let form = {...oldForm, snippets: initialState.snippets->Array.map(s => (s, false))}
+        {...state, form}
+      }
     }
   }
-  let initialState = {
-    {
-      form: {newSnippet, snippets: []},
-    }
-  }
+
   let (state, dispatch) = React.useReducer(update, initialState)
 
   React.useEffect1(() => {
@@ -67,7 +82,7 @@ let make = () => {
     None
   }, [snippets_])
 
-  let viewSnippetForm = (snippet: Schema.DescriptionSnippet.t) => {
+  let viewSnippetForm = ((snippet: Schema.DescriptionSnippet.t, isChanged)) => {
     let (bodyLabel, nameLabel) = if snippet.id == None {
       ("New Snippet Text", "New Snippet Name")
     } else {
@@ -102,7 +117,10 @@ let make = () => {
       />
       <Mui.Box>
         {if None != snippet.id {
-          <Mui.Button type_=Button variant=Text> {"Undo Changes"->React.string} </Mui.Button>
+          <Mui.Button
+            type_=Button variant=Text disabled={!isChanged} onClick={_ => dispatch(UndoChanges)}>
+            {"Undo Changes"->React.string}
+          </Mui.Button>
         } else {
           React.null
         }}
@@ -111,7 +129,7 @@ let make = () => {
     </form>
   }
 
-  let viewSnippet = (snippet: Schema.DescriptionSnippet.t) => {
+  let viewSnippet = ((snippet: Schema.DescriptionSnippet.t, isChanged)) => {
     let isExpanded = true
     <Mui.Box>
       <Mui.ListItem
@@ -132,7 +150,7 @@ let make = () => {
       </Mui.ListItem>
       <Mui.Collapse in_={isExpanded}>
         <Mui.Box sx={Mui.Sx.obj({padding: Mui.System.Value.String("1rem 1.6rem")})}>
-          {viewSnippetForm(snippet)}
+          {viewSnippetForm((snippet, isChanged))}
         </Mui.Box>
       </Mui.Collapse>
     </Mui.Box>
@@ -146,7 +164,11 @@ let make = () => {
             {"Edit Snippets"->React.string}
           </Mui.Typography>
         </Mui.ListSubheader>}>
-        {[[viewSnippet(state.form.newSnippet)], state.form.snippets->Array.map(viewSnippet)]
+        {[
+          [viewSnippet((state.form.newSnippet, true))],
+          [<Mui.Divider />],
+          state.form.snippets->Array.map(viewSnippet),
+        ]
         ->Array.flat
         ->React.array}
       </Mui.List>
