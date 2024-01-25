@@ -3,9 +3,8 @@
 import * as Table from "../Data/Table.bs.mjs";
 import Dexie from "dexie";
 import * as Schema from "../Data/Schema.bs.mjs";
-import * as Description from "../Content/Widget/Description.bs.mjs";
 import * as Js_promise2 from "rescript/lib/es6/js_promise2.js";
-import * as SnippetEditor from "../Popup/SnippetEditor.bs.mjs";
+import * as Core__Promise from "@rescript/core/src/Core__Promise.bs.mjs";
 import * as Version$Dexie from "@dusty-phillips/rescript-dexie/src/Version.bs.mjs";
 
 var dexie = new Dexie("hello dexie 1");
@@ -47,17 +46,84 @@ Table.DescriptionSnippet.put(dexie, {
 var listeners = new Map();
 
 chrome.runtime.onConnect.addListener(function (port) {
-      listeners.set(port.name, port);
-      Js_promise2.then(Table.DescriptionSnippet.toArray(dexie), (function (descriptionSnippets) {
-              console.log("from db", descriptionSnippets);
-              var message = {
-                payload: descriptionSnippets,
-                tag: "init"
+      console.log("connected", {
+            name: port.name,
+            port: port
+          });
+      port.onDisconnect.addListener(function () {
+            port.disconnect();
+            listeners.delete(port.name);
+          });
+      var match = port.name;
+      switch (match) {
+        case "Description.Snippets" :
+            listeners.set(port.name, port);
+            Js_promise2.then(Table.DescriptionSnippet.toArray(dexie), (function (descriptionSnippets) {
+                    var message = {
+                      payload: descriptionSnippets,
+                      tag: "init"
+                    };
+                    port.postMessage(message);
+                    return Promise.resolve();
+                  }));
+            return ;
+        case "SnippetEditor" :
+            listeners.set(port.name, port);
+            port.onMessage.addListener(function (message) {
+                  var match = message.tag;
+                  switch (match) {
+                    case "Table.DescriptionSnippet.add" :
+                        var snippet = Schema.DescriptionSnippet.dateFix(message.payload);
+                        Core__Promise.$$catch(Table.DescriptionSnippet.add(dexie, snippet).then(function (d) {
+                                    return Table.DescriptionSnippet.toArray(dexie);
+                                  }).then(function (descriptionSnippets) {
+                                  var message = {
+                                    payload: descriptionSnippets,
+                                    tag: "init"
+                                  };
+                                  port.postMessage(message);
+                                  return Promise.resolve();
+                                }), (function (err) {
+                                console.log("err", err);
+                                return Promise.resolve();
+                              }));
+                        return ;
+                    case "Table.DescriptionSnippet.put" :
+                        var snippet$1 = message.payload;
+                        Table.DescriptionSnippet.put(dexie, snippet$1);
+                        return ;
+                    default:
+                      throw {
+                            RE_EXN_ID: "Match_failure",
+                            _1: [
+                              "ServiceWorker.res",
+                              65,
+                              8
+                            ],
+                            Error: new Error()
+                          };
+                  }
+                });
+            Js_promise2.then(Table.DescriptionSnippet.toArray(dexie), (function (descriptionSnippets) {
+                    var message = {
+                      payload: descriptionSnippets,
+                      tag: "init"
+                    };
+                    port.postMessage(message);
+                    return Promise.resolve();
+                  }));
+            return ;
+        default:
+          throw {
+                RE_EXN_ID: "Match_failure",
+                _1: [
+                  "ServiceWorker.res",
+                  45,
+                  2
+                ],
+                Error: new Error()
               };
-              port.postMessage(message);
-              return Promise.resolve();
-            }));
-      console.log("connected", port);
+      }
     });
 
 var p;

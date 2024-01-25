@@ -2,12 +2,14 @@
 
 import * as Hooks from "../Util/Hooks.bs.mjs";
 import * as React from "react";
+import * as Caml_obj from "rescript/lib/es6/caml_obj.js";
 import * as Caml_option from "rescript/lib/es6/caml_option.js";
+import * as Core__Option from "@rescript/core/src/Core__Option.bs.mjs";
 import Box from "@mui/material/Box";
 import * as JsxRuntime from "react/jsx-runtime";
 import List from "@mui/material/List";
 import Paper from "@mui/material/Paper";
-import Stack from "@mui/material/Stack";
+import Button from "@mui/material/Button";
 import Collapse from "@mui/material/Collapse";
 import ListItem from "@mui/material/ListItem";
 import TextField from "@mui/material/TextField";
@@ -19,85 +21,214 @@ import ExpandLess from "@mui/icons-material/ExpandLess";
 
 var name = "SnippetEditor";
 
-function update(state, action) {
-  return state;
-}
-
-function viewSnippet(snippet) {
-  return JsxRuntime.jsxs(Box, {
-              children: [
-                JsxRuntime.jsx(ListItem, {
-                      children: Caml_option.some(JsxRuntime.jsx(ListItemText, {
-                                primary: Caml_option.some(JsxRuntime.jsx(Typography, {
-                                          variant: "subtitle1",
-                                          children: Caml_option.some(snippet.name)
-                                        }))
-                              })),
-                      secondaryAction: Caml_option.some(JsxRuntime.jsx(IconButton, {
-                                children: Caml_option.some(JsxRuntime.jsx(ExpandLess, {}))
-                              }))
-                    }),
-                JsxRuntime.jsx(Collapse, {
-                      children: Caml_option.some(JsxRuntime.jsx(Box, {
-                                children: Caml_option.some(JsxRuntime.jsxs(Stack, {
-                                          children: [
-                                            JsxRuntime.jsx(TextField, {
-                                                  defaultValue: snippet.name,
-                                                  label: "Name"
-                                                }),
-                                            JsxRuntime.jsx(TextField, {
-                                                  defaultValue: snippet.body,
-                                                  label: "Body",
-                                                  multiline: true
-                                                })
-                                          ],
-                                          spacing: 2.0
-                                        })),
-                                sx: {
-                                  padding: "1rem 1.6rem"
-                                }
-                              })),
-                      in: true
-                    })
-              ]
-            });
-}
-
-function view(snippets) {
-  return JsxRuntime.jsx(Paper, {
-              style: {
-                minWidth: "720px"
-              },
-              elevation: 1,
-              children: Caml_option.some(JsxRuntime.jsx(List, {
-                        children: Caml_option.some(snippets.map(viewSnippet)),
-                        subheader: Caml_option.some(JsxRuntime.jsx(ListSubheader, {
-                                  children: Caml_option.some(JsxRuntime.jsx(Typography, {
-                                            padding: "1.2rem 0",
-                                            variant: "h5",
-                                            children: "Edit Snippets"
-                                          }))
-                                }))
-                      }))
-            });
-}
-
 function SnippetEditor(props) {
-  var initialState = {
-    snippets: []
+  var newSnippet_date = new Date();
+  var newSnippet = {
+    body: "Snippet text",
+    category_id: 0,
+    date: newSnippet_date,
+    id: undefined,
+    name: "New Snippet",
+    order: -1
   };
-  React.useReducer(update, initialState);
-  var snippets = Hooks.DescriptionSnippet.useWhatever(name);
-  return view(snippets);
+  var match = Hooks.DescriptionSnippet.useWhatever(name);
+  var maybePort = match[1];
+  var snippets_ = match[0];
+  console.log("SnippetEditor called port", maybePort);
+  var update = function (state, action) {
+    switch (action.TAG) {
+      case "GotSnippets" :
+          return {
+                  form: {
+                    newSnippet: newSnippet,
+                    snippets: action._0
+                  }
+                };
+      case "SetSnippet" :
+          var snippet = action._0;
+          var oldForm = state.form;
+          if (snippet.id === undefined) {
+            return {
+                    form: {
+                      newSnippet: snippet,
+                      snippets: oldForm.snippets
+                    }
+                  };
+          }
+          var snippets = oldForm.snippets.map(function (s) {
+                if (Caml_obj.equal(s.id, snippet.id)) {
+                  return snippet;
+                } else {
+                  return s;
+                }
+              });
+          var form_newSnippet = oldForm.newSnippet;
+          var form = {
+            newSnippet: form_newSnippet,
+            snippets: snippets
+          };
+          return {
+                  form: form
+                };
+      case "Submitted" :
+          var snippet$1 = action._0;
+          Core__Option.mapWithDefault(maybePort, undefined, (function (port) {
+                  port.postMessage({
+                        payload: snippet$1,
+                        tag: snippet$1.id === undefined ? "Table.DescriptionSnippet.add" : "Table.DescriptionSnippet.put"
+                      });
+                }));
+          return state;
+      
+    }
+  };
+  var initialState = {
+    form: {
+      newSnippet: newSnippet,
+      snippets: []
+    }
+  };
+  var match$1 = React.useReducer(update, initialState);
+  var dispatch = match$1[1];
+  var state = match$1[0];
+  React.useEffect((function () {
+          dispatch({
+                TAG: "GotSnippets",
+                _0: snippets_
+              });
+        }), [snippets_]);
+  var viewSnippetForm = function (snippet) {
+    var match = snippet.id === undefined ? [
+        "New Snippet Text",
+        "New Snippet Name"
+      ] : [
+        "Body",
+        "Name"
+      ];
+    return JsxRuntime.jsxs("form", {
+                children: [
+                  JsxRuntime.jsx(TextField, {
+                        defaultValue: snippet.name,
+                        fullWidth: true,
+                        label: Caml_option.some(match[1]),
+                        onChange: (function ($$event) {
+                            var value = $$event.currentTarget.value;
+                            dispatch({
+                                  TAG: "SetSnippet",
+                                  _0: {
+                                    body: snippet.body,
+                                    category_id: snippet.category_id,
+                                    date: snippet.date,
+                                    id: snippet.id,
+                                    name: value,
+                                    order: snippet.order
+                                  }
+                                });
+                          }),
+                        value: snippet.name
+                      }),
+                  JsxRuntime.jsx(TextField, {
+                        defaultValue: snippet.body,
+                        fullWidth: true,
+                        label: Caml_option.some(match[0]),
+                        multiline: true,
+                        onChange: (function ($$event) {
+                            var value = $$event.currentTarget.value;
+                            dispatch({
+                                  TAG: "SetSnippet",
+                                  _0: {
+                                    body: value,
+                                    category_id: snippet.category_id,
+                                    date: snippet.date,
+                                    id: snippet.id,
+                                    name: snippet.name,
+                                    order: snippet.order
+                                  }
+                                });
+                          }),
+                        sx: {
+                          margin: "1rem 0"
+                        },
+                        value: snippet.body
+                      }),
+                  JsxRuntime.jsxs(Box, {
+                        children: [
+                          undefined !== snippet.id ? JsxRuntime.jsx(Button, {
+                                  children: "Undo Changes",
+                                  type: "button",
+                                  variant: "text"
+                                }) : null,
+                          JsxRuntime.jsx(Button, {
+                                children: "Save",
+                                type: "submit",
+                                variant: "contained"
+                              })
+                        ]
+                      })
+                ],
+                onSubmit: (function (e) {
+                    e.preventDefault();
+                    dispatch({
+                          TAG: "Submitted",
+                          _0: snippet
+                        });
+                  })
+              });
+  };
+  var viewSnippet = function (snippet) {
+    return JsxRuntime.jsxs(Box, {
+                children: [
+                  JsxRuntime.jsx(ListItem, {
+                        children: Caml_option.some(JsxRuntime.jsx(ListItemText, {
+                                  primary: Caml_option.some(JsxRuntime.jsx(Typography, {
+                                            variant: "subtitle1",
+                                            children: Caml_option.some(snippet.name)
+                                          }))
+                                })),
+                        secondaryAction: Caml_option.some(JsxRuntime.jsx(IconButton, {
+                                  children: Caml_option.some(JsxRuntime.jsx(ExpandLess, {}))
+                                }))
+                      }),
+                  JsxRuntime.jsx(Collapse, {
+                        children: Caml_option.some(JsxRuntime.jsx(Box, {
+                                  children: Caml_option.some(viewSnippetForm(snippet)),
+                                  sx: {
+                                    padding: "1rem 1.6rem"
+                                  }
+                                })),
+                        in: true
+                      })
+                ]
+              });
+  };
+  var view = function () {
+    return JsxRuntime.jsx(Paper, {
+                style: {
+                  minWidth: "720px"
+                },
+                elevation: 1,
+                children: Caml_option.some(JsxRuntime.jsx(List, {
+                          children: Caml_option.some([
+                                  [viewSnippet(state.form.newSnippet)],
+                                  state.form.snippets.map(viewSnippet)
+                                ].flat()),
+                          subheader: Caml_option.some(JsxRuntime.jsx(ListSubheader, {
+                                    children: Caml_option.some(JsxRuntime.jsx(Typography, {
+                                              padding: "1.2rem 0",
+                                              variant: "h5",
+                                              children: "Edit Snippets"
+                                            }))
+                                  }))
+                        }))
+              });
+  };
+  return view();
 }
 
 var make = SnippetEditor;
 
 export {
   name ,
-  update ,
-  viewSnippet ,
-  view ,
   make ,
 }
 /* Hooks Not a pure module */

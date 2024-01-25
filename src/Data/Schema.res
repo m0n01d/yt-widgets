@@ -9,7 +9,7 @@ module DescriptionSnippet = {
     let fields = "++id,name"
     let schema = (tableName, fields)
   }
-  type id = int
+  type id = option<int>
   /*
      {
         body: "This is  multiline string\n with #tags",
@@ -22,7 +22,7 @@ module DescriptionSnippet = {
     body: string,
     category_id: Category.id,
     date: Js.Date.t,
-    id: option<int>,
+    id: id,
     name: string,
     order: int,
   }
@@ -30,4 +30,17 @@ module DescriptionSnippet = {
   let fields = "++id,body,category_id,date,name"
 
   let schema = (tableName, fields)
+
+  /// util
+
+  let dateFix = (snippet: t) => {
+    let d = snippet.date->Js.Date.toString
+    let date = Js.Date.fromString(d)
+    // Hack to get around the fact that it type checks
+    // but the `date` field gets converted to a string when coming over the Port
+    // create a new date from the old stringified date so that
+    // date functions work properly
+
+    {...snippet, date}
+  }
 }

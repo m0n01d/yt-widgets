@@ -60,7 +60,7 @@ module Snippets = {
     }
     let (state, dispatch) = React.useReducer(update, initialState)
 
-    let snippets = Hooks.DescriptionSnippet.useWhatever(name)
+    let (snippets, maybePort) = Hooks.DescriptionSnippet.useWhatever(name)
 
     React.useEffectOnEveryRender(() => {
       switch (state.maybeTextbox, state.selectedSnippet) {

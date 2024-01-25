@@ -121,7 +121,8 @@ function Description$Snippets(props) {
       });
   var dispatch = match[1];
   var state = match[0];
-  var snippets = Hooks.DescriptionSnippet.useWhatever(name);
+  var match$1 = Hooks.DescriptionSnippet.useWhatever(name);
+  var snippets = match$1[0];
   React.useEffect(function () {
         var match = state.maybeTextbox;
         var match$1 = state.selectedSnippet;
@@ -257,15 +258,15 @@ function Description$Snippets(props) {
                   VAL: false
                 }))
       });
-  var match$1 = queryResult.data;
-  if (match$1 === undefined) {
+  var match$2 = queryResult.data;
+  if (match$2 === undefined) {
     return null;
   }
-  if (match$1.length !== 2) {
+  if (match$2.length !== 2) {
     return null;
   }
-  var el = match$1[0];
-  var videoDescriptionTextboxEl = match$1[1];
+  var el = match$2[0];
+  var videoDescriptionTextboxEl = match$2[1];
   if (undefined === state.maybeTextbox) {
     dispatch({
           TAG: "GotTextbox",

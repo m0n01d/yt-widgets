@@ -25,11 +25,25 @@ var schema$1 = [
   fields$1
 ];
 
+function dateFix(snippet) {
+  var d = snippet.date.toString();
+  var date = new Date(d);
+  return {
+          body: snippet.body,
+          category_id: snippet.category_id,
+          date: date,
+          id: snippet.id,
+          name: snippet.name,
+          order: snippet.order
+        };
+}
+
 var DescriptionSnippet = {
   Category: Category,
   tableName: tableName$1,
   fields: fields$1,
-  schema: schema$1
+  schema: schema$1,
+  dateFix: dateFix
 };
 
 export {

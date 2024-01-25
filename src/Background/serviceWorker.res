@@ -37,15 +37,17 @@ let p =
 let listeners = Map.make()
 
 Chrome.Runtime.OnConnect.addListener(port => {
-  let descriptionSnippetsPort = Description.Snippets.name
-  let descriptionSnippetsEditorPort = SnippetEditor.name
+  Js.log2("connected", {"name": port.name, "port": port})
+  port->Chrome.Runtime.Port.OnDisconnect.addListener(() => {
+    port->Chrome.Runtime.Port.disconnect()
+    listeners->Map.delete(port.name)->ignore
+  })
   switch port.name {
-  | descriptionSnippetsPort => {
+  | "Description.Snippets" => {
       // on connect - send data to widget
       listeners->Map.set(port.name, port)->ignore
       Table.DescriptionSnippet.toArray(dexie)
       ->Js.Promise2.then(descriptionSnippets => {
-        Js.log2("from db", descriptionSnippets)
         let message: Chrome.Runtime.Port.message<'a> = {
           payload: descriptionSnippets,
           tag: "init",
@@ -56,12 +58,50 @@ Chrome.Runtime.OnConnect.addListener(port => {
       ->ignore
       // async fetch and then post message with data
     }
-  | descriptionSnippetsEditorPort => {
+  | "SnippetEditor" => {
       // on connect - send data to widget
       listeners->Map.set(port.name, port)->ignore
+      port->Chrome.Runtime.Port.addListener(message => {
+        switch message.tag {
+        | "Table.DescriptionSnippet.add" => {
+            let snippet: Schema.DescriptionSnippet.t =
+              message.payload->Schema.DescriptionSnippet.dateFix
+            dexie
+            ->Table.DescriptionSnippet.add(snippet)
+            ->Promise.then(
+              d => {
+                dexie->Table.DescriptionSnippet.toArray
+              },
+            )
+            ->Promise.then(
+              descriptionSnippets => {
+                let message: Chrome.Runtime.Port.message<'a> = {
+                  payload: descriptionSnippets,
+                  tag: "init",
+                }
+                port->Chrome.Runtime.Port.postMessage(message)
+                Js.Promise2.resolve()
+              },
+            )
+            ->Promise.catch(
+              err => {
+                Js.log2("err", err)
+                Promise.resolve()
+              },
+            )
+            ->ignore
+          }
+        | "Table.DescriptionSnippet.put" => {
+            let snippet: Schema.DescriptionSnippet.t = message.payload
+            dexie
+            ->Table.DescriptionSnippet.put(snippet)
+            ->ignore
+          }
+        }
+      })
+
       Table.DescriptionSnippet.toArray(dexie)
       ->Js.Promise2.then(descriptionSnippets => {
-        Js.log2("from db", descriptionSnippets)
         let message: Chrome.Runtime.Port.message<'a> = {
           payload: descriptionSnippets,
           tag: "init",
@@ -73,5 +113,4 @@ Chrome.Runtime.OnConnect.addListener(port => {
       // async fetch and then post message with data
     }
   }
-  Js.log2("connected", port)
 })
