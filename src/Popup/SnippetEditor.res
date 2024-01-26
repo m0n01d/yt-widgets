@@ -5,7 +5,7 @@ type form = {
   newSnippet: Schema.DescriptionSnippet.t,
   snippets: array<(Schema.DescriptionSnippet.t, bool)>,
 }
-type model = {form: form, snippets: array<Schema.DescriptionSnippet.t>}
+type model = {form: form}
 
 type tag = SaveNewSnippet(Schema.DescriptionSnippet.t) | EditSnippet(Schema.DescriptionSnippet.t)
 
@@ -30,14 +30,13 @@ let make = () => {
   let initialState = {
     {
       form: {newSnippet, snippets: []},
-      snippets: snippets_,
     }
   }
   let update = (state: model, action: msg) => {
     switch action {
     | GotSnippets(snippets) => {
         ...state,
-        form: {newSnippet, snippets: snippets->Array.map(s => (s, false))},
+        form: {newSnippet, snippets: snippets_->Array.map(s => (s, false))},
       }
     | SetSnippet(snippet) => {
         let oldForm = state.form
@@ -68,7 +67,7 @@ let make = () => {
       }
     | UndoChanges => {
         let oldForm = state.form
-        let form = {...oldForm, snippets: initialState.snippets->Array.map(s => (s, false))}
+        let form = {...oldForm, snippets: snippets_->Array.map(s => (s, false))}
         {...state, form}
       }
     }

@@ -34,13 +34,11 @@ function SnippetEditor(props) {
   var match = Hooks.DescriptionSnippet.useWhatever(name);
   var maybePort = match[1];
   var snippets_ = match[0];
-  var initialState_form = {
-    newSnippet: newSnippet,
-    snippets: []
-  };
   var initialState = {
-    form: initialState_form,
-    snippets: snippets_
+    form: {
+      newSnippet: newSnippet,
+      snippets: []
+    }
   };
   var update = function (state, action) {
     if (typeof action !== "object") {
@@ -57,8 +55,7 @@ function SnippetEditor(props) {
         snippets: form_snippets
       };
       return {
-              form: form,
-              snippets: state.snippets
+              form: form
             };
     }
     switch (action.TAG) {
@@ -66,14 +63,13 @@ function SnippetEditor(props) {
           return {
                   form: {
                     newSnippet: newSnippet,
-                    snippets: action._0.map(function (s) {
+                    snippets: snippets_.map(function (s) {
                           return [
                                   s,
                                   false
                                 ];
                         })
-                  },
-                  snippets: state.snippets
+                  }
                 };
       case "SetSnippet" :
           var snippet = action._0;
@@ -83,8 +79,7 @@ function SnippetEditor(props) {
                     form: {
                       newSnippet: snippet,
                       snippets: oldForm$1.snippets
-                    },
-                    snippets: state.snippets
+                    }
                   };
           }
           var snippets = oldForm$1.snippets.map(function (param) {
@@ -107,8 +102,7 @@ function SnippetEditor(props) {
             snippets: snippets
           };
           return {
-                  form: form$1,
-                  snippets: state.snippets
+                  form: form$1
                 };
       case "Submitted" :
           var snippet$1 = action._0;
