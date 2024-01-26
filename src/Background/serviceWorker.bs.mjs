@@ -56,9 +56,9 @@ chrome.runtime.onConnect.addListener(function (port) {
             return ;
         case "SnippetEditor" :
             listeners.set(port.name, port);
-            port.onMessage.addListener(function (message) {
-                  if (message.TAG === "TableAdd") {
-                    var snippet = Schema.DescriptionSnippet.dateFix(message._0);
+            port.onMessage.addListener(function (tag) {
+                  if (tag.TAG === "SaveNewSnippet") {
+                    var snippet = Schema.DescriptionSnippet.dateFix(tag._0);
                     Core__Promise.$$catch(Table.DescriptionSnippet.add(dexie, snippet).then(function (d) {
                                 return Table.DescriptionSnippet.toArray(dexie);
                               }).then(function (descriptionSnippets) {
@@ -76,7 +76,7 @@ chrome.runtime.onConnect.addListener(function (port) {
                           }));
                     return ;
                   }
-                  var snippet$1 = Schema.DescriptionSnippet.dateFix(message._0);
+                  var snippet$1 = Schema.DescriptionSnippet.dateFix(tag._0);
                   Table.DescriptionSnippet.put(dexie, snippet$1).then(function (d) {
                           return Table.DescriptionSnippet.toArray(dexie);
                         }).then(function (descriptionSnippets) {

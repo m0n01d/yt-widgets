@@ -7,7 +7,7 @@ type form = {
 }
 type model = {form: form, snippets: array<Schema.DescriptionSnippet.t>}
 
-type tag = TableAdd(Schema.DescriptionSnippet.t) | TablePut(Schema.DescriptionSnippet.t)
+type tag = SaveNewSnippet(Schema.DescriptionSnippet.t) | EditSnippet(Schema.DescriptionSnippet.t)
 
 type msg =
   | GotSnippets(array<Schema.DescriptionSnippet.t>)
@@ -58,9 +58,9 @@ let make = () => {
     | Submitted(snippet) => {
         maybePort->Option.mapWithDefault((), port => {
           let message = if snippet.id == None {
-            TableAdd(snippet)
+            SaveNewSnippet(snippet)
           } else {
-            TablePut(snippet)
+            EditSnippet(snippet)
           }
           port->Chrome.Runtime.Port.postMessage(message)
         })

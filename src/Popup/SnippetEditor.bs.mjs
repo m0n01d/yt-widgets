@@ -114,10 +114,10 @@ function SnippetEditor(props) {
           var snippet$1 = action._0;
           Core__Option.mapWithDefault(maybePort, undefined, (function (port) {
                   var message = snippet$1.id === undefined ? ({
-                        TAG: "TableAdd",
+                        TAG: "SaveNewSnippet",
                         _0: snippet$1
                       }) : ({
-                        TAG: "TablePut",
+                        TAG: "EditSnippet",
                         _0: snippet$1
                       });
                   port.postMessage(message);

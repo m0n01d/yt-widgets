@@ -79,9 +79,6 @@ var app = Core__Option.map(Caml_option.nullable_to_opt($$document.querySelector(
           var match$1 = React.useReducer(update, initialState);
           var dispatch = match$1[1];
           var state = match$1[0];
-          React.useEffect((function () {
-                  
-                }), []);
           var bodyWatcher = function (mutationList, observer) {
             mutationList.forEach(function (mutation) {
                   var hasRemovedDialog = Array.prototype.slice.call(mutation.removedNodes).some(function (el) {

@@ -38,9 +38,9 @@ Chrome.Runtime.OnConnect.addListener(port => {
       listeners->Map.set(port.name, port)->ignore
       Table.DescriptionSnippet.toArray(dexie)
       ->Js.Promise2.then(descriptionSnippets => {
-        let message: Chrome.Runtime.Port.message<'a> = Hooks.DescriptionSnippet.GotSnippets(
-          descriptionSnippets,
-        )
+        let message: Chrome.Runtime.Port.message<
+          Hooks.DescriptionSnippet.tag,
+        > = Hooks.DescriptionSnippet.GotSnippets(descriptionSnippets)
         port->Chrome.Runtime.Port.postMessage(message)
         Js.Promise2.resolve()
       })
@@ -50,9 +50,9 @@ Chrome.Runtime.OnConnect.addListener(port => {
   | "SnippetEditor" => {
       // on connect - send data to widget
       listeners->Map.set(port.name, port)->ignore
-      port->Chrome.Runtime.Port.addListener((message: SnippetEditor.tag) => {
-        switch message {
-        | SnippetEditor.TableAdd(snippy) => {
+      port->Chrome.Runtime.Port.addListener((tag: SnippetEditor.tag) => {
+        switch tag {
+        | SnippetEditor.SaveNewSnippet(snippy: Schema.DescriptionSnippet.t) => {
             let snippet: Schema.DescriptionSnippet.t = snippy->Schema.DescriptionSnippet.dateFix
             dexie
             ->Table.DescriptionSnippet.add(snippet)
@@ -83,8 +83,8 @@ Chrome.Runtime.OnConnect.addListener(port => {
             )
             ->ignore
           }
-        | SnippetEditor.TablePut(snippy) => {
-            let snippet: Schema.DescriptionSnippet.t = snippy->Schema.DescriptionSnippet.dateFix
+        | SnippetEditor.EditSnippet(snippy: Schema.DescriptionSnippet.t) => {
+            let snippet = snippy->Schema.DescriptionSnippet.dateFix
             dexie
             ->Table.DescriptionSnippet.put(snippet)
             ->Promise.then(
@@ -97,7 +97,7 @@ Chrome.Runtime.OnConnect.addListener(port => {
                 listeners->Map.forEach(
                   port_ => {
                     let message: Chrome.Runtime.Port.message<
-                      'a,
+                      Hooks.DescriptionSnippet.tag,
                     > = Hooks.DescriptionSnippet.GotSnippets(descriptionSnippets)
 
                     port_->Chrome.Runtime.Port.postMessage(message)
@@ -113,9 +113,9 @@ Chrome.Runtime.OnConnect.addListener(port => {
 
       Table.DescriptionSnippet.toArray(dexie)
       ->Js.Promise2.then(descriptionSnippets => {
-        let message: Chrome.Runtime.Port.message<'a> = Hooks.DescriptionSnippet.GotSnippets(
-          descriptionSnippets,
-        )
+        let message: Chrome.Runtime.Port.message<
+          Hooks.DescriptionSnippet.tag,
+        > = Hooks.DescriptionSnippet.GotSnippets(descriptionSnippets)
         port->Chrome.Runtime.Port.postMessage(message)
         Js.Promise2.resolve()
       })
