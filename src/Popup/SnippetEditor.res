@@ -134,17 +134,7 @@ let make = () => {
   let viewSnippet = ((snippet: Schema.DescriptionSnippet.t, isChanged)) => {
     let isExpanded = true
     <Mui.Card sx={Mui.Sx.obj({margin: Mui.System.Value.Number(2.0)})}>
-      <Mui.ListItem
-      // secondaryAction={<Mui.IconButton
-      //onClick={_ => dispatch(ExpandedSnippet(snippet))}
-      // >
-      //   {if isExpanded {
-      //     <Ui.Icon.Expand.Less />
-      //   } else {
-      //     <Ui.Icon.Expand.More />
-      //   }}
-      // </Mui.IconButton>}
-      >
+      <Mui.ListItem>
         <Mui.ListItemText
           primary={<Mui.Typography variant={Subtitle1}>
             {["Edit -", snippet.name]->Array.joinWith(" ")->React.string}

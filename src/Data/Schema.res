@@ -33,7 +33,7 @@ module DescriptionSnippet = {
 
   /// util
 
-  let dateFix = (snippet: t) => {
+  let dateFix = (snippet: t): t => {
     let d = snippet.date->Js.Date.toString
     let date = Js.Date.fromString(d)
     // Hack to get around the fact that it type checks
