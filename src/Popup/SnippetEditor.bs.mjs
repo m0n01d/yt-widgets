@@ -222,6 +222,7 @@ function SnippetEditor(props) {
   };
   var viewSnippet = function (param) {
     var snippet = param[0];
+    var prefix = undefined === snippet.id ? "Add" : "Edit";
     return JsxRuntime.jsxs(Card, {
                 sx: {
                   margin: 2.0
@@ -232,9 +233,9 @@ function SnippetEditor(props) {
                                   primary: Caml_option.some(JsxRuntime.jsx(Typography, {
                                             variant: "subtitle1",
                                             children: Caml_option.some([
-                                                    "Edit -",
+                                                    prefix,
                                                     snippet.name
-                                                  ].join(" "))
+                                                  ].join(" - "))
                                           }))
                                 }))
                       }),

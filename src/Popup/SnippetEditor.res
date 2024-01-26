@@ -133,11 +133,17 @@ let make = () => {
 
   let viewSnippet = ((snippet: Schema.DescriptionSnippet.t, isChanged)) => {
     let isExpanded = true
+    let prefix = if None == snippet.id {
+      "Add"
+    } else {
+      "Edit"
+    }
+
     <Mui.Card sx={Mui.Sx.obj({margin: Mui.System.Value.Number(2.0)})}>
       <Mui.ListItem>
         <Mui.ListItemText
           primary={<Mui.Typography variant={Subtitle1}>
-            {["Edit -", snippet.name]->Array.joinWith(" ")->React.string}
+            {[prefix, snippet.name]->Array.joinWith(" - ")->React.string}
           </Mui.Typography>}
         />
       </Mui.ListItem>
