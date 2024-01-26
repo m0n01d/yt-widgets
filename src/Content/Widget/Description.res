@@ -23,7 +23,6 @@ module Snippets = {
   type msg =
     | ClosedDialog
     | ExpandedSnippet(Schema.DescriptionSnippet.t)
-    | GotSnippets(array<Schema.DescriptionSnippet.t>)
     | GotTextbox(Dom.Element.t)
     | OpenDialog
     | SelectedSnippet(Schema.DescriptionSnippet.t)

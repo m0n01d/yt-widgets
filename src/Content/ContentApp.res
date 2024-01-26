@@ -62,18 +62,6 @@ let app = Document.querySelector(document, "title")->Option.map(titleEl => {
       }
       let (state, dispatch) = React.useReducer(update, initialState)
 
-      React.useEffect0(() => {
-        // let onMessageListener = portMsg => {
-        //   Js.log2("app chrome port inbound", portMsg)
-        // }
-        // let port = Chrome.Runtime.connect({name: "yt-widgets-content"})
-        // Chrome.Runtime.Port.addListener(port, onMessageListener)
-        // let message: Chrome.Runtime.Port.message<'a> = {payload: None, tag: "ready"}
-        // port->Chrome.Runtime.Port.postMessage(message)
-
-        None
-      })
-
       let bodyWatcher = (mutationList, observer) => {
         let dialog = mutationList->Array.forEach(mutation => {
           let hasRemovedDialog =

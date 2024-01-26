@@ -83,16 +83,6 @@ function update(state, action) {
                   maybeTextbox: state.maybeTextbox,
                   selectedSnippet: state.selectedSnippet
                 };
-      case "GotSnippets" :
-          throw {
-                RE_EXN_ID: "Match_failure",
-                _1: [
-                  "Description.res",
-                  33,
-                  4
-                ],
-                Error: new Error()
-              };
       case "GotTextbox" :
           return {
                   expandedSnippet: state.expandedSnippet,
