@@ -1,7 +1,7 @@
 module DescriptionSnippet = {
   type tag = GotSnippets(array<Schema.DescriptionSnippet.t>)
 
-  let useWhatever = name => {
+  let usePort = name => {
     let (snippets, setState) = React.useState(_ => ([], None))
 
     React.useEffect0(() => {

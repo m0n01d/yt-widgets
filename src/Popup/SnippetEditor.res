@@ -26,7 +26,7 @@ let make = () => {
     order: -1,
   }
 
-  let (snippets_, maybePort) = Hooks.DescriptionSnippet.useWhatever(name)
+  let (snippets_, maybePort) = Hooks.DescriptionSnippet.usePort(name)
   let initialState = {
     {
       form: {newSnippet, snippets: []},

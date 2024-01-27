@@ -3,7 +3,7 @@
 import * as React from "react";
 import * as Schema from "../Data/Schema.bs.mjs";
 
-function useWhatever(name) {
+function usePort(name) {
   var match = React.useState(function () {
         return [
                 [],
@@ -34,7 +34,7 @@ function useWhatever(name) {
 }
 
 var DescriptionSnippet = {
-  useWhatever: useWhatever
+  usePort: usePort
 };
 
 export {

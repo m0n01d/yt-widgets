@@ -31,7 +31,7 @@ function SnippetEditor(props) {
     name: "New Snippet",
     order: -1
   };
-  var match = Hooks.DescriptionSnippet.useWhatever(name);
+  var match = Hooks.DescriptionSnippet.usePort(name);
   var maybePort = match[1];
   var snippets_ = match[0];
   var initialState = {

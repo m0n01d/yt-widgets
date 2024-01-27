@@ -111,7 +111,7 @@ function Description$Snippets(props) {
       });
   var dispatch = match[1];
   var state = match[0];
-  var match$1 = Hooks.DescriptionSnippet.useWhatever(name);
+  var match$1 = Hooks.DescriptionSnippet.usePort(name);
   var snippets = match$1[0];
   React.useEffect(function () {
         var match = state.maybeTextbox;
