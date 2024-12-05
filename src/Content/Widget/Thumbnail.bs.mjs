@@ -16,7 +16,7 @@ import * as ReactQuery$1 from "@tanstack/react-query";
 
 var sidePanelSelector = "ytcp-video-metadata-editor-sidepanel";
 
-var stillPickerSelector = "#still-picker";
+var stillPickerSelector = "ytcp-video-custom-still-editor";
 
 var thumbnailImgSelector = "ytcp-thumbnail-uploader img#img-with-fallback";
 
@@ -75,12 +75,13 @@ function update(state, action) {
             maybeThumbnailEl: state.maybeThumbnailEl,
             maybeImgSrc: action._0
           };
-  } else {
-    return {
-            maybeThumbnailEl: Caml_option.some(action._0),
-            maybeImgSrc: state.maybeImgSrc
-          };
   }
+  var el = action._0;
+  var maybeImgSrc = el.getAttribute("src");
+  return {
+          maybeThumbnailEl: Caml_option.some(el),
+          maybeImgSrc: (maybeImgSrc == null) ? undefined : Caml_option.some(maybeImgSrc)
+        };
 }
 
 function viewThumbnail(src) {
@@ -236,6 +237,10 @@ function Thumbnail$Preview(props) {
                 });
           }));
   };
+  if (queryResult.isError) {
+    console.log(queryResult.error);
+    return null;
+  }
   var match$1 = queryResult.data;
   if (match$1 === undefined) {
     return null;
@@ -252,7 +257,6 @@ function Thumbnail$Preview(props) {
           _0: thumbnailImgEl
         });
   }
-  console.log("Hello thumbnail");
   var stillPickerObserver = new MutationObserver(stillPickerWatcher);
   stillPickerObserver.observe(stillPickerEl, {
         attributes: true,

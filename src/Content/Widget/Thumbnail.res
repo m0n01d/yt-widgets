@@ -2,7 +2,7 @@ open Webapi.Dom
 open Belt
 
 let sidePanelSelector = "ytcp-video-metadata-editor-sidepanel"
-let stillPickerSelector = "#still-picker"
+let stillPickerSelector = "ytcp-video-custom-still-editor"
 let thumbnailImgSelector = "ytcp-thumbnail-uploader img#img-with-fallback"
 
 let query = _ => {
@@ -52,7 +52,10 @@ module Preview = {
   let update = (state: model, action: msg) => {
     switch action {
     | SetImgSrc(src) => {...state, maybeImgSrc: Some(src)}
-    | SetThumbnailEl(el) => {...state, maybeThumbnailEl: Some(el)}
+    | SetThumbnailEl(el) => {
+        let maybeImgSrc = el->Element.getAttribute("src")
+        {...state, maybeImgSrc, maybeThumbnailEl: Some(el)}
+      }
     }
   }
 
@@ -168,11 +171,14 @@ module Preview = {
     }
 
     switch queryResult {
+    | {isError: true, error, _} => {
+        Console.log(error)
+        React.null
+      }
     | {data: Some([sidePanelEl, stillPickerEl, thumbnailImgEl]), _} => {
         if None == state.maybeThumbnailEl {
           dispatch(SetThumbnailEl(thumbnailImgEl))
         }
-        Js.log("Hello thumbnail")
         let stillPickerObserver = MutationObserver.make(stillPickerWatcher)
         MutationObserver.observe(
           stillPickerObserver,
