@@ -6,7 +6,7 @@ const defaultConfig = {
     inlineDynamicImports: true,
     emptyOutDir: false, // runs second
     rollupOptions: {
-      input: "src/Background/ServiceWorker.bs.mjs",
+      input: "src/Background/serviceWorker.bs.mjs",
       output: {
         assetFileNames: (asset) => {
           switch (asset.name) {

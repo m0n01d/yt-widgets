@@ -103,7 +103,7 @@ chrome.runtime.onConnect.addListener(function (port) {
           throw {
                 RE_EXN_ID: "Match_failure",
                 _1: [
-                  "ServiceWorker.res",
+                  "serviceWorker.res",
                   35,
                   2
                 ],
