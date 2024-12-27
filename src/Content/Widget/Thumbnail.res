@@ -1,12 +1,24 @@
+@new external makeFileReader: unit => 'a = "FileReader"
+@send external readAsDataURL: ('reader, Webapi.File.t) => 'a = "readAsDataURL"
+
 open Webapi.Dom
 open Belt
+open File
 
-let sidePanelSelector = "ytcp-video-metadata-editor-sidepanel"
+let dummyData = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAIAQMAAAD+wSzIAAAABlBMVEX///+/v7+jQ3Y5AAAADklEQVQI12P4AIX8EAgALgAD/aNpbtEAAAAASUVORK5CYII"
+
+let targetElSelector = "ytcp-video-thumbnail-editor"
 let stillPickerSelector = "ytcp-video-custom-still-editor"
 let thumbnailImgSelector = "ytcp-thumbnail-uploader img#img-with-fallback"
+let fileLoader = "ytcp-thumbnail-uploader input#file-loader"
+let titleElSelector = "ytcp-video-title #textbox"
+
+// @TODO
+// get mimetype to save for future use when reuploading an edited photo
+// get title to use in preview, for now use Lorem Ipsum
 
 let query = _ => {
-  [sidePanelSelector, stillPickerSelector, thumbnailImgSelector]
+  [targetElSelector, stillPickerSelector, thumbnailImgSelector, fileLoader]
   ->Js.Array2.map(selector => Ui.queryDom(None, selector, 3)->Js.Promise2.then(el => el))
   ->Js.Promise2.all
 }
@@ -17,8 +29,6 @@ module Palette = {
 
   @react.component
   let make = (~src) => {
-    Js.log2("make palette from ", src)
-
     let (maybeColors: colorPalette, setColors) = React.useState(_ => [])
 
     React.useEffect1(() => {
@@ -46,89 +56,136 @@ module Palette = {
 }
 
 module Preview = {
-  type model = {maybeThumbnailEl: option<Dom.element>, maybeImgSrc: option<string>}
+  type userImg = FromUser(string) | FromYoutube(string)
+  type model = {
+    maybeThumbnailEl: option<Dom.element>,
+    maybeImgSrc: option<userImg>,
+    maybeDialog: option<unit>,
+  }
 
-  type msg = SetImgSrc(string) | SetThumbnailEl(Dom.element)
+  type msg =
+    ClosedDialog | ClickedEditThumb(string) | SetImgSrc(userImg) | SetThumbnailEl(Dom.element)
   let update = (state: model, action: msg) => {
     switch action {
+    | ClosedDialog => {...state, maybeDialog: None}
+
+    | ClickedEditThumb(src) => {...state, maybeDialog: Some()}
     | SetImgSrc(src) => {...state, maybeImgSrc: Some(src)}
     | SetThumbnailEl(el) => {
-        let maybeImgSrc = el->Element.getAttribute("src")
+        let maybeImgSrc = el->Element.getAttribute("src")->Option.map(s => FromYoutube(s))
         {...state, maybeImgSrc, maybeThumbnailEl: Some(el)}
       }
     }
   }
 
   let viewThumbnail = src => {
-    <div
-      style={ReactDOM.Style.make(
-        ~position="relative",
-        ~width="320px",
-        ~height="180px",
-        ~margin="0 auto",
-        (),
-      )}>
-      <img src />
-      <span
+    <Mui.Box>
+      <div
         style={ReactDOM.Style.make(
-          ~background="white",
-          ~border="1px solid black",
-          ~bottom="0",
-          ~left="33%",
-          ~position="absolute",
-          ~top="0",
-          ~width="2px",
-          ~zIndex="1",
+          ~position="relative",
+          ~display="block",
+          ~margin="0.2rem 0.25rem",
           (),
-        )}
-      />
-      <span
-        style={ReactDOM.Style.make(
-          ~background="white",
-          ~border="1px solid black",
-          ~bottom="0",
-          ~left="66%",
-          ~position="absolute",
-          ~top="0",
-          ~width="2px",
-          ~zIndex="1",
-          (),
-        )}
-      />
-      <span
-        style={ReactDOM.Style.make(
-          ~background="white",
-          ~border="1px solid black",
-          ~height="2px",
-          ~left="0",
-          ~position="absolute",
-          ~right="0",
-          ~top="33%",
-          ~zIndex="1",
-          (),
-        )}
-      />
-      <span
-        style={ReactDOM.Style.make(
-          ~background="white",
-          ~border="1px solid black",
-          ~height="2px",
-          ~left="0",
-          ~position="absolute",
-          ~right="0",
-          ~top="66%",
-          ~zIndex="1",
-          (),
-        )}
-      />
-    </div>
+        )}>
+        <img style={ReactDOM.Style.make(~width="100%", ())} src />
+        <span
+          style={ReactDOM.Style.make(
+            ~background="white",
+            ~border="1px solid black",
+            ~bottom="0",
+            ~left="33%",
+            ~position="absolute",
+            ~top="0",
+            ~width="2px",
+            ~zIndex="1",
+            (),
+          )}
+        />
+        <span
+          style={ReactDOM.Style.make(
+            ~background="white",
+            ~border="1px solid black",
+            ~bottom="0",
+            ~left="66%",
+            ~position="absolute",
+            ~top="0",
+            ~width="2px",
+            ~zIndex="1",
+            (),
+          )}
+        />
+        <span
+          style={ReactDOM.Style.make(
+            ~background="white",
+            ~border="1px solid black",
+            ~height="2px",
+            ~left="0",
+            ~position="absolute",
+            ~right="0",
+            ~top="33%",
+            ~zIndex="1",
+            (),
+          )}
+        />
+        <span
+          style={ReactDOM.Style.make(
+            ~background="white",
+            ~border="1px solid black",
+            ~height="2px",
+            ~left="0",
+            ~position="absolute",
+            ~right="0",
+            ~top="66%",
+            ~zIndex="1",
+            (),
+          )}
+        />
+      </div>
+      <div>
+        <Palette src />
+      </div>
+    </Mui.Box>
   }
-  let view = state => {
-    let children = switch state.maybeImgSrc {
-    | Some(src) => [viewThumbnail(src), <Palette src />]
-    | None => []
+
+  let view = (state, dispatch) => {
+    let viewDialog = () => {
+      <Mui.Dialog
+        fullWidth={true}
+        onClose={(_, _) => dispatch(ClosedDialog)}
+        maxWidth={Xs}
+        open_={true}
+        sx={Mui.Sx.obj({zIndex: {Mui.System.Value.Number(2206.0)}})}>
+        {"dialog"->React.string}
+      </Mui.Dialog>
     }
-    React.array(children)
+    let maybeDialog = switch state.maybeDialog {
+    | None => React.null
+    | Some(_) => viewDialog()
+    }
+
+    switch state.maybeImgSrc {
+    | Some(FromYoutube(src)) => <Mui.Box> {viewThumbnail(src)} </Mui.Box>
+    | Some(FromUser(src)) =>
+      <Mui.Box style={ReactDOM.Style.make(~position="relative", ())}>
+        {viewThumbnail(src)}
+        <div>
+          <Mui.Button
+            endIcon={<Ui.Icon.NoteAdd />}
+            onClick={_ => dispatch(ClickedEditThumb(src))}
+            sx={Mui.Sx.obj({
+              margin: Mui.System.Value.String("1rem 0"),
+              width: Mui.System.Value.String("142px"),
+              position: Mui.System.Value.String("absolute"),
+              top: Mui.System.Value.String("1rem"),
+              left: Mui.System.Value.String("1rem"),
+            })}
+            variant={Contained}>
+            {"Preview Thumbnail"->React.string}
+          </Mui.Button>
+        </div>
+      </Mui.Box>
+    | None => React.null
+    }
   }
   @react.component
   let make = () => {
@@ -136,8 +193,9 @@ module Preview = {
       document
       ->Document.querySelector(thumbnailImgSelector)
       ->Option.flatMap(img => img->Element.getAttribute("src"))
+      ->Option.map(s => FromYoutube(s))
 
-    let initialState = {maybeImgSrc: initialImgSrc, maybeThumbnailEl: None}
+    let initialState = {maybeImgSrc: initialImgSrc, maybeThumbnailEl: None, maybeDialog: None}
     let (state, dispatch) = React.useReducer(update, initialState)
     let queryResult = ReactQuery.useQuery({
       queryFn: query,
@@ -147,45 +205,39 @@ module Preview = {
       staleTime: ReactQuery.time(#number(1)),
     })
 
-    let stillPickerWatcher = (mutationList, observer) => {
-      let maybeSrc = mutationList->Js.Array2.reduce((acc, mutation) => {
-        let target = mutation->MutationRecord.target
-        let node = Element.ofNode(target)
-        let name = target->Node.nodeName->Js.String2.toLocaleLowerCase
-        let attrName = MutationRecord.attributeName(mutation)
-        let isSelected = node->Option.flatMap(node => node->Element.getAttribute("aria-selected"))
-        let uploaderIsSelected = node->Option.flatMap(el => el->Element.getAttribute("selected"))
-
-        switch (name, attrName, uploaderIsSelected, node == state.maybeThumbnailEl, isSelected) {
-        | ("ytcp-thumbnail-uploader", Some("selected"), Some(""), _, _)
-        | (_, _, _, _, Some("true")) =>
-          node
-          ->Option.flatMap(el => Element.querySelector(el, "img"))
-          ->Option.flatMap(img => img->Element.getAttribute("src"))
-        | (_, Some("src"), _, true, _) =>
-          state.maybeThumbnailEl->Option.flatMap(el => el->Element.getAttribute("src"))
-        | _ => acc
-        }
-      }, None)
-      maybeSrc->Option.mapWithDefault((), src => dispatch(SetImgSrc(src)))
-    }
-
     switch queryResult {
     | {isError: true, error, _} => {
         Console.log(error)
         React.null
       }
-    | {data: Some([sidePanelEl, stillPickerEl, thumbnailImgEl]), _} => {
+    | {data: Some([targetEl, stillPickerEl, thumbnailImgEl, fileLoaderEl]), _} => {
+        switch fileLoaderEl->HtmlInputElement.ofElement {
+        | Some(fileInput) => {
+            let rec fn = ev => {
+              let target = ev->InputElement.Event.target
+              let files = target->InputElement.files
+
+              files->Array.forEach(f => {
+                let reader = File.Reader.make()
+                reader->File.Reader.addEventListener(#load, () => {
+                  let src = File.Reader.result(reader)
+                  dispatch(SetImgSrc(FromUser(src)))
+                  Console.log(src)
+                })
+                reader->File.Reader.readAsDataURL(f)
+              })
+              fileInput->InputElement.removeEventListener(#change, fn)
+            }
+            fileInput->InputElement.addEventListener(#change, fn)
+          }
+        | None => Console.log("what")
+        }
+
         if None == state.maybeThumbnailEl {
           dispatch(SetThumbnailEl(thumbnailImgEl))
         }
-        let stillPickerObserver = MutationObserver.make(stillPickerWatcher)
-        MutationObserver.observe(
-          stillPickerObserver,
-          stillPickerEl,
-          {"attributes": true, "childList": true, "subtree": true},
-        )
-        ReactDOM.createPortal(view(state), sidePanelEl)
+
+        ReactDOM.createPortal(view(state, dispatch), targetEl)
       }
     | _ => React.null
     }
@@ -200,3 +252,44 @@ let make = () => {
     <Preview />
   </ReactQuery.Provider>
 }
+
+/*
+
+
+function dispatchChangeEventWithDataUrl(inputElement, dataUrl) {
+  // Create a new File object from the data URL
+  const file = dataURLtoFile(dataUrl, 'image.png'); // Replace 'image.png' with the appropriate file name and type
+
+  // Create a DataTransfer object and add the file to it
+  const dataTransfer = new DataTransfer();
+  dataTransfer.items.add(file);
+
+  // Set the files property of the input element to the DataTransfer object
+  inputElement.files = dataTransfer.files;
+
+  // Dispatch the change event
+  const changeEvent = new Event('change', { bubbles: true });
+  inputElement.dispatchEvent(changeEvent);
+}
+
+function dataURLtoFile(dataUrl, filename) {
+  const arr = dataUrl.split(',');
+  const mime = arr[0].match(/:(.*?);/)[1];
+  const bstr = atob(arr[1]);
+  let n = bstr.length;
+  const u8arr = new Uint8Array(n);
+
+  while (n--) {
+    u8arr[n] = bstr.charCodeAt(n);
+  }
+
+  return new File([u8arr], filename, { type: mime });
+}
+
+// Example usage:
+const inputElement = document.getElementById('myInput');
+const dataUrl = 'data:image/png;base64,...'; // Your data URL here
+
+dispatchChangeEventWithDataUrl(inputElement, dataUrl);
+
+ */

@@ -2,29 +2,36 @@
 
 import * as Ui from "../Ui.bs.mjs";
 import * as React from "react";
-import * as Caml_obj from "rescript/lib/es6/caml_obj.js";
 import * as Js_array from "rescript/lib/es6/js_array.js";
 import * as ColorJs from "color.js";
 import * as ReactDom from "react-dom";
+import * as Belt_Array from "rescript/lib/es6/belt_Array.js";
 import * as ReactQuery from "@rescriptbr/react-query/src/ReactQuery.bs.mjs";
 import * as Belt_Option from "rescript/lib/es6/belt_Option.js";
 import * as Caml_option from "rescript/lib/es6/caml_option.js";
 import * as Js_promise2 from "rescript/lib/es6/js_promise2.js";
+import Box from "@mui/material/Box";
 import * as JsxRuntime from "react/jsx-runtime";
-import * as Webapi__Dom__Element from "rescript-webapi/src/Webapi/Dom/Webapi__Dom__Element.bs.mjs";
+import Button from "@mui/material/Button";
+import Dialog from "@mui/material/Dialog";
 import * as ReactQuery$1 from "@tanstack/react-query";
+import NoteAdd from "@mui/icons-material/NoteAdd";
+import * as Webapi__Dom__HtmlInputElement from "rescript-webapi/src/Webapi/Dom/Webapi__Dom__HtmlInputElement.bs.mjs";
 
-var sidePanelSelector = "ytcp-video-metadata-editor-sidepanel";
+var targetElSelector = "ytcp-video-thumbnail-editor";
 
 var stillPickerSelector = "ytcp-video-custom-still-editor";
 
 var thumbnailImgSelector = "ytcp-thumbnail-uploader img#img-with-fallback";
 
+var fileLoader = "ytcp-thumbnail-uploader input#file-loader";
+
 function query(param) {
   return Promise.all([
-                sidePanelSelector,
+                targetElSelector,
                 stillPickerSelector,
-                thumbnailImgSelector
+                thumbnailImgSelector,
+                fileLoader
               ].map(function (selector) {
                   return Js_promise2.then(Ui.queryDom(undefined, selector, 3), (function (el) {
                                 return el;
@@ -34,7 +41,6 @@ function query(param) {
 
 function Thumbnail$Palette(props) {
   var src = props.src;
-  console.log("make palette from ", src);
   var match = React.useState(function () {
         return [];
       });
@@ -70,105 +76,190 @@ var Palette = {
 };
 
 function update(state, action) {
-  if (action.TAG === "SetImgSrc") {
+  if (typeof action !== "object") {
     return {
             maybeThumbnailEl: state.maybeThumbnailEl,
-            maybeImgSrc: action._0
+            maybeImgSrc: state.maybeImgSrc,
+            maybeDialog: undefined
           };
   }
-  var el = action._0;
-  var maybeImgSrc = el.getAttribute("src");
-  return {
-          maybeThumbnailEl: Caml_option.some(el),
-          maybeImgSrc: (maybeImgSrc == null) ? undefined : Caml_option.some(maybeImgSrc)
-        };
+  switch (action.TAG) {
+    case "ClickedEditThumb" :
+        return {
+                maybeThumbnailEl: state.maybeThumbnailEl,
+                maybeImgSrc: state.maybeImgSrc,
+                maybeDialog: Caml_option.some(undefined)
+              };
+    case "SetImgSrc" :
+        return {
+                maybeThumbnailEl: state.maybeThumbnailEl,
+                maybeImgSrc: action._0,
+                maybeDialog: state.maybeDialog
+              };
+    case "SetThumbnailEl" :
+        var el = action._0;
+        var maybeImgSrc = Belt_Option.map(Caml_option.nullable_to_opt(el.getAttribute("src")), (function (s) {
+                return {
+                        TAG: "FromYoutube",
+                        _0: s
+                      };
+              }));
+        return {
+                maybeThumbnailEl: Caml_option.some(el),
+                maybeImgSrc: maybeImgSrc,
+                maybeDialog: state.maybeDialog
+              };
+    
+  }
 }
 
 function viewThumbnail(src) {
-  return JsxRuntime.jsxs("div", {
+  return JsxRuntime.jsxs(Box, {
               children: [
-                JsxRuntime.jsx("img", {
-                      src: src
-                    }),
-                JsxRuntime.jsx("span", {
+                JsxRuntime.jsxs("div", {
+                      children: [
+                        JsxRuntime.jsx("img", {
+                              style: {
+                                width: "100%"
+                              },
+                              src: src
+                            }),
+                        JsxRuntime.jsx("span", {
+                              style: {
+                                background: "white",
+                                border: "1px solid black",
+                                bottom: "0",
+                                left: "33%",
+                                position: "absolute",
+                                top: "0",
+                                width: "2px",
+                                zIndex: "1"
+                              }
+                            }),
+                        JsxRuntime.jsx("span", {
+                              style: {
+                                background: "white",
+                                border: "1px solid black",
+                                bottom: "0",
+                                left: "66%",
+                                position: "absolute",
+                                top: "0",
+                                width: "2px",
+                                zIndex: "1"
+                              }
+                            }),
+                        JsxRuntime.jsx("span", {
+                              style: {
+                                background: "white",
+                                border: "1px solid black",
+                                height: "2px",
+                                left: "0",
+                                position: "absolute",
+                                right: "0",
+                                top: "33%",
+                                zIndex: "1"
+                              }
+                            }),
+                        JsxRuntime.jsx("span", {
+                              style: {
+                                background: "white",
+                                border: "1px solid black",
+                                height: "2px",
+                                left: "0",
+                                position: "absolute",
+                                right: "0",
+                                top: "66%",
+                                zIndex: "1"
+                              }
+                            })
+                      ],
                       style: {
-                        background: "white",
-                        border: "1px solid black",
-                        bottom: "0",
-                        left: "33%",
-                        position: "absolute",
-                        top: "0",
-                        width: "2px",
-                        zIndex: "1"
+                        display: "block",
+                        margin: "0.2rem 0.25rem",
+                        position: "relative"
                       }
                     }),
-                JsxRuntime.jsx("span", {
-                      style: {
-                        background: "white",
-                        border: "1px solid black",
-                        bottom: "0",
-                        left: "66%",
-                        position: "absolute",
-                        top: "0",
-                        width: "2px",
-                        zIndex: "1"
-                      }
-                    }),
-                JsxRuntime.jsx("span", {
-                      style: {
-                        background: "white",
-                        border: "1px solid black",
-                        height: "2px",
-                        left: "0",
-                        position: "absolute",
-                        right: "0",
-                        top: "33%",
-                        zIndex: "1"
-                      }
-                    }),
-                JsxRuntime.jsx("span", {
-                      style: {
-                        background: "white",
-                        border: "1px solid black",
-                        height: "2px",
-                        left: "0",
-                        position: "absolute",
-                        right: "0",
-                        top: "66%",
-                        zIndex: "1"
-                      }
+                JsxRuntime.jsx("div", {
+                      children: JsxRuntime.jsx(Thumbnail$Palette, {
+                            src: src
+                          })
                     })
-              ],
-              style: {
-                height: "180px",
-                margin: "0 auto",
-                position: "relative",
-                width: "320px"
-              }
+              ]
             });
 }
 
-function view(state) {
-  var src = state.maybeImgSrc;
-  if (src !== undefined) {
-    return [
-            viewThumbnail(src),
-            JsxRuntime.jsx(Thumbnail$Palette, {
-                  src: src
-                })
-          ];
-  } else {
-    return [];
+function view(state, dispatch) {
+  var viewDialog = function () {
+    return JsxRuntime.jsx(Dialog, {
+                open: true,
+                children: "dialog",
+                fullWidth: true,
+                maxWidth: "xs",
+                onClose: (function (param, param$1) {
+                    dispatch("ClosedDialog");
+                  }),
+                sx: {
+                  zIndex: 2206.0
+                }
+              });
+  };
+  var match = state.maybeDialog;
+  if (match !== undefined) {
+    viewDialog();
   }
+  var match$1 = state.maybeImgSrc;
+  if (match$1 === undefined) {
+    return null;
+  }
+  if (match$1.TAG !== "FromUser") {
+    return JsxRuntime.jsx(Box, {
+                children: Caml_option.some(viewThumbnail(match$1._0))
+              });
+  }
+  var src = match$1._0;
+  return JsxRuntime.jsxs(Box, {
+              style: {
+                position: "relative"
+              },
+              children: [
+                viewThumbnail(src),
+                JsxRuntime.jsx("div", {
+                      children: JsxRuntime.jsx(Button, {
+                            children: "Edit Thumbnail",
+                            onClick: (function (param) {
+                                dispatch({
+                                      TAG: "ClickedEditThumb",
+                                      _0: src
+                                    });
+                              }),
+                            endIcon: Caml_option.some(JsxRuntime.jsx(NoteAdd, {})),
+                            sx: {
+                              left: "1rem",
+                              position: "absolute",
+                              top: "1rem",
+                              width: "142px",
+                              margin: "1rem 0"
+                            },
+                            variant: "contained"
+                          })
+                    })
+              ]
+            });
 }
 
 function Thumbnail$Preview(props) {
-  var initialImgSrc = Belt_Option.flatMap(Caml_option.nullable_to_opt(document.querySelector(thumbnailImgSelector)), (function (img) {
-          return Caml_option.nullable_to_opt(img.getAttribute("src"));
+  var initialImgSrc = Belt_Option.map(Belt_Option.flatMap(Caml_option.nullable_to_opt(document.querySelector(thumbnailImgSelector)), (function (img) {
+              return Caml_option.nullable_to_opt(img.getAttribute("src"));
+            })), (function (s) {
+          return {
+                  TAG: "FromYoutube",
+                  _0: s
+                };
         }));
   var initialState = {
     maybeThumbnailEl: undefined,
-    maybeImgSrc: initialImgSrc
+    maybeImgSrc: initialImgSrc,
+    maybeDialog: undefined
   };
   var match = React.useReducer(update, initialState);
   var dispatch = match[1];
@@ -189,54 +280,6 @@ function Thumbnail$Preview(props) {
                   VAL: false
                 }))
       });
-  var stillPickerWatcher = function (mutationList, observer) {
-    var maybeSrc = mutationList.reduce((function (acc, mutation) {
-            var target = mutation.target;
-            var node = Webapi__Dom__Element.ofNode(target);
-            var name = target.nodeName.toLocaleLowerCase();
-            var attrName = mutation.attributeName;
-            var isSelected = Belt_Option.flatMap(node, (function (node) {
-                    return Caml_option.nullable_to_opt(node.getAttribute("aria-selected"));
-                  }));
-            var uploaderIsSelected = Belt_Option.flatMap(node, (function (el) {
-                    return Caml_option.nullable_to_opt(el.getAttribute("selected"));
-                  }));
-            var match = Caml_obj.equal(node, state.maybeThumbnailEl);
-            var exit = 0;
-            var exit$1 = 0;
-            if (name === "ytcp-thumbnail-uploader" && !((attrName == null) || !(attrName === "selected" && uploaderIsSelected === ""))) {
-              exit = 2;
-            } else {
-              exit$1 = 3;
-            }
-            if (exit$1 === 3) {
-              exit = isSelected === "true" ? 2 : 1;
-            }
-            switch (exit) {
-              case 1 :
-                  if ((attrName == null) || !(attrName === "src" && match)) {
-                    return acc;
-                  } else {
-                    return Belt_Option.flatMap(state.maybeThumbnailEl, (function (el) {
-                                  return Caml_option.nullable_to_opt(el.getAttribute("src"));
-                                }));
-                  }
-              case 2 :
-                  return Belt_Option.flatMap(Belt_Option.flatMap(node, (function (el) {
-                                    return Caml_option.nullable_to_opt(el.querySelector("img"));
-                                  })), (function (img) {
-                                return Caml_option.nullable_to_opt(img.getAttribute("src"));
-                              }));
-              
-            }
-          }), undefined);
-    Belt_Option.mapWithDefault(maybeSrc, undefined, (function (src) {
-            dispatch({
-                  TAG: "SetImgSrc",
-                  _0: src
-                });
-          }));
-  };
   if (queryResult.isError) {
     console.log(queryResult.error);
     return null;
@@ -245,25 +288,46 @@ function Thumbnail$Preview(props) {
   if (match$1 === undefined) {
     return null;
   }
-  if (match$1.length !== 3) {
+  if (match$1.length !== 4) {
     return null;
   }
-  var sidePanelEl = match$1[0];
-  var stillPickerEl = match$1[1];
+  var targetEl = match$1[0];
   var thumbnailImgEl = match$1[2];
+  var fileLoaderEl = match$1[3];
+  var fileInput = Webapi__Dom__HtmlInputElement.ofElement(fileLoaderEl);
+  if (fileInput !== undefined) {
+    var fileInput$1 = Caml_option.valFromOption(fileInput);
+    var fn = function (ev) {
+      var target = ev.target;
+      var files = target.files;
+      Belt_Array.forEach(files, (function (f) {
+              var reader = new FileReader();
+              reader.addEventListener("load", (function () {
+                      var src = reader.result;
+                      dispatch({
+                            TAG: "SetImgSrc",
+                            _0: {
+                              TAG: "FromUser",
+                              _0: src
+                            }
+                          });
+                      console.log(src);
+                    }));
+              reader.readAsDataURL(f);
+            }));
+      fileInput$1.removeEventListener("change", fn);
+    };
+    fileInput$1.addEventListener("change", fn);
+  } else {
+    console.log("what");
+  }
   if (undefined === state.maybeThumbnailEl) {
     dispatch({
           TAG: "SetThumbnailEl",
           _0: thumbnailImgEl
         });
   }
-  var stillPickerObserver = new MutationObserver(stillPickerWatcher);
-  stillPickerObserver.observe(stillPickerEl, {
-        attributes: true,
-        childList: true,
-        subtree: true
-      });
-  return ReactDom.createPortal(view(state), sidePanelEl);
+  return ReactDom.createPortal(view(state, dispatch), targetEl);
 }
 
 var Preview = {
@@ -282,12 +346,16 @@ function Thumbnail(props) {
             });
 }
 
+var dummyData = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAIAQMAAAD+wSzIAAAABlBMVEX///+/v7+jQ3Y5AAAADklEQVQI12P4AIX8EAgALgAD/aNpbtEAAAAASUVORK5CYII";
+
 var make = Thumbnail;
 
 export {
-  sidePanelSelector ,
+  dummyData ,
+  targetElSelector ,
   stillPickerSelector ,
   thumbnailImgSelector ,
+  fileLoader ,
   query ,
   Palette ,
   Preview ,
