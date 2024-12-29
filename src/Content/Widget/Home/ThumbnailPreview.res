@@ -4,13 +4,11 @@ open Webapi.Dom
 //   ->Js.Array2.map(selector => Document.querySelectorAll(selector))->Js.Promise2.then(el => el))
 //   ->Js.Promise2.all
 // }
-let query = x => {
-  Console.log2("query", x)
+let query = _ => {
   Document.querySelectorAll(document, "ytd-browse #contents ytd-rich-item-renderer")
   ->NodeList.toArray
   ->Array.map(el => Element.ofNode(el))
   ->Array.map(maybeEl => {
-    Console.log2("maybe its here", maybeEl)
     switch maybeEl {
     | Some(el) => Promise.resolve(el)
     | None => Promise.reject(Error.make("Not Found")->Error.toException)
@@ -21,7 +19,7 @@ let query = x => {
 module ThumbnailPreview = {
   @react.component
   let make = () => {
-    Console.log("init thumbnail preview")
+    let {maybePort, maybeThumbnailData} = Hooks.Preview.usePort("Home.Thumbnail.Preview")
     let index = Math.floor(Math.random() *. 5.0)->Float.toInt
     let queryResult = ReactQuery.useQuery({
       queryFn: query,
@@ -32,11 +30,10 @@ module ThumbnailPreview = {
       retry: ReactQuery.retry(#number(5)),
       retryDelay: ReactQuery.retryDelay(#number(1000)),
     })
-    Console.log2("prviewe el", queryResult)
 
-    switch queryResult {
-    | {isError: true, error, _} => Console.log(error)
-    | {data: Some(videoElements)} => {
+    switch (maybeThumbnailData, queryResult) {
+    | (_, {isError: true, error, _}) => Console.log(error)
+    | (Some(thumbnailData), {data: Some(videoElements)}) => {
         let videoElement = videoElements->Array.getUnsafe(index)
         let thumb = videoElement->Element.querySelector("ytd-thumbnail img")->Option.getExn
         let title =
@@ -46,9 +43,9 @@ module ThumbnailPreview = {
 
         // move to useEffect
 
-        thumb->Element.setAttribute("src", "https://placecats.com/300/200")
-        title->Element.setInnerText("Hello World")
-        Console.log((thumb, title))
+        Console.log2(thumbnailData, (thumb, title))
+        thumb->Element.setAttribute("src", thumbnailData.src)
+        title->Element.setInnerText(thumbnailData.title)
       }
 
     | _ => Console.log("no data")

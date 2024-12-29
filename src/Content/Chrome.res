@@ -24,3 +24,11 @@ module Runtime = {
     external addListener: (Port.t => unit) => unit = "addListener"
   }
 }
+
+@val external chrome: 'a = "chrome"
+type chrome
+module Storage = {
+  //      %raw(`let chrome.storage.local.get(console.log)`)
+  @val @scope(("chrome", "storage", "local"))
+  external get: unit => Promise.t<'a> = "get"
+}

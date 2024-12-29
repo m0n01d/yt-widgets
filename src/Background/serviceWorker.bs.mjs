@@ -56,6 +56,30 @@ chrome.runtime.onConnect.addListener(function (port) {
                     return Promise.resolve();
                   }));
             return ;
+        case "Home.Thumbnail.Preview" :
+            console.log("init home thumbnail preview");
+            listeners.set(port.name, port);
+            chrome.storage.local.get().then(function (data) {
+                  console.log("storage", data);
+                  if (data !== undefined) {
+                    var message = {
+                      TAG: "GotThumbnailPreview",
+                      _0: data
+                    };
+                    port.postMessage(message);
+                    return Promise.resolve();
+                  }
+                  throw {
+                        RE_EXN_ID: "Match_failure",
+                        _1: [
+                          "serviceWorker.res",
+                          132,
+                          8
+                        ],
+                        Error: new Error()
+                      };
+                });
+            return ;
         case "SnippetEditor" :
             listeners.set(port.name, port);
             port.onMessage.addListener(function (tag) {

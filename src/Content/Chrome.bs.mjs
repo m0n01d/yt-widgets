@@ -17,7 +17,10 @@ var Runtime = {
   OnMessage: OnMessage
 };
 
+var $$Storage = {};
+
 export {
   Runtime ,
+  $$Storage ,
 }
 /* No side effect */

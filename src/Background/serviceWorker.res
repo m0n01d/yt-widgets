@@ -123,6 +123,23 @@ Chrome.Runtime.OnConnect.addListener(port => {
       })
       ->ignore
     }
+  | "Home.Thumbnail.Preview" => {
+      Console.log("init home thumbnail preview")
+      listeners->Map.set(port.name, port)->ignore
+      Chrome.Storage.get()
+      ->Promise.then(data => {
+        Console.log2("storage", data)
+        switch data {
+        | Some(data) =>
+          let message: Chrome.Runtime.Port.message<
+            Hooks.Preview.tag,
+          > = Hooks.Preview.GotThumbnailPreview(data)
+          port->Chrome.Runtime.Port.postMessage(message)
+          Promise.resolve()
+        }
+      })
+      ->ignore
+    }
   | "Thumbnail.Preview" => {
       listeners->Map.set(port.name, port)->ignore
       port->Chrome.Runtime.Port.addListener((tag: Thumbnail.Preview.tag) => {

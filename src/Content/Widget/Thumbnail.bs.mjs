@@ -223,7 +223,8 @@ function Thumbnail$Preview(props) {
   var match = React.useReducer(update, initialState);
   var dispatch = match[1];
   var state = match[0];
-  var maybePort = Hooks.Preview.usePort("Thumbnail.Preview");
+  var match$1 = Hooks.Preview.usePort("Thumbnail.Preview");
+  var maybePort = match$1.maybePort;
   React.useEffect((function () {
           var match = state.maybeImgSrc;
           var match$1 = state.maybeTitle;
@@ -273,17 +274,17 @@ function Thumbnail$Preview(props) {
     console.log(queryResult.error);
     return null;
   }
-  var match$1 = queryResult.data;
-  if (match$1 === undefined) {
+  var match$2 = queryResult.data;
+  if (match$2 === undefined) {
     return null;
   }
-  if (match$1.length !== 5) {
+  if (match$2.length !== 5) {
     return null;
   }
-  var targetEl = match$1[0];
-  var thumbnailImgEl = match$1[2];
-  var fileLoaderEl = match$1[3];
-  var titleEl = match$1[4];
+  var targetEl = match$2[0];
+  var thumbnailImgEl = match$2[2];
+  var fileLoaderEl = match$2[3];
+  var titleEl = match$2[4];
   var fileInput = Webapi__Dom__HtmlInputElement.ofElement(fileLoaderEl);
   if (fileInput !== undefined) {
     var fileInput$1 = Caml_option.valFromOption(fileInput);
@@ -393,12 +394,9 @@ function Thumbnail(props) {
             });
 }
 
-var dummyData = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAIAQMAAAD+wSzIAAAABlBMVEX///+/v7+jQ3Y5AAAADklEQVQI12P4AIX8EAgALgAD/aNpbtEAAAAASUVORK5CYII";
-
 var make = Thumbnail;
 
 export {
-  dummyData ,
   targetElSelector ,
   stillPickerSelector ,
   thumbnailImgSelector ,

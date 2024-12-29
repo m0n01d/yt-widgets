@@ -5,7 +5,7 @@ open Webapi.Dom
 open Belt
 open File
 
-let dummyData = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAIAQMAAAD+wSzIAAAABlBMVEX///+/v7+jQ3Y5AAAADklEQVQI12P4AIX8EAgALgAD/aNpbtEAAAAASUVORK5CYII"
+// let dummyData = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAIAQMAAAD+wSzIAAAABlBMVEX///+/v7+jQ3Y5AAAADklEQVQI12P4AIX8EAgALgAD/aNpbtEAAAAASUVORK5CYII"
 
 let targetElSelector = "ytcp-video-thumbnail-editor"
 let stillPickerSelector = "ytcp-video-custom-still-editor"
@@ -169,7 +169,7 @@ module Preview = {
       maybeTitle: None,
     }
     let (state, dispatch) = React.useReducer(update, initialState)
-    let maybePort = Hooks.Preview.usePort("Thumbnail.Preview")
+    let {maybePort} = Hooks.Preview.usePort("Thumbnail.Preview")
 
     React.useEffect(() => {
       //port send message to bg

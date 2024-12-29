@@ -39,19 +39,32 @@ var DescriptionSnippet = {
 
 function usePort$1(name) {
   var match = React.useState(function () {
-        
+        return {
+                maybeThumbnailData: undefined,
+                maybePort: undefined
+              };
       });
   var setState = match[1];
   React.useEffect((function () {
           var port = chrome.runtime.connect({
                 name: name
               });
-          setState(function (param) {
-                return port;
+          setState(function (state) {
+                return {
+                        maybeThumbnailData: state.maybeThumbnailData,
+                        maybePort: port
+                      };
               });
           console.log("effect", port);
           var onMessageListener = function (tag) {
             console.log("Preview onmessaglister: app chrome port inbound", tag);
+            var payload = tag._0;
+            setState(function (param) {
+                  return {
+                          maybeThumbnailData: payload,
+                          maybePort: port
+                        };
+                });
           };
           port.onMessage.addListener(onMessageListener);
           return (function () {

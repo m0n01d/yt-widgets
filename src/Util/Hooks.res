@@ -28,17 +28,26 @@ module DescriptionSnippet = {
   }
 }
 module Preview = {
-  // type tag = GotSnippets(array<Schema.DescriptionSnippet.t>)
+  type thumbnailData = {
+    title: string,
+    src: string,
+  }
+  type tag = GotThumbnailPreview(thumbnailData)
+  type state = {maybeThumbnailData: option<thumbnailData>, maybePort: option<Chrome.Runtime.Port.t>}
 
   let usePort = name => {
-    let (maybePort, setState) = React.useState(_ => None)
+    let (state, setState) = React.useState(_ => {maybeThumbnailData: None, maybePort: None})
 
     React.useEffect0(() => {
       let port = Chrome.Runtime.connect({name: name})
-      setState(_ => Some(port))
+      setState(state => {...state, maybePort: Some(port)})
       Console.log2("effect", port)
       let onMessageListener: Chrome.Runtime.Port.message<'a> => unit = tag => {
         Js.log2("Preview onmessaglister: app chrome port inbound", tag)
+        switch tag {
+        | GotThumbnailPreview(payload) =>
+          setState(_ => {maybeThumbnailData: Some(payload), maybePort: Some(port)})
+        }
       }
 
       Chrome.Runtime.Port.addListener(port, onMessageListener)
@@ -50,6 +59,6 @@ module Preview = {
         },
       )
     })
-    maybePort
+    state
   }
 }
