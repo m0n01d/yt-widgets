@@ -28,6 +28,10 @@ module Icon = {
     @module("@mui/icons-material/NoteAdd") @react.component
     external make: unit => React.element = "default"
   }
+  module Preview = {
+    @module("@mui/icons-material/Preview") @react.component
+    external make: unit => React.element = "default"
+  }
 }
 
 let pause = () => {

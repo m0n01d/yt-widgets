@@ -21,12 +21,15 @@ var Input = {};
 
 var NoteAdd = {};
 
+var Preview = {};
+
 var Icon = {
   Description: Description,
   EditNote: EditNote,
   Expand: Expand,
   Input: Input,
-  NoteAdd: NoteAdd
+  NoteAdd: NoteAdd,
+  Preview: Preview
 };
 
 function pause() {

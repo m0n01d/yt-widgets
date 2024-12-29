@@ -44,3 +44,15 @@ module DescriptionSnippet = {
     {...snippet, date}
   }
 }
+
+module ThumbnailPreview = {
+  type id = option<int>
+  type t = {
+    id: id,
+    src: string,
+    title: string,
+  }
+  let tableName = "ThumbnailPreview"
+  let fields = "++id,src,title"
+  let schema = (tableName, fields)
+}

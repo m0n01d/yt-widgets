@@ -37,7 +37,9 @@ Table.DescriptionSnippet.put(dexie, {
 var listeners = new Map();
 
 chrome.runtime.onConnect.addListener(function (port) {
+      console.log("chrome port", port.name, port);
       port.onDisconnect.addListener(function () {
+            console.log("chrome port dissonncted", port.name, port);
             port.disconnect();
             listeners.delete(port.name);
           });
@@ -99,12 +101,21 @@ chrome.runtime.onConnect.addListener(function (port) {
                     return Promise.resolve();
                   }));
             return ;
+        case "Thumbnail.Preview" :
+            listeners.set(port.name, port);
+            port.onMessage.addListener(function (tag) {
+                  console.log("thumbnil", tag);
+                  console.log("open new tab");
+                  ((chrome.storage.local.set({ src: tag.src, title: tag.title })));
+                  ((chrome.tabs.create({url: "https://youtube.com/?ytwidget-preview"})));
+                });
+            return ;
         default:
           throw {
                 RE_EXN_ID: "Match_failure",
                 _1: [
                   "serviceWorker.res",
-                  35,
+                  37,
                   2
                 ],
                 Error: new Error()

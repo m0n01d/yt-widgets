@@ -18,7 +18,7 @@ let titleElSelector = "ytcp-video-title #textbox"
 // get title to use in preview, for now use Lorem Ipsum
 
 let query = _ => {
-  [targetElSelector, stillPickerSelector, thumbnailImgSelector, fileLoader]
+  [targetElSelector, stillPickerSelector, thumbnailImgSelector, fileLoader, titleElSelector]
   ->Js.Array2.map(selector => Ui.queryDom(None, selector, 3)->Js.Promise2.then(el => el))
   ->Js.Promise2.all
 }
@@ -61,15 +61,21 @@ module Preview = {
     maybeThumbnailEl: option<Dom.element>,
     maybeImgSrc: option<userImg>,
     maybeDialog: option<unit>,
+    maybeTitle: option<string>,
   }
 
   type msg =
-    ClosedDialog | ClickedEditThumb(string) | SetImgSrc(userImg) | SetThumbnailEl(Dom.element)
+    | ClosedDialog
+    | ClickedPreviewThumb(string, string)
+    | OpenedPreview
+    | SetImgSrc(userImg)
+    | SetThumbnailEl(Dom.element)
   let update = (state: model, action: msg) => {
     switch action {
     | ClosedDialog => {...state, maybeDialog: None}
 
-    | ClickedEditThumb(src) => {...state, maybeDialog: Some()}
+    | ClickedPreviewThumb(src, title) => {...state, maybeDialog: Some(), maybeTitle: Some(title)}
+    | OpenedPreview => {...state, maybeTitle: None}
     | SetImgSrc(src) => {...state, maybeImgSrc: Some(src)}
     | SetThumbnailEl(el) => {
         let maybeImgSrc = el->Element.getAttribute("src")->Option.map(s => FromYoutube(s))
@@ -77,6 +83,7 @@ module Preview = {
       }
     }
   }
+  type tag = SavePreview({src: string, title: string})
 
   let viewThumbnail = src => {
     <Mui.Box>
@@ -147,46 +154,6 @@ module Preview = {
     </Mui.Box>
   }
 
-  let view = (state, dispatch) => {
-    let viewDialog = () => {
-      <Mui.Dialog
-        fullWidth={true}
-        onClose={(_, _) => dispatch(ClosedDialog)}
-        maxWidth={Xs}
-        open_={true}
-        sx={Mui.Sx.obj({zIndex: {Mui.System.Value.Number(2206.0)}})}>
-        {"dialog"->React.string}
-      </Mui.Dialog>
-    }
-    let maybeDialog = switch state.maybeDialog {
-    | None => React.null
-    | Some(_) => viewDialog()
-    }
-
-    switch state.maybeImgSrc {
-    | Some(FromYoutube(src)) => <Mui.Box> {viewThumbnail(src)} </Mui.Box>
-    | Some(FromUser(src)) =>
-      <Mui.Box style={ReactDOM.Style.make(~position="relative", ())}>
-        {viewThumbnail(src)}
-        <div>
-          <Mui.Button
-            endIcon={<Ui.Icon.NoteAdd />}
-            onClick={_ => dispatch(ClickedEditThumb(src))}
-            sx={Mui.Sx.obj({
-              margin: Mui.System.Value.String("1rem 0"),
-              width: Mui.System.Value.String("142px"),
-              position: Mui.System.Value.String("absolute"),
-              top: Mui.System.Value.String("1rem"),
-              left: Mui.System.Value.String("1rem"),
-            })}
-            variant={Contained}>
-            {"Preview Thumbnail"->React.string}
-          </Mui.Button>
-        </div>
-      </Mui.Box>
-    | None => React.null
-    }
-  }
   @react.component
   let make = () => {
     let initialImgSrc =
@@ -195,22 +162,54 @@ module Preview = {
       ->Option.flatMap(img => img->Element.getAttribute("src"))
       ->Option.map(s => FromYoutube(s))
 
-    let initialState = {maybeImgSrc: initialImgSrc, maybeThumbnailEl: None, maybeDialog: None}
+    let initialState = {
+      maybeImgSrc: initialImgSrc,
+      maybeThumbnailEl: None,
+      maybeDialog: None,
+      maybeTitle: None,
+    }
     let (state, dispatch) = React.useReducer(update, initialState)
+    let maybePort = Hooks.Preview.usePort("Thumbnail.Preview")
+
+    React.useEffect(() => {
+      //port send message to bg
+      // bg will store dataurl in chrome.storage.local
+      // bg will open new crheom tab with dataurl from local
+      switch (state.maybeImgSrc, state.maybeTitle) {
+      | (Some(FromUser(src)), Some(title)) => {
+          maybePort->Option.mapWithDefault((), port => {
+            let message = SavePreview({src, title})
+            Console.log2("from thumbnail message:", message)
+            port->Chrome.Runtime.Port.postMessage(message)
+          })
+          Console.log2(maybePort, "port out to bg with title and src")
+        }
+      | _ => ()
+      }
+
+      Some(
+        () => {
+          dispatch(OpenedPreview)
+        },
+      )
+    }, [state.maybeTitle])
+
     let queryResult = ReactQuery.useQuery({
       queryFn: query,
       queryKey: ["Thumbnail.Preview"],
       refetchOnMount: ReactQuery.refetchOnMount(#bool(true)),
       refetchOnWindowFocus: ReactQuery.refetchOnWindowFocus(#bool(false)),
       staleTime: ReactQuery.time(#number(1)),
+      retry: ReactQuery.retry(#number(5)),
+      retryDelay: ReactQuery.retryDelay(#number(1000)),
     })
-
+    Console.log(queryResult)
     switch queryResult {
     | {isError: true, error, _} => {
         Console.log(error)
         React.null
       }
-    | {data: Some([targetEl, stillPickerEl, thumbnailImgEl, fileLoaderEl]), _} => {
+    | {data: Some([targetEl, stillPickerEl, thumbnailImgEl, fileLoaderEl, titleEl]), _} => {
         switch fileLoaderEl->HtmlInputElement.ofElement {
         | Some(fileInput) => {
             let rec fn = ev => {
@@ -236,7 +235,51 @@ module Preview = {
         if None == state.maybeThumbnailEl {
           dispatch(SetThumbnailEl(thumbnailImgEl))
         }
+        let view = (state, dispatch) => {
+          let viewDialog = () => {
+            <Mui.Dialog
+              fullWidth={true}
+              onClose={(_, _) => dispatch(ClosedDialog)}
+              maxWidth={Xs}
+              open_={true}
+              sx={Mui.Sx.obj({zIndex: {Mui.System.Value.Number(2206.0)}})}>
+              {"dialog"->React.string}
+            </Mui.Dialog>
+          }
+          let maybeDialog = switch state.maybeDialog {
+          | None => React.null
+          | Some(_) => viewDialog()
+          }
 
+          switch state.maybeImgSrc {
+          | Some(FromYoutube(src)) => <Mui.Box> {viewThumbnail(src)} </Mui.Box>
+          | Some(FromUser(src)) => {
+              let title = "
+              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed non risus. Suspendisse lectus tortor, dignissim sit amet, adipiscing nec, ultricies sed, dolor. Cras elementum ultrices diam. Maecenas ligula massa, varius a, semper congue, euismod non, mi."
+              let title_ = titleEl->Element.textContent
+              // ->Option.getWithDefault(title)
+
+              <Mui.Box style={ReactDOM.Style.make(~position="relative", ())}>
+                {viewThumbnail(src)}
+                <div>
+                  <Mui.Button
+                    endIcon={<Ui.Icon.Preview />}
+                    onClick={_ => dispatch(ClickedPreviewThumb(src, title_))}
+                    sx={Mui.Sx.obj({
+                      position: Mui.System.Value.String("absolute"),
+                      top: Mui.System.Value.String("1rem"),
+                      left: Mui.System.Value.String("1rem"),
+                    })}
+                    variant={Contained}>
+                    {"Preview"->React.string}
+                  </Mui.Button>
+                </div>
+              </Mui.Box>
+            }
+
+          | None => React.null
+          }
+        }
         ReactDOM.createPortal(view(state, dispatch), targetEl)
       }
     | _ => React.null

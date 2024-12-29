@@ -37,7 +37,37 @@ var DescriptionSnippet = {
   usePort: usePort
 };
 
+function usePort$1(name) {
+  var match = React.useState(function () {
+        
+      });
+  var setState = match[1];
+  React.useEffect((function () {
+          var port = chrome.runtime.connect({
+                name: name
+              });
+          setState(function (param) {
+                return port;
+              });
+          console.log("effect", port);
+          var onMessageListener = function (tag) {
+            console.log("Preview onmessaglister: app chrome port inbound", tag);
+          };
+          port.onMessage.addListener(onMessageListener);
+          return (function () {
+                    console.log("disconnected hook", port);
+                    port.disconnect();
+                  });
+        }), []);
+  return match[0];
+}
+
+var Preview = {
+  usePort: usePort$1
+};
+
 export {
   DescriptionSnippet ,
+  Preview ,
 }
 /* react Not a pure module */

@@ -46,7 +46,23 @@ var DescriptionSnippet = {
   dateFix: dateFix
 };
 
+var tableName$2 = "ThumbnailPreview";
+
+var fields$2 = "++id,src,title";
+
+var schema$2 = [
+  tableName$2,
+  fields$2
+];
+
+var ThumbnailPreview = {
+  tableName: tableName$2,
+  fields: fields$2,
+  schema: schema$2
+};
+
 export {
   DescriptionSnippet ,
+  ThumbnailPreview ,
 }
 /* No side effect */

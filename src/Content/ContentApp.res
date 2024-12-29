@@ -26,38 +26,27 @@ let observerConfig = {
 let document = Window.document(Dom.window)
 let dummy = Document.createElement(document, "div")
 
-type page = Details | Other
-
-type msg = RemovedDialog | SetDialog(Dom.Node.t) | SetPage(page)
-
-type model = {currentPage: page, maybeUploadDialog: option<Dom.Node.t>}
-
-let update = (state: model, action: msg) => {
-  switch action {
-  | RemovedDialog => {...state, maybeUploadDialog: None}
-  | SetDialog(dialog) => {...state, maybeUploadDialog: Some(dialog)}
-  | SetPage(thePage) => {...state, currentPage: thePage}
-  }
-}
-
-let app = Document.querySelector(document, "title")->Option.map(titleEl => {
-  let bodyEl =
-    document
-    ->Document.asHtmlDocument
-    ->Option.flatMap(HtmlDocument.body)
-    ->Option.getWithDefault(dummy) // unwrap
-
-  module App = {
+module YouTubeStudioApp = {
+  // @TODO add Upload module
+  // basically same as video edit
+  module VideoEdit = {
+    type model = {maybeUploadDialog: option<Dom.Node.t>}
+    type msg = RemovedDialog | SetDialog(Dom.Node.t)
     @react.component
     let make = () => {
-      let pageTitle = titleEl->Element.textContent
-      let route = Js.String.split(" - ", pageTitle)
-      let initialPage = switch route {
-      | ["Video details", _] => Details
-      | _ => Other
+      let bodyEl =
+        document
+        ->Document.asHtmlDocument
+        ->Option.flatMap(HtmlDocument.body)
+        ->Option.getWithDefault(dummy) // unwrap
+
+      let update = (state: model, action: msg) => {
+        switch action {
+        | RemovedDialog => {...state, maybeUploadDialog: None}
+        | SetDialog(dialog) => {...state, maybeUploadDialog: Some(dialog)}
+        }
       }
       let initialState = {
-        currentPage: initialPage,
         maybeUploadDialog: None,
       }
       let (state, dispatch) = React.useReducer(update, initialState)
@@ -67,12 +56,10 @@ let app = Document.querySelector(document, "title")->Option.map(titleEl => {
           let hasRemovedDialog =
             MutationRecord.removedNodes(mutation)
             ->Dom.NodeList.toArray
-            ->Js.Array2.some(
-              el => {
-                let name = el->Node.nodeName->Js.String.toLowerCase
-                name == "ytcp-uploads-dialog"
-              },
-            )
+            ->Js.Array2.some(el => {
+              let name = el->Node.nodeName->Js.String.toLowerCase
+              name == "ytcp-uploads-dialog"
+            })
 
           if hasRemovedDialog {
             dispatch(RemovedDialog)
@@ -96,36 +83,16 @@ let app = Document.querySelector(document, "title")->Option.map(titleEl => {
         })
       }
 
-      let titleElWatcher = (mutationList: array<MutationRecord.t>, observer) => {
-        let title =
-          mutationList
-          ->Array.get(0)
-          ->Option.map(MutationRecord.target)
-          ->Option.mapWithDefault("", Node.textContent)
-
-        let route = Js.String.split(" - ", title)
-
-        switch route {
-        | ["Video details", _] => dispatch(SetPage(Details))
-        | _ => dispatch(SetPage(Other))
-        }
-      }
       React.useEffect0(() => {
         let bodyObserver = MutationObserver.make(bodyWatcher)
-        let titleObserver = MutationObserver.make(titleElWatcher)
         MutationObserver.observe(
           bodyObserver,
           bodyEl,
           {"attributes": true, "childList": true, "subtree": true},
         )
-        MutationObserver.observe(
-          titleObserver,
-          titleEl,
-          {"attributes": false, "childList": true, "subtree": false},
-        )
+
         let cleanup = () => {
           MutationObserver.disconnect(bodyObserver)
-          MutationObserver.disconnect(titleObserver)
         }
 
         Some(cleanup)
@@ -140,13 +107,28 @@ let app = Document.querySelector(document, "title")->Option.map(titleEl => {
         <Thumbnail />,
         <Description />,
       ]
-      let widgets = switch (state.currentPage, state.maybeUploadDialog) {
-      | (Details, None) => detailsPage()
-      | (_, Some(dialog)) => dialogWidgets(dialog)
+      let widgets = switch state.maybeUploadDialog {
+      // @TODO fix
+      | None => detailsPage()
+      | Some(dialog) => dialogWidgets(dialog)
       | _ => []
       }
 
       React.array(widgets)
+    }
+  }
+}
+
+let app = Document.querySelector(document, "title")->Option.map(titleEl => {
+  module App = {
+    @react.component
+    let make = () => {
+      let youtubeUrl = RescriptReactRouter.useUrl()
+      switch youtubeUrl {
+      | {path: list{}, search: "ytwidget-preview", _} => <Home.ThumbnailPreview />
+      | {path: list{"video", _, "edit"}} => <YouTubeStudioApp.VideoEdit />
+      | _ => <Home.ThumbnailPreview /> // @todo fix only load video edit when modal is open
+      }
     }
   }
 

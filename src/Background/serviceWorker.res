@@ -28,7 +28,9 @@ let p =
 let listeners = Map.make()
 
 Chrome.Runtime.OnConnect.addListener(port => {
+  Console.log3("chrome port", port.name, port)
   port->Chrome.Runtime.Port.OnDisconnect.addListener(() => {
+    Console.log3("chrome port dissonncted", port.name, port)
     port->Chrome.Runtime.Port.disconnect()
     listeners->Map.delete(port.name)->ignore
   })
@@ -120,6 +122,20 @@ Chrome.Runtime.OnConnect.addListener(port => {
         Js.Promise2.resolve()
       })
       ->ignore
+    }
+  | "Thumbnail.Preview" => {
+      listeners->Map.set(port.name, port)->ignore
+      port->Chrome.Runtime.Port.addListener((tag: Thumbnail.Preview.tag) => {
+        Console.log2("thumbnil", tag)
+        switch tag {
+        | SavePreview(details) => {
+            Console.log("open new tab")
+
+            %raw(`chrome.storage.local.set({ src: tag.src, title: tag.title })`)
+            %raw(`chrome.tabs.create({url: "https://youtube.com/?ytwidget-preview"})`)
+          }
+        }
+      })
     }
   }
 })
