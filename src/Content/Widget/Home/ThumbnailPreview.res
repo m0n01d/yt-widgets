@@ -1,11 +1,7 @@
 open Webapi.Dom
-// let query = _ => {
-//   ["ytd-browse #contents ytd-rich-item-renderer"]
-//   ->Js.Array2.map(selector => Document.querySelectorAll(selector))->Js.Promise2.then(el => el))
-//   ->Js.Promise2.all
-// }
+
 let query = _ => {
-  Document.querySelectorAll(document, "ytd-browse #contents ytd-rich-item-renderer")
+  Document.querySelectorAll(document, "ytd-browse #contents ytd-rich-grid-media")
   ->NodeList.toArray
   ->Array.map(el => Element.ofNode(el))
   ->Array.map(maybeEl => {
@@ -15,40 +11,61 @@ let query = _ => {
     }
   })
   ->Promise.all
+  ->Promise.then(els => {
+    if Array.length(els) == 0 {
+      Promise.reject(Error.make("Not Found")->Error.toException)
+    } else {
+      Promise.resolve(els)
+    }
+  })
 }
+
+type model =
+  | FlushedWithElements({thumbEl: Element.t, titleEl: Element.t})
+  | GotElements({thumbEl: Element.t, titleEl: Element.t})
+  | NoElements
 module ThumbnailPreview = {
   @react.component
   let make = () => {
     let {maybePort, maybeThumbnailData} = Hooks.Preview.usePort("Home.Thumbnail.Preview")
-    let index = Math.floor(Math.random() *. 5.0)->Float.toInt
+    let (state, setState) = React.useState(_ => NoElements)
     let queryResult = ReactQuery.useQuery({
       queryFn: query,
       queryKey: ["Home.Thumbnail.Preview"],
       refetchOnMount: ReactQuery.refetchOnMount(#bool(true)),
       refetchOnWindowFocus: ReactQuery.refetchOnWindowFocus(#bool(false)),
       staleTime: ReactQuery.time(#number(1)),
-      retry: ReactQuery.retry(#number(5)),
-      retryDelay: ReactQuery.retryDelay(#number(1000)),
+      retry: ReactQuery.retry(#number(69)),
+      retryDelay: ReactQuery.retryDelay(#number(333)),
     })
 
-    switch (maybeThumbnailData, queryResult) {
+    React.useEffectOnEveryRender(() => {
+      switch (state, maybeThumbnailData) {
+      | (GotElements({thumbEl, titleEl}), Some(thumbnailData)) => {
+          thumbEl->Element.setAttribute("src", thumbnailData.src)
+          titleEl->Element.setInnerText(thumbnailData.title)
+          setState(_ => FlushedWithElements({thumbEl, titleEl}))
+        }
+      | _ => ()
+      }
+
+      None
+    })
+
+    switch (state, queryResult) {
     | (_, {isError: true, error, _}) => Console.log(error)
-    | (Some(thumbnailData), {data: Some(videoElements)}) => {
+    | (NoElements, {data: Some(videoElements)}) => {
+        let index = Math.floor(Math.random() *. 4.0)->Float.toInt
         let videoElement = videoElements->Array.getUnsafe(index)
-        let thumb = videoElement->Element.querySelector("ytd-thumbnail img")->Option.getExn
-        let title =
+        let thumbEl = videoElement->Element.querySelector("ytd-thumbnail img")->Option.getExn
+        let titleEl =
           videoElement
           ->Element.querySelector("#video-title-link yt-formatted-string")
           ->Option.getExn
-
-        // move to useEffect
-
-        Console.log2(thumbnailData, (thumb, title))
-        thumb->Element.setAttribute("src", thumbnailData.src)
-        title->Element.setInnerText(thumbnailData.title)
+        setState(_ => GotElements({thumbEl, titleEl}))
       }
 
-    | _ => Console.log("no data")
+    | _ => ()
     }
     React.null
   }
