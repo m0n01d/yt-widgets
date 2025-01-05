@@ -119,24 +119,23 @@ module YouTubeStudioApp = {
   }
 }
 
-let app = Document.querySelector(document, "title")->Option.map(titleEl => {
-  module App = {
-    @react.component
-    let make = () => {
-      let youtubeUrl = RescriptReactRouter.useUrl()
-      switch youtubeUrl {
-      | {path: list{}, search: "ytwidget-preview", _} => <Home.ThumbnailPreview />
-      | {path: list{"video", _, "edit"}} => <YouTubeStudioApp.VideoEdit />
-      | _ => <Home.ThumbnailPreview /> // @todo fix only load video edit when modal is open
-      }
+module App = {
+  @react.component
+  let make = () => {
+    let youtubeUrl = RescriptReactRouter.useUrl()
+    Console.log(("youtubeUrl", youtubeUrl))
+    switch youtubeUrl {
+    | {path: list{}, _} => <Home.ThumbnailPreview />
+    | {path: list{"video", _, "edit"}} => <YouTubeStudioApp.VideoEdit />
+    | _ => React.null
     }
   }
+}
 
-  let root = ReactDOM.Client.createRoot(dummy)
-  ReactDOM.Client.Root.render(
-    root,
-    <Mui.ThemeProvider theme=Func(theme)>
-      <App />
-    </Mui.ThemeProvider>,
-  )
-})
+let root = ReactDOM.Client.createRoot(dummy)
+ReactDOM.Client.Root.render(
+  root,
+  <Mui.ThemeProvider theme=Func(theme)>
+    <App />
+  </Mui.ThemeProvider>,
+)

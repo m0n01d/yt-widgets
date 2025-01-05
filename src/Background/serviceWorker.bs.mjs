@@ -38,9 +38,7 @@ Table.DescriptionSnippet.put(dexie, {
 var listeners = new Map();
 
 chrome.runtime.onConnect.addListener(function (port) {
-      console.log("chrome port", port.name, port);
       port.onDisconnect.addListener(function () {
-            console.log("chrome port dissonncted", port.name, port);
             port.disconnect();
             listeners.delete(port.name);
           });
@@ -58,28 +56,18 @@ chrome.runtime.onConnect.addListener(function (port) {
                   }));
             return ;
         case "Home.Thumbnail.Preview" :
-            console.log("init home thumbnail preview");
             listeners.set(port.name, port);
-            port.onMessage.addListener(function (tag) {
-                  console.log("thumbnil", tag);
+            port.onDisconnect.addListener(function () {
+                  ((chrome.storage.session.clear()));
                 });
             chrome.storage.session.get().then(function (data) {
-                    console.log([
-                          "decoding",
-                          data
-                        ]);
-                    var x = ThumbnailData.Decode.decoder(data);
-                    console.log([
-                          "decoded",
-                          x
-                        ]);
-                    if (x.TAG === "Ok") {
-                      return Promise.resolve(x._0);
+                    var thumbnailData = ThumbnailData.Decode.decoder(data);
+                    if (thumbnailData.TAG === "Ok") {
+                      return Promise.resolve(thumbnailData._0);
                     } else {
-                      return Promise.reject(new Error(x._0));
+                      return Promise.reject(new Error(thumbnailData._0));
                     }
                   }).then(function (data) {
-                  console.log("storage", data);
                   var message = {
                     TAG: "GotThumbnailPreview",
                     _0: data
@@ -136,13 +124,8 @@ chrome.runtime.onConnect.addListener(function (port) {
         case "Thumbnail.Preview" :
             listeners.set(port.name, port);
             port.onMessage.addListener(function (tag) {
-                  console.log("thumbnil", tag);
-                  console.log([
-                        "open new tab",
-                        tag
-                      ]);
                   ((chrome.storage.session.set({ src: tag.src, title: tag.title })));
-                  ((chrome.tabs.create({url: "https://youtube.com/?ytwidget-preview"})));
+                  ((chrome.tabs.create({url: "https://youtube.com"})));
                 });
             return ;
         default:
@@ -150,7 +133,7 @@ chrome.runtime.onConnect.addListener(function (port) {
                 RE_EXN_ID: "Match_failure",
                 _1: [
                   "serviceWorker.res",
-                  37,
+                  40,
                   2
                 ],
                 Error: new Error()

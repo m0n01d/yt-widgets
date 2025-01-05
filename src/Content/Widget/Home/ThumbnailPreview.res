@@ -48,13 +48,6 @@ module ThumbnailPreview = {
           titleEl->Element.setInnerText(thumbnailData.title)
           setState(_ => FlushedWithElements)
         }
-      | (FlushedWithElements, Some(_)) =>
-        maybePort
-        ->Option.map(port => {
-          let message = SavedThumbnailPreview
-          port->Chrome.Runtime.Port.postMessage(message)
-        })
-        ->ignore
       | _ => ()
       }
 

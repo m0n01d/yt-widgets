@@ -153,33 +153,41 @@ var YouTubeStudioApp = {
   VideoEdit: VideoEdit
 };
 
-var app = Core__Option.map(Caml_option.nullable_to_opt($$document.querySelector("title")), (function (titleEl) {
-        var ContentApp = function (props) {
-          var youtubeUrl = RescriptReactRouter.useUrl(undefined, undefined);
-          var match = youtubeUrl.path;
-          if (!match) {
-            return JsxRuntime.jsx(ThumbnailPreview.make, {});
-          }
-          if (match.hd !== "video") {
-            return JsxRuntime.jsx(ThumbnailPreview.make, {});
-          }
-          var match$1 = match.tl;
-          if (!match$1) {
-            return JsxRuntime.jsx(ThumbnailPreview.make, {});
-          }
-          var match$2 = match$1.tl;
-          if (match$2 && match$2.hd === "edit" && !match$2.tl) {
-            return JsxRuntime.jsx(ContentApp$YouTubeStudioApp$VideoEdit, {});
-          } else {
-            return JsxRuntime.jsx(ThumbnailPreview.make, {});
-          }
-        };
-        var root = Client.createRoot(dummy);
-        root.render(JsxRuntime.jsx(Styles.ThemeProvider, {
-                  children: JsxRuntime.jsx(ContentApp, {}),
-                  theme: theme
-                }));
-      }));
+function ContentApp$App(props) {
+  var youtubeUrl = RescriptReactRouter.useUrl(undefined, undefined);
+  console.log([
+        "youtubeUrl",
+        youtubeUrl
+      ]);
+  var match = youtubeUrl.path;
+  if (!match) {
+    return JsxRuntime.jsx(ThumbnailPreview.make, {});
+  }
+  if (match.hd !== "video") {
+    return null;
+  }
+  var match$1 = match.tl;
+  if (!match$1) {
+    return null;
+  }
+  var match$2 = match$1.tl;
+  if (match$2 && match$2.hd === "edit" && !match$2.tl) {
+    return JsxRuntime.jsx(ContentApp$YouTubeStudioApp$VideoEdit, {});
+  } else {
+    return null;
+  }
+}
+
+var App = {
+  make: ContentApp$App
+};
+
+var root = Client.createRoot(dummy);
+
+root.render(JsxRuntime.jsx(Styles.ThemeProvider, {
+          children: JsxRuntime.jsx(ContentApp$App, {}),
+          theme: theme
+        }));
 
 export {
   theme ,
@@ -187,6 +195,7 @@ export {
   $$document ,
   dummy ,
   YouTubeStudioApp ,
-  app ,
+  App ,
+  root ,
 }
 /* document Not a pure module */

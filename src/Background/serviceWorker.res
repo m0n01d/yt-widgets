@@ -28,10 +28,13 @@ let p =
 let listeners = Map.make()
 
 Chrome.Runtime.OnConnect.addListener(port => {
-  Console.log3("chrome port", port.name, port)
+  // Console.log3("chrome port", port.name, port)
   port->Chrome.Runtime.Port.OnDisconnect.addListener(() => {
-    Console.log3("chrome port dissonncted", port.name, port)
+    // Console.log3("chrome port dissonncted", port.name, port)
+    // @TODO consider clearing chrome storage here
+    // if listener name is Home.Thumbnail.Preview then clear storage
     port->Chrome.Runtime.Port.disconnect()
+
     listeners->Map.delete(port.name)->ignore
   })
   switch port.name {
@@ -124,28 +127,20 @@ Chrome.Runtime.OnConnect.addListener(port => {
       ->ignore
     }
   | "Home.Thumbnail.Preview" => {
-      Console.log("init home thumbnail preview")
       listeners->Map.set(port.name, port)->ignore
-      port->Chrome.Runtime.Port.addListener((tag: Home.ThumbnailPreview.tag) => {
-        Console.log2("thumbnil", tag)
-        switch tag {
-        | SavedThumbnailPreview => () // @TODO figureout a nice way to handle clearing //%raw(`chrome.storage.session.clear()`)
-        }
+      port->Chrome.Runtime.Port.OnDisconnect.addListener(() => {
+        %raw(`chrome.storage.session.clear()`)
       })
+
       Chrome.Storage.get()
       // @TODO then decode
       ->Promise.then(data => {
-        Console.log(("decoding", data))
-        let x = ThumbnailData.Decode.decoder(data)
-        Console.log(("decoded", x))
-        switch x {
+        switch ThumbnailData.Decode.decoder(data) {
         | Ok(thumbnailData) => Promise.resolve(thumbnailData)
         | Error(err) => Promise.reject(Error.make(err)->Error.toException)
         }
       })
       ->Promise.then(data => {
-        Console.log2("storage", data)
-        //@TODO DECODE DATA into thumbnail data
         let message: Chrome.Runtime.Port.message<
           Hooks.Preview.tag,
         > = Hooks.Preview.GotThumbnailPreview(data)
@@ -157,13 +152,10 @@ Chrome.Runtime.OnConnect.addListener(port => {
   | "Thumbnail.Preview" => {
       listeners->Map.set(port.name, port)->ignore
       port->Chrome.Runtime.Port.addListener((tag: Thumbnail.Preview.tag) => {
-        Console.log2("thumbnil", tag)
         switch tag {
         | SavePreview(details) => {
-            Console.log(("open new tab", tag))
-
             %raw(`chrome.storage.session.set({ src: tag.src, title: tag.title })`)
-            %raw(`chrome.tabs.create({url: "https://youtube.com/?ytwidget-preview"})`)
+            %raw(`chrome.tabs.create({url: "https://youtube.com"})`)
           }
         }
       })

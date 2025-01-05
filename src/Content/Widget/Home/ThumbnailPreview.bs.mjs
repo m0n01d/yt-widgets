@@ -29,7 +29,6 @@ function query(param) {
 
 function ThumbnailPreview$ThumbnailPreview(props) {
   var match = Hooks.Preview.usePort("Home.Thumbnail.Preview");
-  var maybePort = match.maybePort;
   var maybeThumbnailData = match.maybeThumbnailData;
   var match$1 = React.useState(function () {
         return "NoElements";
@@ -62,15 +61,7 @@ function ThumbnailPreview$ThumbnailPreview(props) {
       });
   React.useEffect(function () {
         if (typeof state !== "object") {
-          if (state === "FlushedWithElements") {
-            if (maybeThumbnailData !== undefined) {
-              Core__Option.map(maybePort, (function (port) {
-                      port.postMessage("SavedThumbnailPreview");
-                    }));
-            }
-            
-          }
-          
+          state === "FlushedWithElements";
         } else if (maybeThumbnailData !== undefined) {
           console.log("thumbnail", maybeThumbnailData);
           state.thumbEl.setAttribute("src", maybeThumbnailData.src);
