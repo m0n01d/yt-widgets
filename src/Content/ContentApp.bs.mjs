@@ -154,27 +154,80 @@ var YouTubeStudioApp = {
 };
 
 function ContentApp$App(props) {
+  var match = React.useState(function () {
+        return {
+                TAG: "Consumer",
+                _0: "ConsumerRoot"
+              };
+      });
+  var setPage = match[1];
+  var app = window.location.host.includes("studio") ? ({
+        TAG: "Studio",
+        _0: "StudioRoot"
+      }) : ({
+        TAG: "Consumer",
+        _0: "ConsumerRoot"
+      });
   var youtubeUrl = RescriptReactRouter.useUrl(undefined, undefined);
+  RescriptReactRouter.watchUrl(function (youtubeUrl) {
+        if (app.TAG === "Studio") {
+          var match = youtubeUrl.path;
+          if (!match) {
+            return ;
+          }
+          switch (match.hd) {
+            case "" :
+                if (match.tl) {
+                  return ;
+                } else {
+                  return setPage(function (param) {
+                              return {
+                                      TAG: "Studio",
+                                      _0: "StudioRoot"
+                                    };
+                            });
+                }
+            case "video" :
+                var match$1 = match.tl;
+                if (!match$1) {
+                  return ;
+                }
+                var match$2 = match$1.tl;
+                if (match$2 && match$2.hd === "edit" && !match$2.tl) {
+                  return setPage(function (param) {
+                              return {
+                                      TAG: "Studio",
+                                      _0: "VideoEdit"
+                                    };
+                            });
+                } else {
+                  return ;
+                }
+            default:
+              return ;
+          }
+        } else {
+          var match$3 = youtubeUrl.path;
+          if (match$3 && match$3.hd === "" && !match$3.tl) {
+            return setPage(function (param) {
+                        return {
+                                TAG: "Consumer",
+                                _0: "ConsumerRoot"
+                              };
+                      });
+          } else {
+            return ;
+          }
+        }
+      });
   console.log([
         "youtubeUrl",
         youtubeUrl
       ]);
-  var match = youtubeUrl.path;
-  if (!match) {
-    return JsxRuntime.jsx(ThumbnailPreview.make, {});
-  }
-  if (match.hd !== "video") {
-    return null;
-  }
-  var match$1 = match.tl;
-  if (!match$1) {
-    return null;
-  }
-  var match$2 = match$1.tl;
-  if (match$2 && match$2.hd === "edit" && !match$2.tl) {
+  if (app.TAG === "Studio") {
     return JsxRuntime.jsx(ContentApp$YouTubeStudioApp$VideoEdit, {});
   } else {
-    return null;
+    return JsxRuntime.jsx(ThumbnailPreview.make, {});
   }
 }
 

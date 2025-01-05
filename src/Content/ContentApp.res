@@ -120,13 +120,30 @@ module YouTubeStudioApp = {
 }
 
 module App = {
+  type studioPage = VideoEdit | StudioRoot
+  type consumerPage = ConsumerRoot
+  type app = Studio(studioPage) | Consumer(consumerPage)
   @react.component
   let make = () => {
+    let (page, setPage) = React.useState(_ => Consumer(ConsumerRoot))
+    let app =
+      window->Window.location->Location.host->String.includes("studio")
+        ? Studio(StudioRoot)
+        : Consumer(ConsumerRoot)
     let youtubeUrl = RescriptReactRouter.useUrl()
-    Console.log(("youtubeUrl", youtubeUrl))
-    switch youtubeUrl {
-    | {path: list{}, _} => <Home.ThumbnailPreview />
-    | {path: list{"video", _, "edit"}} => <YouTubeStudioApp.VideoEdit />
+    let watcher = RescriptReactRouter.watchUrl(youtubeUrl => {
+      switch (app, youtubeUrl) {
+      | (Consumer(_), {path: list{""}, _}) => setPage(_ => Consumer(ConsumerRoot))
+      | (Studio(_), {path: list{""}, _}) => setPage(_ => Studio(StudioRoot))
+      | (Studio(_), {path: list{"video", _, "edit"}}) => setPage(_ => Studio(VideoEdit))
+      | _ => ()
+      }
+    })
+
+    switch app {
+    | Consumer(_) => <Home.ThumbnailPreview />
+    | Studio(StudioRoot) => <YouTubeStudioApp.VideoEdit />
+    | Studio(VideoEdit) => <YouTubeStudioApp.VideoEdit />
     | _ => React.null
     }
   }

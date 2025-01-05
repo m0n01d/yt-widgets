@@ -43,7 +43,6 @@ module ThumbnailPreview = {
     React.useEffectOnEveryRender(() => {
       switch (state, maybeThumbnailData) {
       | (GotElements({thumbEl, titleEl}), Some(thumbnailData)) => {
-          Console.log2("thumbnail", thumbnailData)
           thumbEl->Element.setAttribute("src", thumbnailData.src)
           titleEl->Element.setInnerText(thumbnailData.title)
           setState(_ => FlushedWithElements)

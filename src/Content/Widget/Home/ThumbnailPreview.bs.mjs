@@ -63,7 +63,6 @@ function ThumbnailPreview$ThumbnailPreview(props) {
         if (typeof state !== "object") {
           state === "FlushedWithElements";
         } else if (maybeThumbnailData !== undefined) {
-          console.log("thumbnail", maybeThumbnailData);
           state.thumbEl.setAttribute("src", maybeThumbnailData.src);
           state.titleEl.innerText = maybeThumbnailData.title;
           setState(function (param) {
