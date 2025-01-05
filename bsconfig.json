@@ -20,9 +20,10 @@
     "@dusty-phillips/rescript-dexie",
     "@rescript/react",
     "@rescriptbr/react-query",
-    "rescript-webapi"
+    "rescript-webapi",
+    "@glennsl/rescript-json-combinators"
   ],
-  "bsc-flags": ["-open RescriptCore"],
+  "bsc-flags": ["-open RescriptCore", "-open JsonCombinators"],
   "warnings": {
     "number": "a"
   }
