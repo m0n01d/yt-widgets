@@ -126,17 +126,31 @@ Chrome.Runtime.OnConnect.addListener(port => {
   | "Home.Thumbnail.Preview" => {
       Console.log("init home thumbnail preview")
       listeners->Map.set(port.name, port)->ignore
+      port->Chrome.Runtime.Port.addListener((tag: Home.ThumbnailPreview.tag) => {
+        Console.log2("thumbnil", tag)
+        switch tag {
+        | SavedThumbnailPreview => () // @TODO figureout a nice way to handle clearing //%raw(`chrome.storage.session.clear()`)
+        }
+      })
       Chrome.Storage.get()
+      // @TODO then decode
+      ->Promise.then(data => {
+        Console.log(("decoding", data))
+        let x = ThumbnailData.Decode.decoder(data)
+        Console.log(("decoded", x))
+        switch x {
+        | Ok(thumbnailData) => Promise.resolve(thumbnailData)
+        | Error(err) => Promise.reject(Error.make(err)->Error.toException)
+        }
+      })
       ->Promise.then(data => {
         Console.log2("storage", data)
-        switch data {
-        | Some(data) =>
-          let message: Chrome.Runtime.Port.message<
-            Hooks.Preview.tag,
-          > = Hooks.Preview.GotThumbnailPreview(data)
-          port->Chrome.Runtime.Port.postMessage(message)
-          Promise.resolve()
-        }
+        //@TODO DECODE DATA into thumbnail data
+        let message: Chrome.Runtime.Port.message<
+          Hooks.Preview.tag,
+        > = Hooks.Preview.GotThumbnailPreview(data)
+        port->Chrome.Runtime.Port.postMessage(message)
+        Promise.resolve()
       })
       ->ignore
     }
@@ -146,9 +160,9 @@ Chrome.Runtime.OnConnect.addListener(port => {
         Console.log2("thumbnil", tag)
         switch tag {
         | SavePreview(details) => {
-            Console.log("open new tab")
+            Console.log(("open new tab", tag))
 
-            %raw(`chrome.storage.local.set({ src: tag.src, title: tag.title })`)
+            %raw(`chrome.storage.session.set({ src: tag.src, title: tag.title })`)
             %raw(`chrome.tabs.create({url: "https://youtube.com/?ytwidget-preview"})`)
           }
         }

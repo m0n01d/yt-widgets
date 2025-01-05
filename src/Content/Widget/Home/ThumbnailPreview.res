@@ -21,9 +21,10 @@ let query = _ => {
 }
 
 type model =
-  | FlushedWithElements({thumbEl: Element.t, titleEl: Element.t})
+  | FlushedWithElements
   | GotElements({thumbEl: Element.t, titleEl: Element.t})
   | NoElements
+type tag = SavedThumbnailPreview
 module ThumbnailPreview = {
   @react.component
   let make = () => {
@@ -42,10 +43,18 @@ module ThumbnailPreview = {
     React.useEffectOnEveryRender(() => {
       switch (state, maybeThumbnailData) {
       | (GotElements({thumbEl, titleEl}), Some(thumbnailData)) => {
+          Console.log2("thumbnail", thumbnailData)
           thumbEl->Element.setAttribute("src", thumbnailData.src)
           titleEl->Element.setInnerText(thumbnailData.title)
-          setState(_ => FlushedWithElements({thumbEl, titleEl}))
+          setState(_ => FlushedWithElements)
         }
+      | (FlushedWithElements, Some(_)) =>
+        maybePort
+        ->Option.map(port => {
+          let message = SavedThumbnailPreview
+          port->Chrome.Runtime.Port.postMessage(message)
+        })
+        ->ignore
       | _ => ()
       }
 

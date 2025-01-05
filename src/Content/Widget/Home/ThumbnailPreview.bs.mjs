@@ -29,6 +29,7 @@ function query(param) {
 
 function ThumbnailPreview$ThumbnailPreview(props) {
   var match = Hooks.Preview.usePort("Home.Thumbnail.Preview");
+  var maybePort = match.maybePort;
   var maybeThumbnailData = match.maybeThumbnailData;
   var match$1 = React.useState(function () {
         return "NoElements";
@@ -60,25 +61,29 @@ function ThumbnailPreview$ThumbnailPreview(props) {
                 }))
       });
   React.useEffect(function () {
-        if (typeof state === "object" && state.TAG !== "FlushedWithElements" && maybeThumbnailData !== undefined) {
-          var titleEl = state.titleEl;
-          var thumbEl = state.thumbEl;
-          Math.floor(Math.random() * 4.0) | 0;
-          thumbEl.setAttribute("src", maybeThumbnailData.src);
-          titleEl.innerText = maybeThumbnailData.title;
+        if (typeof state !== "object") {
+          if (state === "FlushedWithElements") {
+            if (maybeThumbnailData !== undefined) {
+              Core__Option.map(maybePort, (function (port) {
+                      port.postMessage("SavedThumbnailPreview");
+                    }));
+            }
+            
+          }
+          
+        } else if (maybeThumbnailData !== undefined) {
+          console.log("thumbnail", maybeThumbnailData);
+          state.thumbEl.setAttribute("src", maybeThumbnailData.src);
+          state.titleEl.innerText = maybeThumbnailData.title;
           setState(function (param) {
-                return {
-                        TAG: "FlushedWithElements",
-                        thumbEl: thumbEl,
-                        titleEl: titleEl
-                      };
+                return "FlushedWithElements";
               });
         }
         
       });
   if (queryResult.isError) {
     console.log(queryResult.error);
-  } else if (typeof state !== "object") {
+  } else if (typeof state !== "object" && state !== "FlushedWithElements") {
     var videoElements = queryResult.data;
     if (videoElements !== undefined) {
       var index = Math.floor(Math.random() * 4.0) | 0;
@@ -94,8 +99,6 @@ function ThumbnailPreview$ThumbnailPreview(props) {
           });
     }
     
-  } else {
-    state.TAG === "FlushedWithElements";
   }
   return null;
 }

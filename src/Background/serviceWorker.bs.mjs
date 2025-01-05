@@ -5,6 +5,7 @@ import Dexie from "dexie";
 import * as Schema from "../Data/Schema.bs.mjs";
 import * as Js_promise2 from "rescript/lib/es6/js_promise2.js";
 import * as Core__Promise from "@rescript/core/src/Core__Promise.bs.mjs";
+import * as ThumbnailData from "../Data/ThumbnailData.bs.mjs";
 import * as Version$Dexie from "@dusty-phillips/rescript-dexie/src/Version.bs.mjs";
 
 var dexie = new Dexie("hello dexie 1");
@@ -59,25 +60,32 @@ chrome.runtime.onConnect.addListener(function (port) {
         case "Home.Thumbnail.Preview" :
             console.log("init home thumbnail preview");
             listeners.set(port.name, port);
-            chrome.storage.local.get().then(function (data) {
+            port.onMessage.addListener(function (tag) {
+                  console.log("thumbnil", tag);
+                });
+            chrome.storage.session.get().then(function (data) {
+                    console.log([
+                          "decoding",
+                          data
+                        ]);
+                    var x = ThumbnailData.Decode.decoder(data);
+                    console.log([
+                          "decoded",
+                          x
+                        ]);
+                    if (x.TAG === "Ok") {
+                      return Promise.resolve(x._0);
+                    } else {
+                      return Promise.reject(new Error(x._0));
+                    }
+                  }).then(function (data) {
                   console.log("storage", data);
-                  if (data !== undefined) {
-                    var message = {
-                      TAG: "GotThumbnailPreview",
-                      _0: data
-                    };
-                    port.postMessage(message);
-                    return Promise.resolve();
-                  }
-                  throw {
-                        RE_EXN_ID: "Match_failure",
-                        _1: [
-                          "serviceWorker.res",
-                          132,
-                          8
-                        ],
-                        Error: new Error()
-                      };
+                  var message = {
+                    TAG: "GotThumbnailPreview",
+                    _0: data
+                  };
+                  port.postMessage(message);
+                  return Promise.resolve();
                 });
             return ;
         case "SnippetEditor" :
@@ -129,8 +137,11 @@ chrome.runtime.onConnect.addListener(function (port) {
             listeners.set(port.name, port);
             port.onMessage.addListener(function (tag) {
                   console.log("thumbnil", tag);
-                  console.log("open new tab");
-                  ((chrome.storage.local.set({ src: tag.src, title: tag.title })));
+                  console.log([
+                        "open new tab",
+                        tag
+                      ]);
+                  ((chrome.storage.session.set({ src: tag.src, title: tag.title })));
                   ((chrome.tabs.create({url: "https://youtube.com/?ytwidget-preview"})));
                 });
             return ;

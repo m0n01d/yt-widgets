@@ -55,7 +55,6 @@ function usePort$1(name) {
                         maybePort: port
                       };
               });
-          console.log("effect", port);
           var onMessageListener = function (tag) {
             console.log("Preview onmessaglister: app chrome port inbound", tag);
             var payload = tag._0;

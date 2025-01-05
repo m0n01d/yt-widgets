@@ -29,6 +29,6 @@ module Runtime = {
 type chrome
 module Storage = {
   //      %raw(`let chrome.storage.local.get(console.log)`)
-  @val @scope(("chrome", "storage", "local"))
+  @val @scope(("chrome", "storage", "session"))
   external get: unit => Promise.t<'a> = "get"
 }
