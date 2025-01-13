@@ -106,6 +106,10 @@ function TitleChecker$TitleChecker(props) {
                   NAME: "number",
                   VAL: 1
                 })),
+        refetchInterval: Caml_option.some(ReactQuery.refetchInterval({
+                  NAME: "number",
+                  VAL: 1000
+                })),
         refetchOnMount: Caml_option.some(ReactQuery.refetchOnMount({
                   NAME: "bool",
                   VAL: true
@@ -145,7 +149,7 @@ function TitleChecker$TitleChecker(props) {
         RE_EXN_ID: "Match_failure",
         _1: [
           "TitleChecker.res",
-          92,
+          93,
           4
         ],
         Error: new Error()

@@ -86,6 +86,7 @@ module TitleChecker = {
       queryKey: ["titlechecker"],
       refetchOnMount: ReactQuery.refetchOnMount(#bool(true)),
       refetchOnWindowFocus: ReactQuery.refetchOnWindowFocus(#bool(false)),
+      refetchInterval: ReactQuery.refetchInterval(#number(1000)),
       staleTime: ReactQuery.time(#number(1)),
     })
 

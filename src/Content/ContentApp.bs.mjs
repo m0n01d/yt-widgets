@@ -153,94 +153,132 @@ var YouTubeStudioApp = {
   VideoEdit: VideoEdit
 };
 
-function ContentApp$App(props) {
-  var match = React.useState(function () {
-        return {
+var app = Core__Option.map(Caml_option.nullable_to_opt($$document.querySelector("title")), (function (titleEl) {
+        var ContentApp = function (props) {
+          var match = React.useState(function () {
+                return {
+                        TAG: "Consumer",
+                        _0: "ConsumerRoot"
+                      };
+              });
+          var setPage = match[1];
+          var page = match[0];
+          var root = window.location.host.includes("studio") ? ({
+                TAG: "Studio",
+                _0: "StudioRoot"
+              }) : ({
                 TAG: "Consumer",
                 _0: "ConsumerRoot"
-              };
-      });
-  var setPage = match[1];
-  var app = window.location.host.includes("studio") ? ({
-        TAG: "Studio",
-        _0: "StudioRoot"
-      }) : ({
-        TAG: "Consumer",
-        _0: "ConsumerRoot"
-      });
-  var youtubeUrl = RescriptReactRouter.useUrl(undefined, undefined);
-  RescriptReactRouter.watchUrl(function (youtubeUrl) {
-        if (app.TAG === "Studio") {
-          var match = youtubeUrl.path;
-          if (!match) {
-            return ;
-          }
-          switch (match.hd) {
-            case "" :
-                if (match.tl) {
+              });
+          var watcher = function (param) {
+            var youtubeUrl = RescriptReactRouter.dangerouslyGetInitialUrl(undefined, undefined);
+            console.log([
+                  "watchingUrl",
+                  youtubeUrl
+                ]);
+            console.log([
+                  "app",
+                  root,
+                  page
+                ]);
+            if (root.TAG === "Studio") {
+              var match = youtubeUrl.path;
+              if (!match) {
+                return ;
+              }
+              switch (match.hd) {
+                case "" :
+                    if (match.tl) {
+                      return ;
+                    } else {
+                      return setPage(function (param) {
+                                  return {
+                                          TAG: "Studio",
+                                          _0: "StudioRoot"
+                                        };
+                                });
+                    }
+                case "channel" :
+                    var match$1 = match.tl;
+                    if (!match$1) {
+                      return ;
+                    }
+                    var match$2 = match$1.tl;
+                    if (match$2 && match$2.hd === "videos" && !match$2.tl) {
+                      return setPage(function (param) {
+                                  return {
+                                          TAG: "Studio",
+                                          _0: "StudioRoot"
+                                        };
+                                });
+                    } else {
+                      return ;
+                    }
+                case "video" :
+                    var match$3 = match.tl;
+                    if (!match$3) {
+                      return ;
+                    }
+                    var match$4 = match$3.tl;
+                    if (match$4 && match$4.hd === "edit" && !match$4.tl) {
+                      return setPage(function (param) {
+                                  return {
+                                          TAG: "Studio",
+                                          _0: "VideoEdit"
+                                        };
+                                });
+                    } else {
+                      return ;
+                    }
+                default:
                   return ;
-                } else {
-                  return setPage(function (param) {
-                              return {
-                                      TAG: "Studio",
-                                      _0: "StudioRoot"
-                                    };
-                            });
-                }
-            case "video" :
-                var match$1 = match.tl;
-                if (!match$1) {
-                  return ;
-                }
-                var match$2 = match$1.tl;
-                if (match$2 && match$2.hd === "edit" && !match$2.tl) {
-                  return setPage(function (param) {
-                              return {
-                                      TAG: "Studio",
-                                      _0: "VideoEdit"
-                                    };
-                            });
-                } else {
-                  return ;
-                }
-            default:
-              return ;
-          }
-        } else {
-          var match$3 = youtubeUrl.path;
-          if (match$3 && match$3.hd === "" && !match$3.tl) {
-            return setPage(function (param) {
-                        return {
-                                TAG: "Consumer",
-                                _0: "ConsumerRoot"
-                              };
+              }
+            } else {
+              var match$5 = youtubeUrl.path;
+              if (match$5 && match$5.hd === "" && !match$5.tl) {
+                return setPage(function (param) {
+                            return {
+                                    TAG: "Consumer",
+                                    _0: "ConsumerRoot"
+                                  };
+                          });
+              } else {
+                return ;
+              }
+            }
+          };
+          var titleElWatcher = function (mutationList, observer) {
+            Core__Option.mapWithDefault(Core__Option.map(mutationList[0], (function (prim) {
+                        return prim.target;
+                      })), "", (function (prim) {
+                    return prim.textContent;
+                  }));
+            watcher();
+          };
+          React.useEffect((function () {
+                  watcher();
+                  var titleObserver = new MutationObserver(titleElWatcher);
+                  titleObserver.observe(titleEl, {
+                        attributes: false,
+                        childList: true,
+                        subtree: false
                       });
+                  return (function () {
+                            titleObserver.disconnect();
+                          });
+                }), []);
+          if (page.TAG === "Studio") {
+            return JsxRuntime.jsx(ContentApp$YouTubeStudioApp$VideoEdit, {});
           } else {
-            return ;
+            return JsxRuntime.jsx(ThumbnailPreview.make, {});
           }
-        }
-      });
-  console.log([
-        "youtubeUrl",
-        youtubeUrl
-      ]);
-  if (app.TAG === "Studio") {
-    return JsxRuntime.jsx(ContentApp$YouTubeStudioApp$VideoEdit, {});
-  } else {
-    return JsxRuntime.jsx(ThumbnailPreview.make, {});
-  }
-}
-
-var App = {
-  make: ContentApp$App
-};
-
-var root = Client.createRoot(dummy);
-
-root.render(JsxRuntime.jsx(Styles.ThemeProvider, {
-          children: JsxRuntime.jsx(ContentApp$App, {}),
-          theme: theme
-        }));
+        };
+        var root = Client.createRoot(dummy);
+        root.render(JsxRuntime.jsx(Styles.ThemeProvider, {
+                  children: JsxRuntime.jsx(ContentApp, {}),
+                  theme: theme
+                }));
+      }));
 
 export {
   theme ,
@@ -248,7 +286,6 @@ export {
   $$document ,
   dummy ,
   YouTubeStudioApp ,
-  App ,
-  root ,
+  app ,
 }
 /* document Not a pure module */

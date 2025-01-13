@@ -260,6 +260,10 @@ function Thumbnail$Preview(props) {
                   NAME: "number",
                   VAL: 1
                 })),
+        refetchInterval: Caml_option.some(ReactQuery.refetchInterval({
+                  NAME: "number",
+                  VAL: 1000
+                })),
         refetchOnMount: Caml_option.some(ReactQuery.refetchOnMount({
                   NAME: "bool",
                   VAL: true

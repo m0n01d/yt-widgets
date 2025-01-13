@@ -199,6 +199,7 @@ module Preview = {
       queryKey: ["Thumbnail.Preview"],
       refetchOnMount: ReactQuery.refetchOnMount(#bool(true)),
       refetchOnWindowFocus: ReactQuery.refetchOnWindowFocus(#bool(false)),
+      refetchInterval: ReactQuery.refetchInterval(#number(1000)),
       staleTime: ReactQuery.time(#number(1)),
       retry: ReactQuery.retry(#number(5)),
       retryDelay: ReactQuery.retryDelay(#number(1000)),

@@ -26,6 +26,7 @@ let p =
   ->ignore
 
 let listeners = Map.make()
+exception SomeError(string)
 
 Chrome.Runtime.OnConnect.addListener(port => {
   // Console.log3("chrome port", port.name, port)
@@ -135,19 +136,37 @@ Chrome.Runtime.OnConnect.addListener(port => {
       Chrome.Storage.get()
       // @TODO then decode
       ->Promise.then(data => {
-        switch ThumbnailData.Decode.decoder(data) {
-        | Ok(thumbnailData) => Promise.resolve(thumbnailData)
-        | Error(err) => Promise.reject(Error.make(err)->Error.toException)
+        ThumbnailData.Decode.decoder(data)->Promise.resolve
+      })
+      ->Promise.catch(e => {
+        let msg = switch e {
+        | SomeError(msg) => "ReScript error occurred: " ++ msg
+        | Exn.Error(obj) =>
+          switch Exn.message(obj) {
+          | Some(msg) => "JS exception occurred: " ++ msg
+          | None => "Some other JS value has been thrown"
+          }
+        | _ => "Unexpected error occurred"
         }
+
+        Error(msg)->Promise.resolve
       })
       ->Promise.then(data => {
-        let message: Chrome.Runtime.Port.message<
-          Hooks.Preview.tag,
-        > = Hooks.Preview.GotThumbnailPreview(data)
-        port->Chrome.Runtime.Port.postMessage(message)
-        Promise.resolve()
+        switch data {
+        | Ok(data) => {
+            let message: Chrome.Runtime.Port.message<
+              Hooks.Preview.tag,
+            > = Hooks.Preview.GotThumbnailPreview(data)
+            port->Chrome.Runtime.Port.postMessage(message)
+            Promise.resolve()
+          }
+        | Error(msg) => {
+            Console.log(msg)
+            Promise.resolve()
+          }
+        }
       })
-      ->ignore
+      ->Promise.done
     }
   | "Thumbnail.Preview" => {
       listeners->Map.set(port.name, port)->ignore

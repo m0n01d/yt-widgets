@@ -52,6 +52,7 @@ module YouTubeStudioApp = {
       let (state, dispatch) = React.useReducer(update, initialState)
 
       let bodyWatcher = (mutationList, observer) => {
+        // handles attaching widgets  to Upload Dialog
         let dialog = mutationList->Array.forEach(mutation => {
           let hasRemovedDialog =
             MutationRecord.removedNodes(mutation)
@@ -118,41 +119,69 @@ module YouTubeStudioApp = {
     }
   }
 }
-
-module App = {
-  type studioPage = VideoEdit | StudioRoot
-  type consumerPage = ConsumerRoot
-  type app = Studio(studioPage) | Consumer(consumerPage)
-  @react.component
-  let make = () => {
-    let (page, setPage) = React.useState(_ => Consumer(ConsumerRoot))
-    let app =
-      window->Window.location->Location.host->String.includes("studio")
-        ? Studio(StudioRoot)
-        : Consumer(ConsumerRoot)
-    let youtubeUrl = RescriptReactRouter.useUrl()
-    let watcher = RescriptReactRouter.watchUrl(youtubeUrl => {
-      switch (app, youtubeUrl) {
-      | (Consumer(_), {path: list{""}, _}) => setPage(_ => Consumer(ConsumerRoot))
-      | (Studio(_), {path: list{""}, _}) => setPage(_ => Studio(StudioRoot))
-      | (Studio(_), {path: list{"video", _, "edit"}}) => setPage(_ => Studio(VideoEdit))
-      | _ => ()
+let app = Document.querySelector(document, "title")->Option.map(titleEl => {
+  module App = {
+    type studioPage = VideoEdit | StudioRoot
+    type consumerPage = ConsumerRoot
+    type app = Studio(studioPage) | Consumer(consumerPage)
+    @react.component
+    let make = () => {
+      let (page, setPage) = React.useState(_ => Consumer(ConsumerRoot))
+      let root =
+        window->Window.location->Location.host->String.includes("studio")
+          ? Studio(StudioRoot)
+          : Consumer(ConsumerRoot)
+      let watcher = _ => {
+        // @INFO can't use RescriptReactRouter.useUrl because youtube doesnt popstate
+        let youtubeUrl = RescriptReactRouter.dangerouslyGetInitialUrl()
+        Console.log(("watchingUrl", youtubeUrl))
+        Console.log(("app", root, page))
+        switch (root, youtubeUrl) {
+        | (Consumer(_), {path: list{""}, _}) => setPage(_ => Consumer(ConsumerRoot))
+        | (Studio(_), {path: list{""}, _}) => setPage(_ => Studio(StudioRoot))
+        | (Studio(_), {path: list{"channel", id, "videos"}, _}) => setPage(_ => Studio(StudioRoot))
+        // /channel/id/upload?
+        | (Studio(_), {path: list{"video", _, "edit"}}) => setPage(_ => Studio(VideoEdit))
+        | _ => ()
+        }
       }
-    })
+      let titleElWatcher = (mutationList: array<MutationRecord.t>, observer) => {
+        let title =
+          mutationList
+          ->Array.get(0)
+          ->Option.map(MutationRecord.target)
+          ->Option.mapWithDefault("", Node.textContent)
+        watcher()
+      }
+      React.useEffect0(() => {
+        watcher()
+        let titleObserver = MutationObserver.make(titleElWatcher)
 
-    switch app {
-    | Consumer(_) => <Home.ThumbnailPreview />
-    | Studio(StudioRoot) => <YouTubeStudioApp.VideoEdit />
-    | Studio(VideoEdit) => <YouTubeStudioApp.VideoEdit />
-    | _ => React.null
+        MutationObserver.observe(
+          titleObserver,
+          titleEl,
+          {"attributes": false, "childList": true, "subtree": false},
+        )
+        let cleanup = () => {
+          MutationObserver.disconnect(titleObserver)
+        }
+
+        Some(cleanup)
+      })
+      switch page {
+      | Consumer(_) => <Home.ThumbnailPreview />
+      | Studio(StudioRoot) => <YouTubeStudioApp.VideoEdit />
+      | Studio(VideoEdit) => <YouTubeStudioApp.VideoEdit />
+      | _ => React.null
+      }
     }
   }
-}
 
-let root = ReactDOM.Client.createRoot(dummy)
-ReactDOM.Client.Root.render(
-  root,
-  <Mui.ThemeProvider theme=Func(theme)>
-    <App />
-  </Mui.ThemeProvider>,
-)
+  let root = ReactDOM.Client.createRoot(dummy)
+  ReactDOM.Client.Root.render(
+    root,
+    <Mui.ThemeProvider theme=Func(theme)>
+      <App />
+    </Mui.ThemeProvider>,
+  )
+})

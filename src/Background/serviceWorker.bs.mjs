@@ -2,11 +2,13 @@
 
 import * as Table from "../Data/Table.bs.mjs";
 import Dexie from "dexie";
+import * as Js_exn from "rescript/lib/es6/js_exn.js";
 import * as Schema from "../Data/Schema.bs.mjs";
 import * as Js_promise2 from "rescript/lib/es6/js_promise2.js";
 import * as Core__Promise from "@rescript/core/src/Core__Promise.bs.mjs";
 import * as ThumbnailData from "../Data/ThumbnailData.bs.mjs";
 import * as Version$Dexie from "@dusty-phillips/rescript-dexie/src/Version.bs.mjs";
+import * as Caml_exceptions from "rescript/lib/es6/caml_exceptions.js";
 
 var dexie = new Dexie("hello dexie 1");
 
@@ -37,6 +39,8 @@ Table.DescriptionSnippet.put(dexie, {
 
 var listeners = new Map();
 
+var SomeError = /* @__PURE__ */Caml_exceptions.create("ServiceWorker.SomeError");
+
 chrome.runtime.onConnect.addListener(function (port) {
       port.onDisconnect.addListener(function () {
             port.disconnect();
@@ -60,19 +64,32 @@ chrome.runtime.onConnect.addListener(function (port) {
             port.onDisconnect.addListener(function () {
                   ((chrome.storage.session.clear()));
                 });
-            chrome.storage.session.get().then(function (data) {
-                    var thumbnailData = ThumbnailData.Decode.decoder(data);
-                    if (thumbnailData.TAG === "Ok") {
-                      return Promise.resolve(thumbnailData._0);
-                    } else {
-                      return Promise.reject(new Error(thumbnailData._0));
-                    }
-                  }).then(function (data) {
-                  var message = {
-                    TAG: "GotThumbnailPreview",
-                    _0: data
-                  };
-                  port.postMessage(message);
+            Core__Promise.$$catch(chrome.storage.session.get().then(function (data) {
+                        return Promise.resolve(ThumbnailData.Decode.decoder(data));
+                      }), (function (e) {
+                      var msg;
+                      if (e.RE_EXN_ID === SomeError) {
+                        msg = "ReScript error occurred: " + e._1;
+                      } else if (e.RE_EXN_ID === Js_exn.$$Error) {
+                        var msg$1 = e._1.message;
+                        msg = msg$1 !== undefined ? "JS exception occurred: " + msg$1 : "Some other JS value has been thrown";
+                      } else {
+                        msg = "Unexpected error occurred";
+                      }
+                      return Promise.resolve({
+                                  TAG: "Error",
+                                  _0: msg
+                                });
+                    })).then(function (data) {
+                  if (data.TAG === "Ok") {
+                    var message = {
+                      TAG: "GotThumbnailPreview",
+                      _0: data._0
+                    };
+                    port.postMessage(message);
+                    return Promise.resolve();
+                  }
+                  console.log(data._0);
                   return Promise.resolve();
                 });
             return ;
@@ -133,7 +150,7 @@ chrome.runtime.onConnect.addListener(function (port) {
                 RE_EXN_ID: "Match_failure",
                 _1: [
                   "serviceWorker.res",
-                  40,
+                  41,
                   2
                 ],
                 Error: new Error()
@@ -150,5 +167,6 @@ export {
   body ,
   p ,
   listeners ,
+  SomeError ,
 }
 /* dexie Not a pure module */
