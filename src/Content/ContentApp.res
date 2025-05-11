@@ -123,7 +123,7 @@ let app = Document.querySelector(document, "title")->Option.map(titleEl => {
   module App = {
     type studioPage = VideoEdit | StudioRoot
     type consumerPage = ConsumerRoot
-    type app = Studio(studioPage) | Consumer(consumerPage)
+    type appPage = Studio(studioPage) | Consumer(consumerPage)
     @react.component
     let make = () => {
       let (page, setPage) = React.useState(_ => Consumer(ConsumerRoot))
@@ -131,7 +131,7 @@ let app = Document.querySelector(document, "title")->Option.map(titleEl => {
         window->Window.location->Location.host->String.includes("studio")
           ? Studio(StudioRoot)
           : Consumer(ConsumerRoot)
-      let watcher = _ => {
+      let setPageFromUrl = _ => {
         // @INFO can't use RescriptReactRouter.useUrl because youtube doesnt popstate
         let youtubeUrl = RescriptReactRouter.dangerouslyGetInitialUrl()
         Console.log(("watchingUrl", youtubeUrl))
@@ -151,10 +151,10 @@ let app = Document.querySelector(document, "title")->Option.map(titleEl => {
           ->Array.get(0)
           ->Option.map(MutationRecord.target)
           ->Option.mapWithDefault("", Node.textContent)
-        watcher()
+        setPageFromUrl()
       }
       React.useEffect0(() => {
-        watcher()
+        setPageFromUrl()
         let titleObserver = MutationObserver.make(titleElWatcher)
 
         MutationObserver.observe(

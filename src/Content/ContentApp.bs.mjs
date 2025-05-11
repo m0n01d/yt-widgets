@@ -170,7 +170,7 @@ var app = Core__Option.map(Caml_option.nullable_to_opt($$document.querySelector(
                 TAG: "Consumer",
                 _0: "ConsumerRoot"
               });
-          var watcher = function (param) {
+          var setPageFromUrl = function (param) {
             var youtubeUrl = RescriptReactRouter.dangerouslyGetInitialUrl(undefined, undefined);
             console.log([
                   "watchingUrl",
@@ -253,10 +253,10 @@ var app = Core__Option.map(Caml_option.nullable_to_opt($$document.querySelector(
                       })), "", (function (prim) {
                     return prim.textContent;
                   }));
-            watcher();
+            setPageFromUrl();
           };
           React.useEffect((function () {
-                  watcher();
+                  setPageFromUrl();
                   var titleObserver = new MutationObserver(titleElWatcher);
                   titleObserver.observe(titleEl, {
                         attributes: false,
