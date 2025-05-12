@@ -8,10 +8,11 @@ import Html
 import Html.Attributes
 import Pages.Url
 import PagesMsg exposing (PagesMsg)
-import UrlPath
 import Route
 import RouteBuilder exposing (App, StatelessRoute)
 import Shared
+import Ui.Button
+import UrlPath
 import View exposing (View)
 
 
@@ -79,20 +80,21 @@ view :
 view app shared =
     { title = "elm-pages is running"
     , body =
-        [ Html.h1 [Html.Attributes.class "flex"
-        ] [ Html.text "elm-pages is up and running!" ]
-        , Html.p [Html.Attributes.class "material-card"
-        ]
-            [ Html.text <| "The message is: " ++ app.data.message
-            , Html.button [Html.Attributes.class "material-button"][Html.text "clicK"]
-            , Html.button [Html.Attributes.class "material-button-primary"][Html.text "clicK"]
-            , Html.button [Html.Attributes.class "material-button-primary2"][Html.text "clicK"]
-            , Html.button [Html.Attributes.class "bg-blue-500 text-onPrimary hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"][Html.text "clicK"]
+        [ Html.h1
+            [ Html.Attributes.class "flex"
             ]
-            
+            [ Html.text "elm-pages is up and running!" ]
+        , Html.p
+            [ Html.Attributes.class "material-card"
+            ]
+            [ Html.text <| "The message is: " ++ app.data.message
+            , Html.button [ Html.Attributes.class "material-button" ] [ Html.text "clicK" ]
+            , Html.button [ Html.Attributes.class "material-button-primary" ] [ Html.text "clicK" ]
+            , Html.button [ Html.Attributes.class "material-button-primary2" ] [ Html.text "clicK" ]
+            , Html.button [ Html.Attributes.class "bg-blue-500 text-onPrimary hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2" ] [ Html.text "clicK" ]
+            , Ui.Button.view { style = Ui.Button.Primary, onClick = () }
+            ]
         , Route.Blog__Slug_ { slug = "hello" }
             |> Route.link [] [ Html.text "My blog post" ]
-            
-
         ]
     }
