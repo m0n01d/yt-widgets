@@ -3,8 +3,10 @@
   "type": "module",
   "scripts": {
     "postinstall": "elm-tooling install",
-    "start": "elm-pages dev",
-    "build": "elm-pages build"
+    "start": "npm run tailwind & elm-pages dev",
+    "build": "elm-pages build",
+
+    "tailwind": "npx tailwindcss -i ./style/tailwind.css -o ./tailwind.dist.css"
   },
   "devDependencies": {
     "elm-codegen": "^0.6.1",

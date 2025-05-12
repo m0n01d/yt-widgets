@@ -1,0 +1,24 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  font-family: "Roboto", sans-serif;
+  background-color: theme("colors.background");
+  color: theme("colors.onBackground");
+}
+
+@layer components {
+  .material-button {
+    @apply rounded-md shadow-md font-medium;
+  }
+  .material-button-primary {
+    @apply material-button bg-primary-500 text-onPrimary hover:bg-primary-700 focus:ring-2 focus:ring-primary-300 focus:ring-offset-2;
+  }
+  .material-button-secondary {
+    @apply material-button bg-secondary-500 text-onSecondary hover:bg-secondary-700 focus:ring-2 focus:ring-secondary-500 focus:ring-offset-2;
+  }
+  .material-card {
+    @apply bg-surface rounded-md shadow-md;
+  }
+}
