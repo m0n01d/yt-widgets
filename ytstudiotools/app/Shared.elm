@@ -4,12 +4,15 @@ import BackendTask exposing (BackendTask)
 import Effect exposing (Effect)
 import FatalError exposing (FatalError)
 import Html exposing (Html)
+import Html.Attributes
 import Html.Events
 import Pages.Flags
+import Pages.Manifest.Category exposing (navigation)
 import Pages.PageUrl exposing (PageUrl)
-import UrlPath exposing (UrlPath)
 import Route exposing (Route)
 import SharedTemplate exposing (SharedTemplate)
+import Ui.Navigation
+import UrlPath exposing (UrlPath)
 import View exposing (View)
 
 
@@ -92,29 +95,31 @@ view :
     -> View msg
     -> { body : List (Html msg), title : String }
 view sharedData page model toMsg pageView =
-    { body =
-        [ Html.nav []
-            [ Html.button
-                [ Html.Events.onClick MenuClicked ]
-                [ Html.text
-                    (if model.showMenu then
-                        "Close Menu"
+    let
+        navigation =
+            Html.nav []
+                [ Ui.Navigation.view
+                , if model.showMenu then
+                    Html.ul []
+                        [ Html.li [] [ Html.text "Menu item 1" ]
+                        , Html.li [] [ Html.text "Menu item 2" ]
+                        ]
 
-                     else
-                        "Open Menu"
-                    )
+                  else
+                    Html.text ""
                 ]
-            , if model.showMenu then
-                Html.ul []
-                    [ Html.li [] [ Html.text "Menu item 1" ]
-                    , Html.li [] [ Html.text "Menu item 2" ]
-                    ]
-
-              else
-                Html.text ""
+                |> Html.map toMsg
+    in
+    { body =
+        [ Html.main_
+            [ Html.Attributes.class "container flex flex-col flex-1 mx-auto md:min-h-screen"
             ]
-            |> Html.map toMsg
-        , Html.main_ [] pageView.body
+            [ navigation
+            , Html.div
+                [ Html.Attributes.class "flex flex-col flex-1"
+                ]
+                pageView.body
+            ]
         ]
     , title = pageView.title
     }

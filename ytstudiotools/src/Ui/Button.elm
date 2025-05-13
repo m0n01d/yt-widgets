@@ -9,7 +9,8 @@ type Style
 
 
 type alias Config msg =
-    { onClick : msg
+    { label : String
+    , onClick : msg
     , style : Style
     }
 
@@ -17,11 +18,11 @@ type alias Config msg =
 styleToClass style =
     case style of
         Primary ->
-            "bg-blue-500 text-onPrimary hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+            ""
 
 
 baseStyles =
-    "px-4 py-2 rounded-md font-medium shadow-md"
+    "inline-flex items-center justify-center border align-middle select-none font-sans font-medium text-center transition-all duration-300 ease-in disabled:opacity-50 disabled:shadow-none disabled:cursor-not-allowed data-[shape=pill]:rounded-full data-[width=full]:w-full focus:shadow-none text-sm rounded-md py-2 px-4 shadow-sm hover:shadow-md bg-slate-800 border-slate-800 text-slate-50 hover:bg-slate-700 hover:border-slate-700"
 
 
 view config =
@@ -29,4 +30,4 @@ view config =
         [ config.style |> styleToClass |> Html.Attributes.class
         , Html.Attributes.class baseStyles
         ]
-        [ Html.text "Click me" ]
+        [ Html.text config.label ]

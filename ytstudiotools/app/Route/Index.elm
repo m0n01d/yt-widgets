@@ -80,21 +80,122 @@ view :
 view app shared =
     { title = "elm-pages is running"
     , body =
-        [ Html.h1
-            [ Html.Attributes.class "flex"
+        [ Html.section
+            [ Html.Attributes.class "flex flex-col items-center justify-center flex-1 flex-shrink-0 min-h-dvh gap-2 md:gap-6"
             ]
-            [ Html.text "elm-pages is up and running!" ]
-        , Html.p
-            [ Html.Attributes.class "material-card"
+            [ Html.p
+                [ Html.Attributes.class "text-2xl md:text-6xl"
+                ]
+                [ Html.strong [ Html.Attributes.class "font-extrabold" ]
+                    [ Html.text "Tools that grow your "
+                    , Html.span
+                        [ Html.Attributes.class "text-red-700"
+                        ]
+                        [ Html.text "Channel" ]
+                    ]
+                ]
+            , Html.p [] [ Html.text "Save time with tools that don't get in your way" ]
+
+            -- , viewTheThing
+            , Html.div
+                []
+                [ Ui.Button.view { style = Ui.Button.Primary, onClick = (), label = "Install Now FREE" }
+                ]
             ]
-            [ Html.text <| "The message is: " ++ app.data.message
-            , Html.button [ Html.Attributes.class "material-button" ] [ Html.text "clicK" ]
-            , Html.button [ Html.Attributes.class "material-button-primary" ] [ Html.text "clicK" ]
-            , Html.button [ Html.Attributes.class "material-button-primary2" ] [ Html.text "clicK" ]
-            , Html.button [ Html.Attributes.class "bg-blue-500 text-onPrimary hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2" ] [ Html.text "clicK" ]
-            , Ui.Button.view { style = Ui.Button.Primary, onClick = () }
-            ]
-        , Route.Blog__Slug_ { slug = "hello" }
-            |> Route.link [] [ Html.text "My blog post" ]
+        , viewBenefits_TitleChecker
+        , viewBenefits_Snippets
+        , viewBenefits_PreviewThumbnail
+        , viewBenefits_Checklist
         ]
     }
+
+
+viewInstallNow =
+    Html.section []
+        [ Html.text "Install now" ]
+
+
+viewTheThing =
+    Html.p
+        [ Html.Attributes.class "pb-2 mb-2 text-gray-700 border-b-2 border-red-700 md:text-2xl"
+        ]
+        [ Html.text "Streamlined tools. Made by Youtubers, for "
+        , Html.span [ Html.Attributes.class "font-semibold text-red-500" ] [ Html.text "You" ]
+        , Html.span
+            [ Html.Attributes.class "text-gray-300"
+            ]
+            [ Html.text "tubers." ]
+        ]
+
+
+sectionClasses =
+    Html.Attributes.class "px-8 py-10 flex flex-col justify-center md:shadow my-8 min-h-48 md:min-h-[75vh] md:[&:nth-child(even)_div]:!flex-row-reverse"
+
+
+fakeImg =
+    Html.div
+        [ Html.Attributes.class "w-48 h-48 my-8 border border-red-500"
+        ]
+        []
+
+
+viewBenefits benefits =
+    Html.section [ sectionClasses ]
+        [ [ case benefits of
+                x :: xs ->
+                    [ Html.div []
+                        [ Html.p
+                            [ Html.Attributes.class "mb-4 text-2xl text-red-500"
+                            ]
+                            [ Html.text x ]
+                        , xs
+                            |> List.map
+                                (\benefit ->
+                                    Html.li [] [ Html.text benefit ]
+                                )
+                            |> Html.ul
+                                [ Html.Attributes.class "list-none md:list-disc"
+                                ]
+                        ]
+                    ]
+
+                _ ->
+                    [ Html.text "" ]
+          , [ fakeImg ]
+          ]
+            |> List.concat
+            |> Html.div
+                [ Html.Attributes.class "flex flex-row flex-col items-center justify-around px-2 py-8 border-box md:flex-row"
+                ]
+        ]
+
+
+viewBenefits_TitleChecker =
+    viewBenefits
+        [ "Reach more viewers with SEO"
+        , "Shorter titles are proven to work better"
+        , "Don't let your title go unread"
+        ]
+
+
+viewBenefits_Snippets =
+    viewBenefits
+        [ "Save time"
+        , "Create snippets to add to your descriptions quickly & easily"
+        , "Add affiliate links and Subscribe CTAs with a click"
+        ]
+
+
+viewBenefits_PreviewThumbnail =
+    viewBenefits
+        [ "How does your thumbnail look in the Feed?"
+        , "See a preview on the Home page or your Channel"
+        , "Check your thumbnail's alignment, balance and colors"
+        ]
+
+
+viewBenefits_Checklist =
+    viewBenefits
+        [ "Don't miss important steps"
+        , "Add an Upload Checklist so you can smash SEO"
+        ]
