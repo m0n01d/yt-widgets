@@ -12,6 +12,7 @@ import Route
 import RouteBuilder exposing (App, StatelessRoute)
 import Shared
 import Ui.Button
+import Ui.Card
 import UrlPath
 import View exposing (View)
 
@@ -112,7 +113,9 @@ view app shared =
 
 viewInstallNow =
     Html.section []
-        [ Html.text "Install now" ]
+        [ Html.text "Install now: "
+        , Ui.Button.view { style = Ui.Button.Primary, onClick = (), label = "Install Now FREE" }
+        ]
 
 
 viewTheThing =
@@ -129,7 +132,11 @@ viewTheThing =
 
 
 sectionClasses =
-    Html.Attributes.class "px-8 py-10 flex flex-col justify-center md:shadow my-8 min-h-48 md:min-h-[75vh] md:[&:nth-child(even)_div]:!flex-row-reverse"
+    Html.Attributes.class "px-8 py-10 flex flex-col justify-center my-8 min-h-48 md:min-h-[75vh] md:[&:nth-child(even)_div]:!flex-row-reverse"
+
+
+fakeCard =
+    Ui.Card.view
 
 
 fakeImg =
@@ -161,7 +168,7 @@ viewBenefits benefits =
 
                 _ ->
                     [ Html.text "" ]
-          , [ fakeImg ]
+          , [ fakeCard ]
           ]
             |> List.concat
             |> Html.div

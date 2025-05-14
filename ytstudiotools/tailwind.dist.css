@@ -620138,6 +620138,11 @@ body {
     min-height: 100vh;
   }
 
+  .md\:translate-y-4{
+    --tw-translate-y: 1rem;
+    transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
+  }
+
   .md\:list-disc{
     list-style-type: disc;
   }
@@ -620148,11 +620153,6 @@ body {
 
   .md\:gap-6{
     gap: 1.5rem;
-  }
-
-  .md\:py-6{
-    padding-top: 1.5rem;
-    padding-bottom: 1.5rem;
   }
 
   .md\:text-2xl{
@@ -620171,21 +620171,13 @@ body {
     box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
   }
 
+  .md\:shadow-lg{
+    --tw-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+    --tw-shadow-colored: 0 10px 15px -3px var(--tw-shadow-color), 0 4px 6px -4px var(--tw-shadow-color);
+    box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
+  }
+
   .md\:\[\&\:nth-child\(even\)_div\]\:\!flex-row-reverse:nth-child(even) div{
     flex-direction: row-reverse !important;
   }
-}
-
-.\[\&_li\:first-of-type\]\:mb-4 li:first-of-type{
-  margin-bottom: 1rem;
-}
-
-.\[\&_li\:first-of-type\]\:text-2xl li:first-of-type{
-  font-size: 1.5rem;
-  line-height: 2rem;
-}
-
-.\[\&_li\:first-of-type\]\:text-red-500 li:first-of-type{
-  --tw-text-opacity: 1;
-  color: rgb(239 68 68 / var(--tw-text-opacity, 1));
 }
