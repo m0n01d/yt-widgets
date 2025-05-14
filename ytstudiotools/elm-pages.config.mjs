@@ -4,6 +4,7 @@ import adapter from "elm-pages/adapter/netlify.js";
 export default {
   vite: defineConfig({}),
   adapter,
+  base: "yt-widgets",
   headTagsTemplate(context) {
     return `
 <link rel="stylesheet" href="/style.css" />

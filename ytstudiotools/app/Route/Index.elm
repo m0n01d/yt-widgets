@@ -15,6 +15,7 @@ import Ui.Button
 import Ui.Card
 import UrlPath
 import View exposing (View)
+import Html.Events exposing (onClick)
 
 
 type alias Model =
@@ -107,6 +108,7 @@ view app shared =
         , viewBenefits_Snippets
         , viewBenefits_PreviewThumbnail
         , viewBenefits_Checklist
+        , viewPricingSection
         ]
     }
 
@@ -146,19 +148,22 @@ fakeImg =
         []
 
 
-viewBenefits benefits =
+viewBenefits benefits cardConfig =
     Html.section [ sectionClasses ]
         [ [ case benefits of
                 x :: xs ->
                     [ Html.div []
                         [ Html.p
-                            [ Html.Attributes.class "mb-4 text-2xl text-red-500"
+                            [ Html.Attributes.class "font-bold mb-6 text-2xl text-red-500"
                             ]
                             [ Html.text x ]
                         , xs
                             |> List.map
                                 (\benefit ->
-                                    Html.li [] [ Html.text benefit ]
+                                    Html.li
+                                        [ Html.Attributes.class "font-sans text-slate-600"
+                                        ]
+                                        [ Html.text benefit ]
                                 )
                             |> Html.ul
                                 [ Html.Attributes.class "list-none md:list-disc"
@@ -168,11 +173,12 @@ viewBenefits benefits =
 
                 _ ->
                     [ Html.text "" ]
-          , [ fakeCard ]
+          , [ Ui.Card.view cardConfig
+            ]
           ]
             |> List.concat
             |> Html.div
-                [ Html.Attributes.class "flex flex-row flex-col items-center justify-around px-2 py-8 border-box md:flex-row"
+                [ Html.Attributes.class "flex flex-row gap-y-8 flex-col items-center justify-around px-2 py-8 border-box md:flex-row"
                 ]
         ]
 
@@ -181,8 +187,11 @@ viewBenefits_TitleChecker =
     viewBenefits
         [ "Reach more viewers with SEO"
         , "Shorter titles are proven to work better"
-        , "Don't let your title go unread"
+        , "An average viewer processes your title in <2s"
         ]
+        { benefit = "Green means good to go!"
+        , feature = "Title Checker"
+        }
 
 
 viewBenefits_Snippets =
@@ -191,6 +200,9 @@ viewBenefits_Snippets =
         , "Create snippets to add to your descriptions quickly & easily"
         , "Add affiliate links and Subscribe CTAs with a click"
         ]
+        { benefit = "Write once, never copy paste again"
+        , feature = "Snippet Editor"
+        }
 
 
 viewBenefits_PreviewThumbnail =
@@ -199,10 +211,124 @@ viewBenefits_PreviewThumbnail =
         , "See a preview on the Home page or your Channel"
         , "Check your thumbnail's alignment, balance and colors"
         ]
+        { benefit = "Get more views"
+        , feature = "Thumbnail Preview"
+        }
 
 
 viewBenefits_Checklist =
     viewBenefits
         [ "Don't miss important steps"
-        , "Add an Upload Checklist so you can smash SEO"
+        , "Add an Upload Checklist to help guide you"
+        , "Customize steps"
+        ]
+        { benefit = "Theres a lot to remember on each upload", feature = "Upload Checklist" }
+
+
+viewPricingSection =
+    Html.section
+        [ Html.Attributes.class "px-8 py-16 flex flex-col items-center bg-gray-50" ]
+        [ Html.h2
+            [ Html.Attributes.class "text-3xl font-bold text-center mb-12" ]
+            [ Html.text "Choose Your Plan" ]
+        , Html.div
+            [ Html.Attributes.class "flex flex-col md:flex-row gap-8 max-w-6xl w-full justify-center" ]
+            [ viewPricingCard
+                { title = "Free"
+                , price = "0"
+                , period = "forever"
+                , features =
+                    [ "Title Checker"
+                    , "Basic Snippets (2 max)"
+                    , "Thumbnail Preview"
+                    , "Standard Checklist"
+                    ]
+                , buttonLabel = "Install Free"
+                , buttonStyle = Ui.Button.Primary
+                , popular = False
+                }
+            , viewPricingCard
+                { title = "Pro"
+                , price = "6"
+                , period = "monthly"
+                , features =
+                    [ "Everything in Free"
+                    , "Unlimited Snippets"
+                    , "Custom Checklists"
+                    , "Advanced Analytics"
+                    , "Priority Support"
+                    ]
+                , buttonLabel = "Upgrade to Pro"
+                , buttonStyle = Ui.Button.Primary
+                , popular = True
+                }
+            ]
+        , Html.div
+            [ Html.Attributes.class "mt-8 text-center" ]
+            [ Html.p
+                [ Html.Attributes.class "text-gray-600 mb-2" ]
+                [ Html.text "Pro plan also available yearly" ]
+            , Html.p
+                [ Html.Attributes.class "text-xl font-bold text-red-700" ]
+                [ Html.text "$48/year "
+                , Html.span
+                    [ Html.Attributes.class "text-sm font-normal text-gray-600" ]
+                    [ Html.text "(save $24)" ]
+                ]
+            ]
+        ]
+
+
+viewPricingCard config =
+    Html.div
+        [ Html.Attributes.class <|
+            "relative flex flex-col p-8 rounded-lg shadow-md bg-white max-w-sm w-full transform transition-transform hover:scale-105 "
+                ++ (if config.popular then
+                        "border-2 border-red-500"
+
+                    else
+                        "border border-gray-200"
+                   )
+        ]
+        [ if config.popular then
+            Html.div
+                [ Html.Attributes.class "absolute -top-4 left-1/2 transform -translate-x-1/2 bg-red-500 text-white px-4 py-1 rounded-full text-sm font-bold" ]
+                [ Html.text "Most Popular" ]
+
+          else
+            Html.text ""
+        , Html.h3
+            [ Html.Attributes.class "text-2xl font-bold text-center mb-4" ]
+            [ Html.text config.title ]
+        , Html.div
+            [ Html.Attributes.class "text-center mb-6" ]
+            [ Html.span
+                [ Html.Attributes.class "text-4xl font-bold" ]
+                [ Html.text <| "$" ++ config.price ]
+            , Html.span
+                [ Html.Attributes.class "text-gray-600" ]
+                [ Html.text <| "/" ++ config.period ]
+            ]
+        , Html.ul
+            [ Html.Attributes.class "mb-8 space-y-3" ]
+            (List.map
+                (\feature ->
+                    Html.li
+                        [ Html.Attributes.class "flex items-center" ]
+                        [ Html.div
+                            [ Html.Attributes.class "text-green-500 mr-2" ]
+                            [ Html.text "✓" ]
+                        , Html.text feature
+                        ]
+                )
+                config.features
+            )
+        , Html.div
+            [ Html.Attributes.class "mt-auto" ]
+            [ Ui.Button.view
+                { style = config.buttonStyle
+                , onClick = ()
+                , label = config.buttonLabel
+                }
+            ]
         ]
