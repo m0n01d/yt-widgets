@@ -18,7 +18,7 @@ view { showMenu, onMenuClick } =
                 [ Html.text "YT" ]
             , Html.h1
                 [ Html.Attributes.class "text-xl font-bold text-gray-800" ]
-                [ Html.text "Studio Tools" ]
+                [ Html.text "StudioTools" ]
             ]
         , Html.div
             [ Html.Attributes.class "hidden md:flex items-center space-x-6" ]

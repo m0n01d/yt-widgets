@@ -132,9 +132,9 @@ view app shared model =
             ]
             [ Html.span
                 [ Html.Attributes.class "bg-red-50 text-red-700 px-4 py-1.5 rounded-full text-sm font-semibold tracking-wide mb-4" ]
-                [ Html.text "YouTube Studio Tools" ]
+                [ Html.text "YTStudioTools" ]
             , Html.p
-                [ Html.Attributes.class "text-3xl md:text-7xl text-center max-w-4xl"
+                [ Html.Attributes.class "text-3xl md:text-7xl text-center max-w-screen-md"
                 ]
                 [ Html.strong [ Html.Attributes.class "font-extrabold" ]
                     [ Html.text "Make uploading videos "
@@ -187,12 +187,8 @@ viewTheThing =
     Html.p
         [ Html.Attributes.class "pb-2 mb-2 text-gray-700 border-b-2 border-red-700 md:text-2xl"
         ]
-        [ Html.text "Streamlined tools. Made by Youtubers, for "
-        , Html.span [ Html.Attributes.class "font-semibold text-red-500" ] [ Html.text "You" ]
-        , Html.span
-            [ Html.Attributes.class "text-gray-300"
-            ]
-            [ Html.text "tubers." ]
+        [ Html.text "Streamlined tools. Made by Creators, for "
+        , Html.span [ Html.Attributes.class "font-semibold text-red-500" ] [ Html.text "Creators" ]
         ]
 
 
@@ -258,6 +254,7 @@ viewBenefits_TitleChecker =
         ]
         { benefit = "Get the green light and watch your views climb"
         , feature = "Title Checker"
+        , tooltipText = "Stay under 60 characters for better visibility. The progress bar changes from green to yellow to red as you go—like a stoplight for your title strategy."
         }
 
 
@@ -269,6 +266,7 @@ viewBenefits_Snippets =
         ]
         { benefit = "Create once, reuse everywhere, earn more"
         , feature = "Snippet Editor"
+        , tooltipText = "Create and reuse blocks of text like affiliate links, hashtags, or CTAs. Your go-to links and phrases, always a click away."
         }
 
 
@@ -280,6 +278,7 @@ viewBenefits_PreviewThumbnail =
         ]
         { benefit = "Thumbnails that make people click"
         , feature = "Thumbnail Preview"
+        , tooltipText = "Instantly preview how your thumbnail looks on the home feed and your channel—before you hit publish."
         }
 
 
@@ -289,7 +288,7 @@ viewBenefits_Checklist =
         , "Follow your custom upload routine every single time"
         , "Build the perfect checklist for your unique workflow"
         ]
-        { benefit = "Flawless uploads, every time", feature = "Upload Checklist" }
+        { benefit = "Flawless uploads, every time", feature = "Upload Checklist", tooltipText = "Customizable checklist to remind you to add CTAs, affiliate links, hashtags, and more—so every upload is on point." }
 
 
 viewPricingSection : PricingPeriod -> Html.Html (PagesMsg Msg)
@@ -318,7 +317,7 @@ viewPricingSection pricingPeriod =
                 [ Html.text "Choose Your Plan" ]
             , Html.p
                 [ Html.Attributes.class "text-gray-600 max-w-lg mx-auto" ]
-                [ Html.text "Save time with tools designed specifically for YouTubers. Select the plan that works best for your channel." ]
+                [ Html.text "Save time with tools designed specifically for Creators. Select the plan that works best for your channel." ]
             ]
         , Html.div
             [ Html.Attributes.class "flex flex-col md:flex-row gap-8 max-w-6xl w-full justify-center mt-8" ]

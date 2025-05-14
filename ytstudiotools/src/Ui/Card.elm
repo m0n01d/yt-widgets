@@ -4,7 +4,7 @@ import Html
 import Html.Attributes
 
 
-view { benefit, feature } =
+view { benefit, feature, tooltipText } =
     Html.div
         [ Html.Attributes.class "w-full max-w-2xl overflow-hidden rounded-xl p-0 border border-slate-200 bg-white shadow-xl shadow-slate-950/5 transition-all duration-300 hover:shadow-2xl hover:-translate-y-1"
         ]
@@ -30,7 +30,7 @@ view { benefit, feature } =
                     []
                 ]
             , Html.div
-                [ Html.Attributes.class "absolute top-3 left-3 bg-red-600 text-white px-3 py-1 rounded-full text-xs font-medium shadow-md" ]
+                [ Html.Attributes.class "absolute top-3 right-3 bg-red-600 text-white px-3 py-1 rounded-full text-xs font-medium shadow-md" ]
                 [ Html.text "Feature" ]
             ]
         , Html.div
@@ -50,7 +50,16 @@ view { benefit, feature } =
             ]
             [ Html.button
                 [ Html.Attributes.class "inline-flex rounded-md border border-gray-800 bg-gray-800 px-4 py-2 text-center font-sans text-sm font-medium text-white transition-all duration-300 ease-in hover:border-gray-900 hover:bg-gray-900 disabled:cursor-not-allowed disabled:opacity-50 shadow-sm hover:shadow-md"
+                , Html.Attributes.attribute "data-toggle" "popover"
+                , Html.Attributes.attribute "data-placement" "top-start"
+                , Html.Attributes.attribute "data-popover-class" "bg-white w-4/12 md:w-48 border border-slate-200 text-slate-800 text-xl rounded-md py-1 px-2 shadow-sm z-50"
                 ]
                 [ Html.text "Learn More" ]
+            , Html.div
+                [ Html.Attributes.class "hidden"
+                , Html.Attributes.attribute "data-popover-content" ""
+                ]
+                [ Html.text tooltipText
+                ]
             ]
         ]

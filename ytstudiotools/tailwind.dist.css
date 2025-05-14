@@ -620219,6 +620219,10 @@ body {
     min-height: 100vh;
   }
 
+  .md\:w-2\/12{
+    width: 16.666667%;
+  }
+
   .md\:flex-row{
     flex-direction: row;
   }
