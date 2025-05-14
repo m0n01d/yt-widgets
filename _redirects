@@ -1,0 +1,5 @@
+/greet /.netlify/functions/server-render 200
+/greet/content.dat /.netlify/functions/server-render 200
+/hello /.netlify/functions/server-render 200
+/hello/content.dat /.netlify/functions/server-render 200
+
