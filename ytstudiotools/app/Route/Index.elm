@@ -155,14 +155,11 @@ view app shared model =
                 [ Html.Attributes.class "flex flex-col sm:flex-row gap-4 mt-4" ]
                 [ Ui.Button.view { style = Ui.Button.Primary, onClick = (), label = "Install Now FREE" }
                 , Html.a
-                    [ Html.Attributes.class "inline-flex items-center justify-center font-medium text-center transition-all ease-in py-2 px-4 text-sm rounded-md text-gray-700 hover:text-gray-900 hover:bg-gray-100"
-                    , Html.Attributes.href "#features"
+                    [ Html.Attributes.href "#features"
+                    , Html.Attributes.class "inline-flex items-center justify-center border align-middle select-none font-sans font-medium text-center transition-all duration-300 ease-in disabled:opacity-50 disabled:shadow-none disabled:cursor-not-allowed data-[shape=pill]:rounded-full data-[width=full]:w-full focus:shadow-none text-sm rounded-md py-2.5 px-5"
+                    , Html.Attributes.class "bg-transparent border-gray-300 text-gray-700 hover:bg-gray-50 hover:text-gray-900"
                     ]
-                    [ Html.text "See Features"
-                    , Html.div
-                        [ Html.Attributes.class "ml-2" ]
-                        [ Html.text "↓" ]
-                    ]
+                    [ Html.text "See Features ↓" ]
                 ]
             ]
         , Html.div
@@ -307,7 +304,10 @@ viewPricingSection pricingPeriod =
                     ( "48", "yearly" )
     in
     Html.section
-        [ Html.Attributes.class "px-8 py-16 flex flex-col items-center bg-gradient-to-br from-gray-50 to-gray-100" ]
+        [ Html.Attributes.id "pricing"
+        , Html.Attributes.class "px-8 py-16 flex flex-col items-center bg-gradient-to-br from-gray-50 to-gray-100"
+        , Html.Attributes.class "scroll-mt-16"
+        ]
         [ Html.div
             [ Html.Attributes.class "max-w-6xl w-full mb-12 text-center" ]
             [ Html.span
@@ -332,7 +332,7 @@ viewPricingSection pricingPeriod =
                     , "Standard Checklist"
                     ]
                 , buttonLabel = "Install Free"
-                , buttonStyle = Ui.Button.Primary
+                , buttonStyle = Ui.Button.Secondary
                 , popular = False
                 }
             , viewPricingCard pricingPeriod
@@ -395,7 +395,7 @@ viewPricingToggle pricingPeriod =
                 "transform translate-x-5"
     in
     Html.div
-        [ Html.Attributes.class "flex items-center justify-center gap-3 mb-3 mt-1 text-xs bg-gray-50 py-2 px-3 rounded-full shadow-sm" ]
+        [ Html.Attributes.class "flex border items-center justify-center gap-3 mb-3 mt-1 text-xs bg-gray-50 py-2 px-3 rounded-full shadow-sm" ]
         [ Html.span
             [ Html.Attributes.class ("transition-colors " ++ monthlyClass) ]
             [ Html.text "Monthly" ]
@@ -417,12 +417,12 @@ viewPricingToggle pricingPeriod =
 viewPricingCard pricingPeriod config =
     Html.div
         [ Html.Attributes.class <|
-            "relative flex flex-col p-8 rounded-xl shadow-lg bg-white max-w-sm w-full transform transition-all duration-300 hover:shadow-xl hover:-translate-y-1 "
+            "relative flex border-2 flex-col p-8 rounded-xl shadow-lg bg-white max-w-sm w-full transform transition-all duration-300 hover:shadow-xl hover:-translate-y-1 "
                 ++ (if config.popular then
-                        "border-2 border-red-500 z-10"
+                        "border-red-500 z-10"
 
                     else
-                        "border border-gray-200"
+                        "border-gray-200 "
                    )
         ]
         [ if config.popular then
@@ -431,7 +431,9 @@ viewPricingCard pricingPeriod config =
                 [ Html.text "Most Popular" ]
 
           else
-            Html.text ""
+            Html.div
+                [ Html.Attributes.class "absolute opacity-0 -top-4 h-4 pointer-events-none" ]
+                [ Html.text "invisible spacer" ]
         , Html.div
             [ Html.Attributes.class "flex flex-col items-center" ]
             [ Html.h3
@@ -441,10 +443,12 @@ viewPricingCard pricingPeriod config =
                 viewPricingToggle pricingPeriod
 
               else
-                Html.text ""
+                Html.div
+                    [ Html.Attributes.class "text-center text-xs bg-gray-50 border h-[36px] py-2 px-3 rounded-full shadow-sm mb-3 mt-1" ]
+                    [ Html.text "Perfect for beginners 👋" ]
             ]
         , Html.div
-            [ Html.Attributes.class "text-center mb-8 mt-2" ]
+            [ Html.Attributes.class "text-center mt-2" ]
             [ Html.span
                 [ Html.Attributes.class "text-5xl font-extrabold" ]
                 [ Html.text <| "$" ++ config.price ]
@@ -453,7 +457,8 @@ viewPricingCard pricingPeriod config =
                 [ Html.text <| "/" ++ config.period ]
             ]
         , Html.div
-            [ Html.Attributes.class "w-full h-px bg-gray-200 mb-6" ]
+            [ Html.Attributes.class "w-full h-px bg-gray-200 mt-6 mb-6"
+            ]
             []
         , Html.ul
             [ Html.Attributes.class "mb-8 space-y-4" ]

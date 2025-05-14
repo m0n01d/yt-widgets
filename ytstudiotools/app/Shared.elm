@@ -97,28 +97,21 @@ view :
 view sharedData page model toMsg pageView =
     let
         navigation =
-            Html.nav []
-                [ Ui.Navigation.view
-                , if model.showMenu then
-                    Html.ul []
-                        [ Html.li [] [ Html.text "Menu item 1" ]
-                        , Html.li [] [ Html.text "Menu item 2" ]
-                        ]
-
-                  else
-                    Html.text ""
-                ]
+            Ui.Navigation.view { showMenu = model.showMenu, onMenuClick = MenuClicked }
                 |> Html.map toMsg
     in
     { body =
-        [ Html.main_
-            [ Html.Attributes.class "container flex flex-col flex-1 mx-auto md:min-h-screen"
-            ]
+        [ Html.div 
+            [ Html.Attributes.class "relative min-h-screen" ]
             [ navigation
-            , Html.div
-                [ Html.Attributes.class "flex flex-col flex-1"
+            , Html.main_
+                [ Html.Attributes.class "container flex flex-col flex-1 mx-auto md:min-h-screen pt-4"
                 ]
-                pageView.body
+                [ Html.div
+                    [ Html.Attributes.class "flex flex-col flex-1"
+                    ]
+                    pageView.body
+                ]
             ]
         ]
     , title = pageView.title

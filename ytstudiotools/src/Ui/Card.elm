@@ -49,8 +49,8 @@ view { benefit, feature } =
             [ Html.Attributes.class "w-full rounded px-6 pb-5"
             ]
             [ Html.button
-                [ Html.Attributes.class "inline-flex items-center justify-center rounded-md border border-red-600 bg-red-600 px-5 py-2.5 text-center font-sans text-sm font-medium text-white transition-all duration-300 ease-in hover:bg-red-700 hover:border-red-700 shadow-md hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-50 disabled:shadow-none"
+                [ Html.Attributes.class "inline-flex rounded-md border border-gray-800 bg-gray-800 px-4 py-2 text-center font-sans text-sm font-medium text-white transition-all duration-300 ease-in hover:border-gray-900 hover:bg-gray-900 disabled:cursor-not-allowed disabled:opacity-50 shadow-sm hover:shadow-md"
                 ]
-                [ Html.text "Install Now" ]
+                [ Html.text "Learn More" ]
             ]
         ]
