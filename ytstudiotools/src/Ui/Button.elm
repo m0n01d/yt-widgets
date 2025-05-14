@@ -6,6 +6,7 @@ import Html.Attributes
 
 type Style
     = Primary
+    | Secondary
 
 
 type alias Config msg =
@@ -18,16 +19,19 @@ type alias Config msg =
 styleToClass style =
     case style of
         Primary ->
-            ""
+            "bg-red-600 border-red-600 text-white hover:bg-red-700 hover:border-red-700"
+        
+        Secondary ->
+            "bg-transparent border-gray-300 text-gray-700 hover:bg-gray-50 hover:text-gray-900"
 
 
 baseStyles =
-    "inline-flex items-center justify-center border align-middle select-none font-sans font-medium text-center transition-all duration-300 ease-in disabled:opacity-50 disabled:shadow-none disabled:cursor-not-allowed data-[shape=pill]:rounded-full data-[width=full]:w-full focus:shadow-none text-sm rounded-md py-2 px-4 shadow-sm hover:shadow-md bg-slate-800 border-slate-800 text-slate-50 hover:bg-slate-700 hover:border-slate-700"
+    "inline-flex items-center justify-center border align-middle select-none font-sans font-medium text-center transition-all duration-300 ease-in disabled:opacity-50 disabled:shadow-none disabled:cursor-not-allowed data-[shape=pill]:rounded-full data-[width=full]:w-full focus:shadow-none text-sm rounded-md py-2.5 px-5 shadow-md hover:shadow-lg"
 
 
 view config =
     Html.button
-        [ config.style |> styleToClass |> Html.Attributes.class
+        [ Html.Attributes.class (styleToClass config.style)
         , Html.Attributes.class baseStyles
         ]
         [ Html.text config.label ]
