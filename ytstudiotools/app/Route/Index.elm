@@ -150,7 +150,7 @@ view app shared model =
                 ]
             , Html.p
                 [ Html.Attributes.class "text-lg text-gray-600 mb-6 mt-4 text-center max-w-xl" ]
-                [ Html.text "Save time in the Studio so you can focus on making great content" ]
+                [ Html.text "Save time in the studio so you can focus on creating great content" ]
             , Html.div
                 [ Html.Attributes.class "flex flex-col sm:flex-row gap-4 mt-4" ]
                 [ Ui.Button.view { style = Ui.Button.Primary, onClick = (), label = "Install Now FREE" }
@@ -255,44 +255,44 @@ viewBenefits benefits cardConfig =
 
 viewBenefits_TitleChecker =
     viewBenefits
-        [ "Reach more viewers with SEO"
-        , "Shorter titles are proven to work better"
-        , "An average viewer processes your title in <2s"
+        [ "Craft titles that rank higher in search results"
+        , "Stop second-guessing your title length with real-time feedback"
+        , "Catch viewers' attention in those crucial first 2 seconds"
         ]
-        { benefit = "Green means good to go!"
+        { benefit = "Get the green light and watch your views climb"
         , feature = "Title Checker"
         }
 
 
 viewBenefits_Snippets =
     viewBenefits
-        [ "Save time"
-        , "Create snippets to add to your descriptions quickly & easily"
-        , "Add affiliate links and Subscribe CTAs with a click"
+        [ "Save time on repetitive description tasks"
+        , "Add social links, CTAs and affiliate links in seconds"
+        , "Keep your branding consistent across all your videos"
         ]
-        { benefit = "Write once, never copy paste again"
+        { benefit = "Create once, reuse everywhere, earn more"
         , feature = "Snippet Editor"
         }
 
 
 viewBenefits_PreviewThumbnail =
     viewBenefits
-        [ "How does your thumbnail look in the Feed?"
-        , "See a preview on the Home page or your Channel"
-        , "Check your thumbnail's alignment, balance and colors"
+        [ "See exactly what viewers see before you publish"
+        , "Preview your thumbnail in Home, Channel, and Search feeds"
+        , "Spot design issues that kill click-through rates"
         ]
-        { benefit = "Get more views"
+        { benefit = "Thumbnails that make people click"
         , feature = "Thumbnail Preview"
         }
 
 
 viewBenefits_Checklist =
     viewBenefits
-        [ "Don't miss important steps"
-        , "Add an Upload Checklist to help guide you"
-        , "Customize steps"
+        [ "Never forget tags, cards, or end screens again"
+        , "Follow your custom upload routine every single time"
+        , "Build the perfect checklist for your unique workflow"
         ]
-        { benefit = "Theres a lot to remember on each upload", feature = "Upload Checklist" }
+        { benefit = "Flawless uploads, every time", feature = "Upload Checklist" }
 
 
 viewPricingSection : PricingPeriod -> Html.Html (PagesMsg Msg)
